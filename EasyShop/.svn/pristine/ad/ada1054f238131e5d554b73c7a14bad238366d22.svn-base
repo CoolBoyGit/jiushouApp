@@ -1,0 +1,155 @@
+//
+//  LogisticsController.m
+//  EasyShop
+//
+//  Created by jiushou on 16/7/1.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESLogisticsController.h"
+#import "ESLogisticsTableViewCell.h"
+#import "ESLogisticHeardView.h"
+
+@interface ESLogisticsController ()<UITableViewDelegate,UITableViewDataSource>
+@property (nonatomic,strong)UITableView*tableView;
+@property (nonatomic,strong)NSArray*logiticArrayItem;
+@property (nonatomic,strong)OrderTracesInfo*orderInfo;
+/*cell里面的线的高度*/
+@property (nonatomic,assign)CGFloat lineH;
+@property (nonatomic,strong) ESIndicator *indicator;
+@end
+
+@implementation ESLogisticsController
+- (ESIndicator *)indicator
+{
+    if (!_indicator) {
+        _indicator = [ESIndicator indicatorToView:self.view];
+    }
+    return _indicator;
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor=[UIColor whiteColor];
+    self.title=@"物流跟踪";
+    [self.view addSubview:self.tableView];
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@0);
+        make.right.left.bottom.equalTo(@0);
+    }];
+    [self getLogistic];
+    
+}
+-(NSArray *)logiticArrayItem{
+    if (_logiticArrayItem==nil) {
+        _logiticArrayItem=[[NSArray alloc]init];
+    }
+    return _logiticArrayItem;
+}
+-(UITableView*)tableView{
+    if (_tableView==nil) {
+        _tableView=[[UITableView alloc]initWithFrame:CGRectMake(0, 0, ScreenWidth, ScreenHeight) style:UITableViewStyleGrouped];
+        _tableView.delegate=self;
+        _tableView.dataSource=self;
+        [_tableView registerClass:[ESLogisticsTableViewCell class] forCellReuseIdentifier:@"ESLogisticsTableViewCell"];
+        [_tableView registerClass:[ESLogisticHeardView class] forHeaderFooterViewReuseIdentifier:@"ESLogisticHeardView"];
+    }
+    return _tableView;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+         self.tableView.separatorStyle=UITableViewCellSeparatorStyleNone;
+        TraceInfo*info=[self.logiticArrayItem objectAtIndex:self.logiticArrayItem.count-1-indexPath.row];
+        CGFloat h=[self getHeightForRowAddressInfo:info];
+        return h;
+    
+}
+-(CGFloat)getHeightForRowAddressInfo :(TraceInfo*)tracInfo{
+    
+    CGRect rect=[tracInfo.AcceptStation boundingRectWithSize:CGSizeMake(ScreenWidth-60, 100) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:15]} context:nil];
+    self.lineH=rect.size.height+60;
+    NSLog(@"%f",self.lineH);
+    return rect.size.height+60;
+    
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    return 0.1;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 140;
+}
+//-(UIView*)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
+//    UIView*view=[[UIView alloc]initWithFrame:CGRectMake(0, 0, 0, 3)];
+//    return view;
+//}
+-(UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    ESLogisticHeardView*heardView=[tableView dequeueReusableHeaderFooterViewWithIdentifier:@"ESLogisticHeardView"];
+    heardView.orderTracs=self.orderInfo;
+    return heardView;
+}
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 1;
+}
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+           return self.logiticArrayItem.count;
+    
+    
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+
+    
+        ESLogisticsTableViewCell*cell=[tableView dequeueReusableCellWithIdentifier:@"ESLogisticsTableViewCell" forIndexPath:indexPath];
+    cell.selectionStyle=UITableViewCellSelectionStyleNone;
+        //TraceInfo*info=[self.logiticArrayItem objectAtIndex:<#(NSUInteger)#>]
+        if (indexPath.row==0) {
+            cell.isFirstcell=YES;
+        }else{
+            cell.isFirstcell=NO;
+        }if (indexPath.row==self.logiticArrayItem.count-1) {
+            cell.isLastcell=YES;
+        }else{
+            cell.isLastcell=NO;
+        }
+        cell.info=[self.logiticArrayItem objectAtIndex:(self.logiticArrayItem.count - indexPath.row-1)];
+       
+         //cell.lineH=self.lineH;
+        return cell;
+
+    
+    
+   
+}
+#pragma mark获取物流信息
+-(void)getLogistic{
+    GetOrderTracesRequest*request=[GetOrderTracesRequest request];
+    request.order_id=self.orderId;
+    [self.indicator startAnimation];
+    [ESService getOrderTracesRequest:request success:^(OrderTracesInfo *response) {
+        [self endGSNetworking];
+        self.logiticArrayItem=response.Traces;
+        self.orderInfo=response;
+        [self.tableView reloadData];
+    } failure:^(NSError *error) {
+        
+    }];
+}
+- (void)endGSNetworking
+{
+    [self.indicator stopAnimation];
+    
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

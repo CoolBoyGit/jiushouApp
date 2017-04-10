@@ -1,0 +1,278 @@
+
+
+
+//
+//  ESPosrCommentCell.m
+//  EasyShop
+//
+//  Created by wcz on 16/7/14.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESPosrCommentCell.h"
+#import "ImageViewScrollView.h"
+#import "LIRTUIButton.h"
+#import "PlaceholderTextView.h"
+#import "ESPostCommentImageCell.h"
+#import "JKImagePickerController.h"
+#import "JKAssets.h"
+#import <AssetsLibrary/AssetsLibrary.h>
+#import "ALAssetsLibrary+Extend.h"
+
+@interface ESPosrCommentCell ()<UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout,JKImagePickerControllerDelegate,UITextViewDelegate>
+
+@property (nonatomic, strong) UIImageView *shopImageView;
+@property (nonatomic, strong) UILabel *line1Label;
+@property (nonatomic, strong) PlaceholderTextView *commentTextView;
+@property (nonatomic, assign) NSInteger cellIndex;
+@property (nonatomic, strong) UICollectionView *collectionview;
+@property (nonatomic, strong) NSDictionary *cellInfoDict;
+@property (nonatomic, strong) NSMutableArray *assetsArray;
+
+@end
+
+@implementation ESPosrCommentCell
+
+- (void)setEvaluationInfo:(EvaluationGoodsInfo *)evaluationInfo
+{
+    _evaluationInfo = evaluationInfo;
+    
+    [self.shopImageView sd_setImageWithURL:[NSURL URLWithString:evaluationInfo.imageURL] placeholderImage:nil];
+    
+    [self.collectionview reloadData];
+}
+
+- (UICollectionView *)collectionview
+{
+    if (_collectionview == nil) {
+        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+        flowLayout.minimumInteritemSpacing = 10;
+        flowLayout.minimumLineSpacing = 10;
+//        flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+        //        flowLayout.itemSize = CGSizeMake(ScreenWidth, 125);
+        _collectionview = [[UICollectionView alloc]initWithFrame:CGRectZero collectionViewLayout:flowLayout];
+        
+        _collectionview.dataSource = self;
+        _collectionview.pagingEnabled = YES;
+        _collectionview.showsVerticalScrollIndicator = NO;
+        _collectionview.showsHorizontalScrollIndicator = NO;
+        _collectionview.delegate = self;
+        [_collectionview registerClass:[ESPostCommentImageCell class] forCellWithReuseIdentifier:@"ESPostCommentImageCell"];
+        _collectionview.backgroundColor = [UIColor whiteColor];
+    }
+    return _collectionview;
+}
+
+- (void)updateViewInfoWithInfo:(NSDictionary *)dict index:(NSInteger)index {
+    self.cellInfoDict = dict;
+    self.userInteractionEnabled = YES;
+    self.shopImageView.contentMode = UIViewContentModeScaleAspectFit;
+    [self.shopImageView sd_setImageWithURL:[NSURL URLWithString:dict[@"goodsImgUrl"]] placeholderImage:[UIImage imageNamed:@"bg"] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+        if (error == nil) {
+            self.shopImageView.contentMode = UIViewContentModeScaleAspectFit;
+        }
+    }];
+    
+    self.line1Label.alpha = 1.0f;
+    self.commentTextView.alpha = 1.0f;
+    self.commentTextView.text = dict[@"goodsComment"];
+    _cellIndex = index;
+}
+
+-(void)btnClick1:(LIRTUIButton *)btn
+{
+    NSArray *array1 = @[@"haoping1",@"haoping1",@"chaping"];
+    NSArray *array2 = @[@"haoping",@"haoping",@"chaping1"];
+    
+    btn.selected = !btn.selected;
+    if (btn.selected) {
+        btn.leftImg.image = [UIImage imageNamed:array2[btn.tag]];
+    } else
+        btn.leftImg.image = [UIImage imageNamed:array1[btn.tag]];
+    
+    self.evaluationInfo.result = [NSNumber numberWithInteger:btn.tag + 1];
+}
+
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])
+    {
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        
+        [self.contentView addSubview:self.shopImageView];
+        [self.shopImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.mas_left).with.offset(10);
+            make.top.equalTo(self.mas_top).with.offset(10);
+            make.size.mas_equalTo(CGSizeMake(60, 60));
+        }];
+        [self.contentView addSubview:self.commentTextView];
+        [self.commentTextView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.shopImageView.mas_right).with.offset(5);
+            make.right.equalTo(self.mas_right).with.offset(-35);
+            make.top.equalTo(self.mas_top).with.offset(10);
+            make.height.equalTo(@60);
+        }];
+        
+        [self.contentView addSubview:self.collectionview];
+        [self.collectionview mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@10);
+            make.right.equalTo(@(-10));
+            make.top.equalTo(self.commentTextView.mas_bottom).offset(10);
+            make.height.equalTo(@50);
+        }];
+        
+        [self.contentView addSubview:self.line1Label];
+        [self.line1Label mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.mas_left).with.offset(0);
+            make.right.equalTo(self.mas_right).with.offset(0);
+            make.top.equalTo(self.collectionview.mas_bottom).with.offset(10);
+            make.height.equalTo(@0.5);
+        }];
+        
+        NSArray *array = @[@"好评",@"中评",@"差评"];
+        NSArray *array1 = @[@"haoping1",@"haoping1",@"chaping"];
+        for (int i = 0; i < 3; i++) {
+            LIRTUIButton *button1 = [[LIRTUIButton alloc] initWithFrame:CGRectMake(ScreenWidth/3.0*i, 100 + 70, ScreenWidth/3.0, 30)];
+            button1.frame = CGRectMake(ScreenWidth/3.0*i, 100 + 70, ScreenWidth/3.0, 30);
+            button1.tag = i;
+            [button1 addTarget:self action:@selector(btnClick1:) forControlEvents:UIControlEventTouchUpInside];
+            button1.rightLabel.text = array[i];
+            button1.leftImg.image = [UIImage imageNamed:array1[i]];
+            [self addSubview:button1];
+        }
+
+    }
+    return self;
+}
+
+#pragma mark
+#pragma mark Init & Add
+- (UIImageView *)shopImageView {
+    if (!_shopImageView) {
+        _shopImageView = [[UIImageView alloc] init];
+        _shopImageView.layer.masksToBounds = YES;
+    }
+    return _shopImageView;
+}
+- (UILabel *)line1Label {
+    if (!_line1Label) {
+        _line1Label = [[UILabel alloc] init];
+        _line1Label.backgroundColor = ADeanHEXCOLOR(0xcccccc);
+    }
+    return _line1Label;
+}
+- (PlaceholderTextView *)commentTextView {
+    if (!_commentTextView) {
+        _commentTextView = [[PlaceholderTextView alloc] initWithFrame:CGRectMake(5, 0, ScreenWidth - 10, 60)];
+        _commentTextView.placeholder = @"亲，评价可以用语音了，帮你码字的事交给我们吧！";
+        _commentTextView.placeholderFont=[UIFont boldSystemFontOfSize:13];
+        _commentTextView.delegate = self;
+    }
+    return _commentTextView;
+}
+
+#pragma mark - UITextViewDelegate
+
+- (void)textViewDidChange:(UITextView *)textView
+{
+    self.evaluationInfo.content = textView.text;
+}
+
+-(BOOL)textView:(PlaceholderTextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
+{
+    textView.textColor = ADeanHEXCOLOR(0x323232);
+    textView.font = ADeanFONT17;
+    NSString * toBeString = [textView.text stringByReplacingCharactersInRange:range withString:text];
+    
+    if (toBeString.length >120) {
+        return NO;
+    }
+    return YES;
+}
+
+
+#pragma mark - UICollectionViewDataSource
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    return self.evaluationInfo.imageItems.count + 1;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESPostCommentImageCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ESPostCommentImageCell" forIndexPath:indexPath];
+    //加号
+    if (indexPath.item == self.evaluationInfo.imageItems.count) {
+        cell.image = [UIImage imageNamed:@"add"];
+    }else{
+        cell.image = [self.evaluationInfo.imageItems objectAtIndex:indexPath.item];
+    }
+    return cell;
+}
+
+
+#pragma mark - UICollectionViewDelegateFlowLayout
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    return CGSizeMake(50, 50);
+}
+
+#pragma mark - UICollectionViewDelegate
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    [self photoLibraryAction];
+}
+
+- (void)photoLibraryAction {
+    JKImagePickerController *imagePickerController = [[JKImagePickerController alloc] init];
+    imagePickerController.delegate = self;
+    imagePickerController.showsCancelButton = YES;
+    imagePickerController.allowsMultipleSelection = YES;
+    imagePickerController.minimumNumberOfSelection = 1;
+    imagePickerController.maximumNumberOfSelection = 4;
+    imagePickerController.selectedAssetArray = self.assetsArray;
+    
+    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:imagePickerController];
+//    [self presentViewController:navigationController animated:YES completion:NULL];
+    [[AppDelegate shared] presentViewController:navigationController animated:YES completion:nil];
+}
+
+#pragma mark - JKImagePickerControllerDelegate
+- (void)imagePickerControllerDidCancel:(JKImagePickerController *)imagePicker
+{
+    [imagePicker dismissViewControllerAnimated:YES completion:^{
+        
+    }];
+}
+- (void)imagePickerController:(JKImagePickerController *)imagePicker didSelectAssets:(NSArray *)assets isSource:(BOOL)source
+{
+    
+    [imagePicker dismissViewControllerAnimated:YES completion:^{
+        
+    }];
+    
+    self.assetsArray = [NSMutableArray arrayWithArray:assets];
+    
+    [self.evaluationInfo.imageItems removeAllObjects];
+    for (int i = 0; i < self.assetsArray.count; i++) {
+        JKAssets *jka = self.assetsArray[i];
+        ALAssetsLibrary   *lib = [[ALAssetsLibrary alloc] init];
+        [lib extend_assetForURL:jka.assetPropertyURL resultBlock:^(ALAsset *asset) {
+            if (asset) {
+                UIImage *image = [UIImage imageWithCGImage:[asset thumbnail]];
+                
+                [self.evaluationInfo.imageItems addObject:image];
+                [self.collectionview reloadData];
+
+            }
+
+        } failureBlock:^(NSError *error) {
+            
+        }];
+    }
+}
+
+
+@end

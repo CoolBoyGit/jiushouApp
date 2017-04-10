@@ -1,0 +1,18 @@
+
+target  'EasyShop' do
+  pod 'IQKeyboardManager'
+  pod 'Masonry',                  '~> 0.6.4'
+  pod 'WMPageController'
+  pod 'SDWebImage', '~> 3.7.5'
+  pod 'JSQMessagesViewController'
+  pod 'AFNetworking'
+  pod 'MJExtension'
+  pod 'MBProgressHUD'
+  pod 'MJRefresh' 
+  pod 'BlocksKit'
+  pod 'EaseUI', :git => 'https://github.com/easemob/easeui-ios-cocoapods.git'
+  pod 'EaseMobSDKFull', :git => 'https://github.com/easemob/sdk-ios-cocoapods-integration.git'
+  pod 'MWPhotoBrowser', '~> 2.1.2'
+end
+
+

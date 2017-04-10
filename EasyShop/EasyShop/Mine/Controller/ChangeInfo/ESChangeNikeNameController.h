@@ -1,0 +1,14 @@
+//
+//  ESChangeNikeNameController.h
+//  EasyShop
+//
+//  Created by jiushou on 16/6/27.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESChangeNikeNameController : ESMyViewController
+@property (nonatomic,strong)UITextField *nikeTextField;
+@property (nonatomic,strong)UIButton* nikeButton;
+@end

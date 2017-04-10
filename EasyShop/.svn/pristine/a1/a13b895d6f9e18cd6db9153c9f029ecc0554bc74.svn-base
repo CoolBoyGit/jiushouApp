@@ -1,0 +1,110 @@
+//
+//  ESSearchGoodsCell.m
+//  EasyShop
+//
+//  Created by guojian on 16/5/22.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESSearchGoodsCell.h"
+
+@interface ESSearchGoodsCell()
+
+@property (nonatomic, strong) UIImageView               *productImg;//商品的图像
+@property (nonatomic, strong) UILabel                   *productName;//商品的名称
+@property (nonatomic, strong) UILabel                   *productPrice;//商品的价格
+
+@end
+
+@implementation ESSearchGoodsCell
+
+- (void)setGoodsInfo:(GoodsInfo *)goodsInfo
+{
+    _goodsInfo = goodsInfo;
+    
+    [self.productImg sd_setImageWithURL:[NSURL URLWithString:_goodsInfo.image] placeholderImage:[UIImage imageNamed:@"bg"]];
+    self.productName.text = _goodsInfo.name;
+    self.productPrice.text = [NSString stringWithFormat:@"¥%@",_goodsInfo.price];
+}
+
+//- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+//{
+//    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+//        
+//        [self.contentView addSubview:self.productImg];
+//        [self.contentView addSubview:self.productName];
+//        [self.contentView addSubview:self.productPrice];
+//        
+//    }
+//    return self;
+//}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        
+        [self.contentView addSubview:self.productImg];
+        [self.contentView addSubview:self.productName];
+        [self.contentView addSubview:self.productPrice];
+        
+        [self.productImg mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(@10);
+            make.left.equalTo(@15);
+            make.height.equalTo(@80);
+            make.width.equalTo(@80);
+        }];
+        
+        [self.productName mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(@10);
+            make.left.equalTo(self.productImg.mas_right).with.offset(10);
+            make.height.equalTo(@40);
+            make.right.equalTo(self.productPrice.mas_left).with.offset(-10);
+        }];
+        [self.productPrice mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(@10);
+            make.right.equalTo(@-10);
+            make.height.equalTo(@30);
+            make.width.equalTo(@60);
+        }];
+    }
+    return self;
+}
+
+
+- (UIImageView *)productImg
+{
+    if (!_productImg) {
+        _productImg =[[UIImageView alloc] init];
+        _productImg.layer.masksToBounds = YES;
+        _productImg.contentMode = UIViewContentModeScaleAspectFit;
+        
+    }
+    return _productImg;
+}
+
+- (UILabel *)productName
+{
+    if (!_productName) {
+        _productName = [[UILabel alloc] init];
+        _productName.backgroundColor = [UIColor clearColor];
+        _productName.font = ADeanFONT15;
+        _productName.numberOfLines = 2;
+        _productName.text = @"小黄瓜爽肤水  200M 999元";
+    }
+    return _productName;
+}
+- (UILabel *)productPrice
+{
+    if (!_productPrice) {
+        _productPrice = [[UILabel alloc] init];
+        _productPrice.backgroundColor = [UIColor clearColor];
+        _productPrice.font = ADeanFONT15;
+        _productPrice.text = @"¥999.00";
+        _productPrice.textColor = RGB(233, 40, 46);
+        _productPrice.textAlignment = NSTextAlignmentLeft;
+    }
+    return _productPrice;
+}
+
+
+@end

@@ -1,0 +1,15 @@
+//
+//  ViewController.h
+//  二维码扫码器
+//
+//  Created by 高备资产 on 16/5/13.
+//  Copyright © 2016年 高备资产. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESScanViewController : ESMyViewController
+
+
+@end
+

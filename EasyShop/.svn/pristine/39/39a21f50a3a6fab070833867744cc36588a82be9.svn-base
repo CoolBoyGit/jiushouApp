@@ -1,0 +1,194 @@
+
+
+//
+//  ICDrawbackController.m
+//  EasyShop
+//
+//  Created by wcz on 16/4/23.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+//退货退款界面
+#import "ICDrawbackController.h"
+#import "ESDrawbackCell.h"
+#import "ESMyOrderListCell.h"
+#import "MyOrderHeaderView.h"
+#import "ESOrderDetailController.h"
+
+@interface ICDrawbackController ()<UITableViewDataSource,UITableViewDelegate>//<UICollectionViewDataSource, UICollectionViewDelegate,UICollectionViewDelegateFlowLayout>
+
+//@property (nonatomic, strong) UICollectionView *collectionview;
+/** tableview */
+@property (nonatomic,strong) UITableView *tableView;
+
+/** from */
+@property (nonatomic,assign) NSInteger page;
+/** 退货订单信息 （item ：OrderInfo ） */
+@property (nonatomic,strong) NSMutableArray *returnItems;
+
+@end
+@implementation ICDrawbackController
+
+- (NSMutableArray *)returnItems
+{
+    if (!_returnItems) {
+        _returnItems = [NSMutableArray array];
+    }
+    return _returnItems;
+}
+
+
+- (UITableView *)tableView
+{
+    if (_tableView == nil) {
+        _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+        _tableView.delegate = self;
+        _tableView.tableFooterView = [[UIView alloc] init];
+        [_tableView registerClass:[ESMyOrderListCell class] forCellReuseIdentifier:kIDMyOrderListCell];
+        [_tableView registerClass:[MyOrderHeaderView class] forHeaderFooterViewReuseIdentifier:kIDMyOrderHeader];
+//        [_tableView registerClass:[MyOrderFooterView class] forHeaderFooterViewReuseIdentifier:kIDMyOrderFooter];
+    }
+    return _tableView;
+}
+//- (UICollectionView *)collectionview
+//{
+//    if (_collectionview == nil) {
+//        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+//        flowLayout.minimumInteritemSpacing = 20;
+//        flowLayout.minimumLineSpacing = 20;
+//        //        flowLayout.itemSize = CGSizeMake(ScreenWidth, 125);
+//        _collectionview = [[UICollectionView alloc]initWithFrame:CGRectZero collectionViewLayout:flowLayout];
+//        _collectionview.dataSource = self;
+//        _collectionview.showsVerticalScrollIndicator = NO;
+//        _collectionview.showsHorizontalScrollIndicator = NO;
+//        _collectionview.delegate = self;
+//        [_collectionview registerClass:[ESDrawbackCell class] forCellWithReuseIdentifier:@"ESDrawbackCell"];
+//        _collectionview.backgroundColor = [UIColor whiteColor];
+//    }
+//    return _collectionview;
+//}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+//    [self.view addSubview:self.collectionview];
+    self.title = @"退货/退款";
+    
+    [self.view addSubview:self.tableView];
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.equalTo(@0);
+    }];
+    @weakify(self);
+    self.tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        @strongify(self);
+        [self refreshList];
+    }];
+    self.tableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+        @strongify(self);
+        [self moreList];
+    }];
+    
+    
+    [self refreshList];
+    
+}
+
+#pragma mark - UITableViewDataSource
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return self.returnItems.count;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    OrderInfo *info = [self.returnItems objectAtIndex:section];
+    return info.order_goods.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESMyOrderListCell *cell = [tableView dequeueReusableCellWithIdentifier:kIDMyOrderListCell forIndexPath:indexPath];
+    OrderInfo *info = [self.returnItems objectAtIndex:indexPath.section];
+    cell.goodsInfo = [info.order_goods objectAtIndex:indexPath.row];
+    return cell;
+}
+
+#pragma mark - UITableViewDelegate
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 75;
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    OrderInfo *info = [self.returnItems objectAtIndex:indexPath.section];
+    if (info.orderStatus != OrderStatus_Cancel) {//不是已取消订单
+        ESOrderDetailController *detail = [[ESOrderDetailController alloc] init];
+        detail.order_id = info.order_id;
+        [self.navigationController pushViewController:detail animated:YES];
+    }
+}
+
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    return kHeightMyOrderHeader;
+}
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    MyOrderHeaderView *headerView = [tableView dequeueReusableHeaderFooterViewWithIdentifier:kIDMyOrderHeader];
+    headerView.orderInfo    = [self.returnItems objectAtIndex:section];
+    return headerView;
+}
+
+
+#pragma mark - Networking
+
+#pragma mark 请求退货退款订单
+- (void)refreshList
+{
+    self.page = 1;
+    [self fetchReturnList];
+}
+- (void)moreList
+{
+    self.page ++ ;
+    [self fetchReturnList];
+}
+
+- (void)fetchReturnList
+{
+    GetReturnListRequest *request = [GetReturnListRequest request];
+    request.status = @0;
+    request.page = [NSNumber numberWithInteger:self.page];
+    request.n = @20;
+    
+    @weakify(self);
+    [ESService getReturnListRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        if (self.page == 1) {
+            [self.returnItems removeAllObjects];
+        }
+        self.tableView.mj_footer.hidden = response.count < 20;
+        
+        [self.returnItems addObjectsFromArray:response];
+        [self.tableView reloadData];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+    
+}
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.tableView.mj_header endRefreshing];
+    [self.tableView.mj_footer endRefreshing];
+}
+
+@end

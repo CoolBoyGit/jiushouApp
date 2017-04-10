@@ -1,0 +1,159 @@
+//
+//  ESMyFootController.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/20.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESMyFootController.h"
+#import "ESMyFootListCell.h"
+#import "ESHomeShopDetailController.h"
+
+@interface ESMyFootController()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong) UITableView *tableView;
+
+/** from */
+@property (nonatomic,assign) NSInteger page;
+/** 足迹item （item ：FootprintInfo ） */
+@property (nonatomic,strong) NSMutableArray *footItems;
+
+@end
+
+@implementation ESMyFootController
+
+- (NSMutableArray *)footItems
+{
+    if (!_footItems) {
+        _footItems = [NSMutableArray array];
+    }
+    return _footItems;
+}
+
+#pragma mark - LifeCycle
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
+    TitleCenter;
+    self.title = @"我的足迹";
+//    [self initalizedCumstomNav];
+
+    [self.view addSubview:self.tableView];
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(@0);
+        make.top.equalTo(@0);
+        make.bottom.equalTo(@0);
+    }];
+    @weakify(self);
+    self.tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+       @strongify(self);
+        [self refreshList];
+    }];
+    self.tableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+       @strongify(self);
+        [self moreList];
+    }];
+    
+    
+    [self refreshList];
+}
+
+#pragma mark
+#pragma mark - tableview代理方法;
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.footItems.count;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 120;
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
+    FootprintInfo *info = [self.footItems objectAtIndex:indexPath.row];
+    
+    ESHomeShopDetailController *detail = [[ESHomeShopDetailController alloc] init];
+//    detail.isNavHidden = YES;
+
+    detail.goods_id = info.goods_id;
+    [self.navigationController pushViewController:detail animated:YES];
+    
+    //            NormalWebViewController *vc = [[NormalWebViewController alloc] init];
+    //            vc.hidesBottomBarWhenPushed = YES;
+    //            [self.navigationController pushViewController:vc animated:NO];
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESMyFootListCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESMyFootListCell"];
+    cell.footInfo = [self.footItems objectAtIndex:indexPath.row];
+    return cell;
+}
+
+#pragma mark
+#pragma mark lazy init
+- (UITableView *)tableView
+{
+    if (_tableView == nil) {
+        _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+        _tableView.delegate = self;
+        _tableView.tableFooterView = [[UIView alloc] init];
+        [_tableView registerClass:[ESMyFootListCell class] forCellReuseIdentifier:@"ESMyFootListCell"];
+    }
+    return _tableView;
+}
+
+#pragma mark - Networking
+- (void)refreshList
+{
+    self.page = 1;
+    [self fetchFootprint];
+}
+- (void)moreList
+{
+    self.page ++ ;
+    [self fetchFootprint];
+}
+- (void)fetchFootprint
+{
+    GetFootprintRequest *request = [GetFootprintRequest request];
+    request.page = [NSNumber numberWithInteger:self.page];
+    request.n    = @20;
+    
+    @weakify(self);
+    [ESService getFootprintRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        if (self.page == 1) {
+            [self.footItems removeAllObjects];
+        }
+        self.tableView.mj_footer.hidden = response.count < 20;
+        
+        [self.footItems addObjectsFromArray:response];
+        [self.tableView reloadData];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+    
+}
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.tableView.mj_header endRefreshing];
+    [self.tableView.mj_footer endRefreshing];
+}
+
+@end

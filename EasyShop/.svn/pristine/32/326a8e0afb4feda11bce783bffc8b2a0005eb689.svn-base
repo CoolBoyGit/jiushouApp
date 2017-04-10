@@ -1,0 +1,121 @@
+//
+//  OrderRequest.h
+//  EasyShopService
+//
+//  Created by guojian on 16/5/2.
+//  Copyright © 2016年 naijoug. All rights reserved.
+//
+
+#import "BaseRequest.h"
+
+
+typedef NS_ENUM(NSInteger,OrderType) {
+    OrderType_All = 0,      //  全部
+    OrderType_WaitingPay,   //待支付
+    OrderType_WaitingSend,  //待发货
+    OrderType_WaitingSure,  //待确认
+    OrderType_OK,           //已完成
+//    OrderType_Cancel,       //已取消
+    
+};
+
+/** 11.1 获取订单（需要登录） */
+@interface OrderRequest : BaseRequest
+
+/** 类型
+ *  默认0：[1-5]; 0:全部,  1:待支付；2：已支付，待发货；3：已发货，待确认；4：完成收货；//5：已取消；
+ */
+@property (nonatomic,strong) NSNumber *type;
+/** 页数 */
+@property (nonatomic,strong) NSNumber *page;
+/** 记录数 */
+@property (nonatomic,strong) NSNumber *n;
+
+@end
+
+/** 11.2 获取订单详情信息（需登录） */
+@interface GetOrderDetailRequest : BaseRequest
+
+/** 订单id */
+@property (nonatomic,copy) NSString *order_id;
+
+@end
+
+/** 11.3 确认订单（需要登录  ） */
+@interface OrderConfirmRequest : BaseRequest
+
+@end
+
+/** 11.4 生成订单（需要登录  ） */
+@interface CreateOrderRequest : BaseRequest
+
+/** 地址id */
+@property (nonatomic,copy) NSString *address_id;
+/** 买家留言 */
+@property (nonatomic,copy) NSString *message;
+
+@end
+
+/** 11.5 取消订单（需要登录  ） */
+@interface CancelOrderRequest : BaseRequest
+
+/** 订单id
+ *  订单id 只可以取消未支付订单
+ */
+@property (nonatomic,copy) NSString *order_id;
+/** 取消订单原因 */
+@property (nonatomic,copy) NSString *message;
+
+@end
+
+/** 11.6 确认订单  */
+@interface ComfirmOrderRequest : BaseRequest
+
+/** 订单id */
+@property (nonatomic,copy) NSString *order_id;
+
+@end
+
+/** 11.7 查询退款/退货订单 */
+@interface GetReturnListRequest : BaseRequest
+
+/** 状态（0：所有；1：申请中；2：通过；3：拒绝;4：完成） */
+@property (nonatomic,strong) NSNumber *status;
+/** 页数 */
+@property (nonatomic,strong) NSNumber *page;
+/** 记录数 */
+@property (nonatomic,strong) NSNumber *n;
+
+@end
+
+/** 11.8 申请退款 */
+@interface ApplyOrderRequest : BaseRequest
+
+/** 类型（1: 申请退款;2: 申请退货） */
+@property (nonatomic,strong) NSNumber *type;
+/** 订单id */
+@property (nonatomic,copy) NSString *order_id;
+/** 退货原因 */
+@property (nonatomic,copy) NSString *reason;
+/** 留言 */
+@property (nonatomic,copy) NSString *message;
+
+@end
+
+/** 11.9 更新申请物流信息 */
+@interface UpdateApplyRequest : BaseRequest
+
+/** 订单id */
+@property (nonatomic,copy) NSString *order_id;
+/** 物流id */
+@property (nonatomic,copy) NSString *express_id;
+/** 物流单号 */
+@property (nonatomic,copy) NSString *express_code;
+
+@end
+
+@interface GetAllOrderCount : BaseRequest
+
+@end
+
+

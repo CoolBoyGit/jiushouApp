@@ -1,0 +1,27 @@
+
+target  'EasyShop' do
+pod 'AFNetworking'
+pod 'SDWebImage', '~> 3.7.5'
+pod 'EaseUI', :git => 'https://github.com/easemob/easeui-ios-cocoapods.git'
+pod 'EaseMobSDKFull', :git => 'https://github.com/easemob/sdk-ios-cocoapods-integration.git'
+
+  pod 'IQKeyboardManager'
+  pod 'Masonry',                  '~> 0.6.4'
+  pod 'WMPageController'
+ 
+  pod 'JSQMessagesViewController'
+
+  pod 'MJExtension'
+  pod 'MBProgressHUD'
+  pod 'MJRefresh' 
+  pod 'BlocksKit'
+
+  pod 'MWPhotoBrowser', '~> 2.1.1’
+  pod 'ZXingObjC', '~> 3.0'
+  pod 'SSZipArchive'
+  pod ‘DKNightVersion’
+end
+
+
+
+

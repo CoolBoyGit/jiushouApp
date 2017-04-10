@@ -1,0 +1,19 @@
+//
+//  ICCouponController.h
+//  iCarePregnant
+//
+//  Created by wcz on 16/6/22.
+//  Copyright © 2016年 oenius. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ICCouponController : UIViewController
+
+/** 是否是个人中心的优惠券 */
+@property (nonatomic,assign) BOOL isCenter;
+
+/** 类型（1：未使用、2：已使用、3：已过期） */
+@property (nonatomic,copy) NSNumber *type;
+
+@end

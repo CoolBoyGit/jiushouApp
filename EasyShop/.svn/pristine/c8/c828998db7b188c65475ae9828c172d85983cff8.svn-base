@@ -1,0 +1,87 @@
+
+//
+//  HomePushCell.m
+//  MFBank
+//
+//  Created by mairong on 15/12/19.
+//  Copyright © 2015年 MFBank. All rights reserved.
+//
+
+#import "ESOrderStateCell.h"
+#import "TIBTUIButton.h"
+#import "ESRemindController.h"
+#import "ICCollectShopController.h"
+#import "ESMyOrderPageController.h"
+#import "ESMyFootController.h"
+@implementation ESOrderStateCell
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    return self;
+}
+-(void)setImgArr:(NSArray *)imgArr
+{
+    _imgArr = imgArr;
+    int count = (int)imgArr.count;
+    CGFloat w = ScreenWidth / count;
+    for (int i = 0; i < count; i++) {
+        TIBTUIButton *btn = [[TIBTUIButton alloc]initWithFrame:CGRectMake(w*(i%5), 0, w, 70)];
+        btn.tag = i;
+        btn.backgroundColor = [UIColor whiteColor];
+        btn.layer.cornerRadius = 5.0f;
+        [btn addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+        btn.leftImg.contentMode = UIViewContentModeScaleToFill;
+        NSString *image = imgArr[i];
+        btn.leftImg.image = [UIImage imageNamed:image];
+        btn.rightLabel.text = self.titleArr[i] ;
+        [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [self.contentView addSubview:btn];
+    }
+}
+- (void)btnClick:(id)sender
+{
+    UIButton *btn = (UIButton *)sender;
+    if (self.tag == 0) {
+        if (btn.tag == 0) {//我的收藏 0是收藏
+            ESLoginVerify
+            
+            ESMyFootController*vc=[[ESMyFootController alloc]init];
+            vc.flag=0;
+            [[AppDelegate shared]pushViewController:vc animated:YES];                   }
+        if (btn.tag == 1){//心愿单 1是心愿单
+            ESLoginVerify
+            ESMyFootController*vc=[[ESMyFootController alloc]init];
+            vc.flag=1;
+            [[AppDelegate shared]pushViewController:vc animated:YES];
+//            ICCollectShopController *vc = [[ICCollectShopController alloc] init];
+//            vc.isCollet = NO;
+//            [[AppDelegate shared] pushViewController:vc animated:YES];
+        }
+        if (btn.tag == 2) {//到货提醒 2是到货提醒
+            ESLoginVerify
+            ESMyFootController*vc=[[ESMyFootController alloc]init];
+            vc.flag=2;
+            [[AppDelegate shared]pushViewController:vc animated:YES];
+//            ESRemindController *vc = [[ESRemindController alloc] init];
+//            vc.hidesBottomBarWhenPushed = YES;
+//            [[AppDelegate shared] pushViewController:vc animated:YES];
+        }
+            return;
+    }
+    
+    if (self.tag == 1) {
+        ESLoginVerify
+        
+        ESMyOrderPageController *controller = [[ESMyOrderPageController alloc] init];
+        controller.selectIndex = (int)btn.tag + 1;
+        controller.hidesBottomBarWhenPushed = YES;
+        [[AppDelegate shared] pushViewController:controller animated:YES];
+    }
+}
+@end
+
+

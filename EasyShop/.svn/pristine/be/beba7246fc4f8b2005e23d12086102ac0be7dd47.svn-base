@@ -1,0 +1,45 @@
+//
+//  FavoritesRequest.m
+//  EasyShopService
+//
+//  Created by guojian on 16/5/2.
+//  Copyright © 2016年 naijoug. All rights reserved.
+//
+
+#import "FavoritesRequest.h"
+
+@implementation GetFavoritesGoodsRequest
+
+@end
+
+@implementation AddFavoritesGoodsRequest
+
+@end
+
+@implementation CancelFavoritesGoodsRequest
+
+@end
+
+@implementation AddFavoritesShopRequest
+
+@end
+
+@implementation CancelFavoritesShopRequest
+
+@end
+
+@implementation GetFavoritesShopRequest
+
+@end
+
+@implementation GetFootprintRequest
+
+@end
+@implementation DelFootprintRequest
+
++ (NSDictionary *)mj_replacedKeyFromPropertyName
+{
+    return @{@"fid":@"id"};
+}
+
+@end

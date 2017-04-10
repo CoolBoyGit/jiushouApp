@@ -1,0 +1,411 @@
+//
+//  ESMyFootController.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/20.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESMyFootController.h"
+#import "ESMyFootListCell.h"
+#import "ESHomeShopDetailController.h"
+
+@interface ESMyFootController()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong) UITableView *tableView;
+
+/** from */
+@property (nonatomic,assign) NSInteger page;
+/** 足迹item （item ：FootprintInfo ） */
+@property (nonatomic,strong) NSMutableArray *footItems;
+@property (nonatomic,strong) UILabel*tipLabel;
+@property (nonatomic,strong) NSString *tipStr;
+@property (nonatomic,copy)  NSString*string;
+@property (nonatomic,strong) UIView*tipsView;
+@property (nonatomic,assign) int flagg;
+@property (nonatomic,strong) UILabel *label;
+@property (nonatomic,assign) CGFloat witdh;
+@end
+
+@implementation ESMyFootController
+
+- (NSMutableArray *)footItems
+{
+    if (!_footItems) {
+        _footItems = [NSMutableArray array];
+    }
+    return _footItems;
+}
+-(UILabel *)label{
+    if (_label==nil) {
+        _label=[[UILabel alloc]init];
+        _label.text=@"就手猜你喜欢";
+        self. witdh =[_label.text widthOfFont:[UIFont systemFontOfSize:15]];
+        _label.textAlignment=NSTextAlignmentCenter;
+        _label.font=[UIFont systemFontOfSize:15];
+    }
+    return _label;
+}
+-(UILabel *)tipLabel{
+    if (_tipLabel==nil) {
+        _tipLabel=[[UILabel alloc]init];
+        _tipLabel.text=self.tipStr;
+        _tipLabel.font=[UIFont systemFontOfSize:17];
+        _tipLabel.textAlignment=NSTextAlignmentCenter;
+    }
+    return _tipLabel;
+}
+-(UIView *)tipsView{
+    if (_tipsView==nil) {
+        _tipsView=[[UIView alloc]init];
+        _tipsView.backgroundColor=[UIColor whiteColor];
+    }
+    return _tipsView;
+}
+#pragma mark - LifeCycle
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
+    TitleCenter;
+    switch (self.flag) {
+        case 0:
+            self.title=@"我的收藏";
+            self.tipStr=@"还没有收藏宝贝";
+            break;
+        case 1:
+            self.title=@"心愿单";
+            self.tipStr=@"心愿单还没有宝贝";
+            
+            break;
+        case 2:
+            self.title=@"到货提醒";
+            self.tipStr=@"空空如也,去逛逛吧!";
+            break;
+        case 3:
+            self.title=@"我的足迹";
+            self.tipStr=@"空空如也,去逛逛吧!";
+            break;
+        default:
+            break;
+    }
+    //self.title = @"我的足迹";
+//    [self initalizedCumstomNav];
+
+    [self.view addSubview:self.tableView];
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(@0);
+        make.top.equalTo(@0);
+        make.bottom.equalTo(@0);
+    }];
+    @weakify(self);
+    self.tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+       @strongify(self);
+        [self refreshList];
+    }];
+    self.tableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+       @strongify(self);
+        [self moreList];
+    }];
+    [self.tipsView addSubview:self.tipLabel];
+    [self.tipLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.center.mas_equalTo(self.tipsView.center);
+        make.right.equalTo(@-10);
+        
+        make.left.equalTo(@10);
+        make.height.equalTo(@40);
+    }];
+    [self.tipsView addSubview:self.label];
+    [self.label mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(@-10);
+        make.width.equalTo(@(self.witdh+10));
+        make.left.equalTo(@((ScreenWidth-self.witdh-10)/2.0));
+        make.height.equalTo(@20);
+    }];
+    self.tipsView.frame=CGRectMake(0, 0, ScreenWidth, 140);
+    
+    
+    [self refreshList];
+}
+
+#pragma mark
+#pragma mark - tableview代理方法;
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.footItems.count;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 84;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    if (self.flagg==1) {
+        GoodsInfo *info=[self .footItems objectAtIndex:indexPath.row];
+         ESHomeShopDetailController *detail = [[ESHomeShopDetailController alloc] init];
+        detail.goods_id=info.gid;
+        [self.navigationController pushViewController:detail animated:YES];
+    }else{
+        if (self.flag==3) {
+            FootprintInfo *info = [self.footItems objectAtIndex:indexPath.row];
+            ESHomeShopDetailController *detail = [[ESHomeShopDetailController alloc] init];
+            //    detail.isNavHidden = YES;
+            
+            detail.goods_id = info.goods_id;
+            [self.navigationController pushViewController:detail animated:YES];
+            
+        }else{
+            FavoritesGoodsInfo*info=[self.footItems objectAtIndex:indexPath.row];
+            ESHomeShopDetailController *detail = [[ESHomeShopDetailController alloc] init];
+            detail.goods_id = info.goods_id;
+            [self.navigationController pushViewController:detail animated:YES];
+        }
+
+    }
+    
+    
+    
+    //            NormalWebViewController *vc = [[NormalWebViewController alloc] init];
+    //            vc.hidesBottomBarWhenPushed = YES;
+    //            [self.navigationController pushViewController:vc animated:NO];
+}
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (self.flagg==1) {
+        return;
+       
+
+    }else{
+        if (editingStyle == UITableViewCellEditingStyleDelete) {//删除
+            
+            [self deleteCollectionAtGoods_id:indexPath];
+            
+        }
+    }
+    
+}
+
+//删除的是收藏 心愿单 或者是到货提醒
+- (void)deleteCollectionAtGoods_id:(NSIndexPath *)index{
+    
+    
+    if (self.flag == 3) {//我的足迹
+        FootprintInfo *info = [self.footItems objectAtIndex:index.row];
+        DelFootprintRequest *request = [DelFootprintRequest request];
+        request.fid = info.fooId;
+        @weakify(self);
+        [ESService delFootprintRequest:request success:^{
+           @strongify(self);
+            [self endGSNetworking];
+            
+            /*为了方便暂时不从新请求网络收藏的数据*/
+            NSMutableArray *arr = [self.footItems mutableCopy];
+            for (FavoritesGoodsInfo *goodsInfo in arr) {
+                if ([goodsInfo.goods_id isEqualToString:info
+                     .goods_id]) {
+                    [self.footItems removeObject:goodsInfo];
+                }
+            }
+            [self.tableView deleteRowsAtIndexPaths:@[index] withRowAnimation:UITableViewRowAnimationLeft];
+            
+        } failure:^(NSError *error) {
+            @strongify(self);
+            [self endGSNetworking];
+        }];
+        
+    }else{
+        FavoritesGoodsInfo*info             =[self.footItems objectAtIndex:index.row];
+        CancelFavoritesGoodsRequest*request = [CancelFavoritesGoodsRequest request];
+        request.goods_id                    = info.goods_id;
+        request.type                        = [NSNumber numberWithInt: self.flag];
+        @weakify(self);
+        [ESService cancelFavoritesGoodsRequest:request success:^{
+            @strongify(self);
+            
+            [self endGSNetworking];
+            /*为了方便暂时不从新请求网络收藏的数据*/
+            NSMutableArray *arr = [self.footItems mutableCopy];
+            for (FavoritesGoodsInfo *goodsInfo in arr) {
+                if ([goodsInfo.goods_id isEqualToString:info
+                     .goods_id]) {
+                    [self.footItems removeObject:goodsInfo];
+                }
+            }
+            [self.tableView deleteRowsAtIndexPaths:@[index] withRowAnimation:UITableViewRowAnimationLeft];
+            
+            
+        } failure:^(NSError *error) {
+            @strongify(self);
+            [self endGSNetworking];
+        }];
+    }
+    
+}
+- (UITableViewCellEditingStyle) tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (self.flagg==1) {
+        return UITableViewCellEditingStyleNone;
+    }else{
+        return UITableViewCellEditingStyleDelete;
+    }
+    
+    
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESMyFootListCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESMyFootListCell"];
+    if (self.flagg==1) {
+        cell.info=[self.footItems objectAtIndex:indexPath.row];
+    }else{
+        cell.footInfo = [self.footItems objectAtIndex:indexPath.row];
+        
+    }
+    return cell;
+    
+}
+
+#pragma mark
+#pragma mark lazy init
+- (UITableView *)tableView
+{
+    if (_tableView == nil) {
+        _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+        _tableView.delegate = self;
+        _tableView.tableFooterView = [[UIView alloc] init];
+        [_tableView registerClass:[ESMyFootListCell class] forCellReuseIdentifier:@"ESMyFootListCell"];
+    }
+    return _tableView;
+}
+
+#pragma mark - Networking
+
+#pragma mark - 请求列表数据
+- (void)refreshList
+{
+    self.page = 1;
+    if (self.flagg==1) {
+        [self fetchGoods];
+    }else{
+        [self fetchFootprint];
+    }
+    
+}
+- (void)moreList
+{
+    self.page ++ ;
+    if (self.flagg==1) {
+        [self fetchGoods];
+    }else{
+       [self fetchFootprint];
+    }
+   
+}
+- (void)fetchFootprint
+{
+    
+    self.flagg=2;
+    if (self.flag==3) {//我的足迹
+        GetFootprintRequest *request = [GetFootprintRequest request];
+        request.page = [NSNumber numberWithInteger:self.page];
+        request.n    = @20;
+        
+        @weakify(self);
+        [ESService getFootprintRequest:request success:^(NSArray *response) {
+            @strongify(self);
+            [self endGSNetworking];
+            if (response.count==0) {
+                self.flagg=1;
+                
+                [self fetchGoods];
+            }
+            else{
+                self.tableView.tableHeaderView.hidden=YES;
+                if (self.page == 1) {
+                    [self.footItems removeAllObjects];
+                }
+                self.tableView.mj_footer.hidden = response.count < 20;
+                
+                [self.footItems addObjectsFromArray:response];
+                [self.tableView reloadData];
+            }
+            
+            
+        } failure:^(NSError *error) {
+            @strongify(self);
+            [self endGSNetworking];
+        }];
+    }else {
+        GetFavoritesGoodsRequest *request = [GetFavoritesGoodsRequest request];
+        request.type=[NSNumber numberWithInt:self.flag];
+        
+        @weakify(self);
+        [ESService getFavoritesGoodsRequest:request success:^(NSArray *response) {
+            @strongify(self);
+            [self endGSNetworking];
+            if (response.count==0) {
+                self.flagg=1;
+                [self fetchGoods];
+            }
+            else{
+                
+                self.footItems = [NSMutableArray arrayWithArray:response];
+                [self.tableView reloadData];
+            }
+            
+            
+            
+            
+        } failure:^(NSError *error) {
+            @strongify(self);
+            [self endGSNetworking];
+        }];
+    }
+    
+    
+}
+-(void)fetchGoods{
+    GoodsRequest*request=[GoodsRequest request];
+    request.page=[NSNumber numberWithInteger:self.page];
+    request.n=[NSNumber numberWithInt:10];
+    request.orderBy=[NSNumber numberWithInt:2];
+    @weakify(self);
+    [ESService goodsRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        self.tableView.mj_footer.hidden = response.count < 20;
+        if (self.page == 1) {
+            [self.footItems removeAllObjects];
+        }
+        
+        [self.footItems addObjectsFromArray:response];
+        self.tableView.tableHeaderView=self.tipsView;
+        [self.tableView reloadData];
+        
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+    }];
+    
+}
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.tableView.mj_header endRefreshing];
+    [self.tableView.mj_footer endRefreshing];
+}
+
+@end

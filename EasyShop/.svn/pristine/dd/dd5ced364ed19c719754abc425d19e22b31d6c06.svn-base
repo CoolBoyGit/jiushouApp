@@ -1,0 +1,95 @@
+//
+//  MyOrderHeaderView.m
+//  EasyShop
+//
+//  Created by guojian on 16/5/22.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "MyOrderHeaderView.h"
+#import "GSTimeTool.h"
+
+@interface MyOrderHeaderView()
+
+@property (nonatomic, strong) UILabel *dateLabel;
+@property (nonatomic, strong) UILabel *stateLabel;
+/** 分割线 */
+@property (nonatomic,strong) UIView *lineView;
+@end
+
+@implementation MyOrderHeaderView
+
+- (void)setOrderInfo:(OrderInfo *)orderInfo
+{
+    _orderInfo = orderInfo;
+    
+    self.dateLabel.text = [GSTimeTool formatterNumber:_orderInfo.create_time toType:GSTimeType_YYYYMMdd];
+    self.stateLabel.text = _orderInfo.orderDisplay;
+}
+
+- (instancetype)initWithReuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithReuseIdentifier:reuseIdentifier]) {
+        
+        self.contentView.backgroundColor = [UIColor whiteColor];
+        
+        [self.contentView addSubview:self.dateLabel];
+        [self.contentView addSubview:self.stateLabel];
+        [self.contentView addSubview:self.lineView];
+        
+    }
+    return self;
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    [self.dateLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@12);
+        make.top.equalTo(@12);
+    }];
+    
+    [self.stateLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(@(-12));
+        make.top.equalTo(@(12));
+    }];
+    
+    [self.lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@(12));
+        make.right.equalTo(@(-12));
+        make.top.equalTo(self.contentView.mas_bottom).offset(-1);
+        make.height.equalTo(@1);
+    }];
+}
+
+- (UIView *)lineView
+{
+    if (!_lineView) {
+        _lineView = [[UIView alloc] init];
+        _lineView.backgroundColor = RGB(240, 240, 240);
+    }
+    return _lineView;
+}
+
+- (UILabel *)dateLabel
+{
+    if (_dateLabel == nil) {
+        _dateLabel = [[UILabel alloc] init];
+        _dateLabel.textColor = [UIColor blackColor];
+        _dateLabel.font = [UIFont systemFontOfSize:15];
+    }
+    return _dateLabel;
+}
+
+- (UILabel *)stateLabel
+{
+    if (_stateLabel == nil) {
+        _stateLabel = [[UILabel alloc] init];
+        _stateLabel.textColor = [UIColor blackColor];
+        _stateLabel.font = [UIFont systemFontOfSize:15];
+    }
+    return _stateLabel;
+}
+
+@end

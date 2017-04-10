@@ -1,0 +1,96 @@
+//
+//  ESLocationManager.m
+//  EasyShop
+//
+//  Created by jiushou on 16/8/17.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESLocationManager.h"
+
+@interface  ESLocationManager ()<CLLocationManagerDelegate>{
+    CLLocationManager* _locationManager;
+
+}
+@property(nonatomic,strong) CLGeocoder *geocodeer;
+@end
+@implementation ESLocationManager
+-(CLGeocoder *)geocodeer{
+    if (_geocodeer==nil) {
+        _geocodeer=[[CLGeocoder alloc]init];
+        
+    }
+    return _geocodeer;
+}
++ (instancetype)shareManager
+{
+    static ESLocationManager *manager;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        manager = [[ESLocationManager alloc] init];
+    });
+    return manager;
+}
+-(void)createLocation{
+    _locationManager=[[CLLocationManager alloc]init];
+    _locationManager.distanceFilter=1.0f;
+    _locationManager.desiredAccuracy=kCLLocationAccuracyBest;
+    if ([[[UIDevice currentDevice]systemVersion]floatValue]>=8.0) {
+     
+        [_locationManager requestWhenInUseAuthorization];
+        
+    }
+//    if ([[[UIDevice currentDevice]systemVersion]floatValue]>=9.0) {
+//        [_locationManager requestWhenInUseAuthorization];
+//        //_locationManager.allowsBackgroundLocationUpdates=YES;
+//        
+//    }
+    _locationManager.delegate=self;
+    
+    [_locationManager startUpdatingLocation];
+    
+}
+//-(instancetype)init{
+//    if (self=[super init]) {
+//        
+//    }
+//    return self;
+//}
+
+-(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations{
+    CLLocation *location=[locations lastObject];
+    CLLocationCoordinate2D coordinate =location.coordinate;
+    //获取经度
+    CLLocationDegrees longitut=coordinate.longitude;
+    CLLocationDegrees latitute=coordinate.latitude;
+    [self.geocodeer reverseGeocodeLocation:location completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
+        
+        if (error==nil) {
+            for (CLPlacemark*placMark in placemarks) {
+                NSLog(@"name=%@",placMark.name);
+                NSLog(@"地理位置%@",placMark.location);
+                NSLog(@"详细地址%@",placMark.addressDictionary);
+                NSLog(@"FormattedAddressLines%@",placMark.addressDictionary[@"FormattedAddressLines"]);
+                NSLog(@"Name%@",placMark.addressDictionary[@"Name"]);
+                NSLog(@"Street%@",placMark.addressDictionary[@"Street"]);//街道地址以及号数
+                NSLog(@"loaclity%@",placMark.locality);//江门市
+                NSLog(@"subLocality%@",placMark.subLocality);//蓬江区
+                NSLog(@"State%@",placMark.addressDictionary[@"State"]);//广东省
+                NSLog(@"subThoroughfare%@",placMark.subThoroughfare);//号数
+                NSLog(@"thoroughfare%@",placMark.thoroughfare);//街道
+                self.sucessBlock(placMark.addressDictionary[@"State"],placMark.locality,placMark.subLocality);
+            }
+        }
+        
+    }];
+   [_locationManager stopUpdatingLocation];
+    NSLog(@"%f",longitut);
+    NSLog(@"%f",latitute);
+
+
+}
+//
+-(void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error{
+    
+}
+@end

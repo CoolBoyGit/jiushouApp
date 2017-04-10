@@ -1,0 +1,233 @@
+//
+//  ESUserCenterController.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/9.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESUserCenterController.h"
+#import "ESAllOrderCell.h"
+#import "ESOrderStateCell.h"
+#import "ESUserInfoCell.h"
+#import "NormalWebViewController.h"
+#import "ESAddressListController.h"
+#import "ESMyScoreController.h"
+#import "ESChatViewController.h"
+#import "ICDrawbackController.h"
+#import "ESMyOrderPageController.h"
+#import "ESLoginViewController.h"
+#import "ESUserMoreCell.h"
+#import "ESRegisterController.h"
+@interface ESUserCenterController()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong) UITableView *tableView;
+
+@end
+
+@implementation ESUserCenterController
+-(void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    if (kUserManager.isLogin==YES) {
+        self.navigationItem.title  = [kUserManager .userInfo.username stringByReplacingCharactersInRange:NSMakeRange(5, 3) withString:@"***"];
+    }else{
+        self.navigationItem.title=@"未登录";
+    }
+
+    [self.tableView reloadData];
+}
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    
+    [self addNotification];
+       self.view.backgroundColor = [UIColor whiteColor];
+    
+    [self.view addSubview:self.tableView];
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.left.bottom.equalTo(@0);
+        make.top.equalTo(@0);
+    }];
+}
+
+
+- (void)dealloc
+{
+    [self removeNotification];
+}
+
+#pragma mark - Notification
+- (void)addNotification
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDidLogin) name:kUserLoginNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDidLogout) name:kUserLogoutNotification object:nil];
+    //是用户资料获取的时候
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userInfoUpdate) name:kUserInfoUpdateNotification object:nil];
+}
+
+- (void)removeNotification
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)userDidLogin
+{
+    
+}
+- (void)userDidLogout
+{
+    [self.tableView reloadData];
+}
+- (void)userInfoUpdate
+{
+    [self.tableView reloadData];
+}
+
+#pragma mark
+#pragma mark - tableview代理方法;
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 3;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    if (section == 0) {
+        return 2;
+    } else if (section == 1) {
+        return 2;
+    } else
+        return 1;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    if (section == 0) {
+        return .1;
+    }
+    return 10;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section == 0) {
+        if (indexPath.row == 0) {
+            return 70;
+        }
+        return 70;
+    }else if (indexPath.section == 1) {
+        if (indexPath.row == 0) {
+            return 44;
+        }
+        return 70;
+    }
+
+    return (ScreenWidth) / 4.0 *3+25;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
+{
+    return .1;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    if (indexPath.section == 0 && indexPath.row == 0) {//登录
+        if (!kUserManager.isLogin) {//未登录
+            ESLoginViewController *controller = [[ESLoginViewController alloc]init];
+//            controller.isNavHidden = YES;
+            controller.hidesBottomBarWhenPushed = YES;
+           // [self.navigationController pushViewController:controller animated:NO];
+            return;
+        }
+    }
+    if (indexPath.section == 1) {
+        ESLoginVerify
+        
+        ESMyOrderPageController *controller = [[ESMyOrderPageController alloc]init];
+        controller.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:controller animated:NO];
+        return;
+    }
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section == 0 ) {//用户信息
+        if (indexPath.row == 0) {
+            
+            ESUserInfoCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESUserInfoCell"];
+            cell.userInfo   = kUserManager.userInfo;
+            if (kUserManager.isLogin) {
+                cell.loginButton.hidden=YES;
+                cell.registerButton.hidden=YES;
+                cell.nickNameLabel.hidden=NO;
+                cell.signatureLable.hidden=NO;
+            }else{
+                cell.loginButton.hidden=NO;
+                cell.registerButton.hidden=NO;
+                cell.nickNameLabel.hidden=YES;
+                cell.signatureLable.hidden=YES;
+            }
+            cell.loaginBlock=^{
+                ESLoginViewController *controller = [[ESLoginViewController alloc]init];
+                //            controller.isNavHidden = YES;
+                controller.hidesBottomBarWhenPushed = YES;
+                [self.navigationController pushViewController:controller animated:NO];
+                
+                
+                
+            };
+            cell.registerBlock=^{
+                ESRegisterController* registerVc=[[ESRegisterController alloc]init];
+                registerVc.hidesBottomBarWhenPushed=YES;
+                [self.navigationController pushViewController:registerVc animated:NO];
+                
+            };
+            return cell;
+        }
+        
+        ESOrderStateCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESOrderStateCell"];
+        cell.titleArr = @[@"我的收藏",@"心愿单",@"到货提醒"];
+        cell.tag = indexPath.section;
+        cell.imgArr = @[@"user_ collect",@"wish_normal",@"user_ remind"];
+        return cell;
+    } else if (indexPath.section == 1) {//我的订单
+        if (indexPath.row == 0) {
+            ESAllOrderCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESAllOrderCell"];
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            cell.detailTextLabel.text = @"查看全部订单";
+            cell.detailTextLabel.font = ADeanFONT13;
+            cell.imgStr = @"allOrder";
+            cell.titleStr = @"我的订单";
+            
+            cell.detailTextLabel.textColor = ADeanHEXCOLOR(0x999999);
+            return cell;
+        }
+        ESOrderStateCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESOrderStateCell"];
+        cell.titleArr = @[@"待付款",@"待发货",@"待收货",@"待评价"];
+        cell.tag = indexPath.section;
+        cell.imgArr = @[@"user_waitfor",@"user_dispatchgoods",@"user_ consignee",@"user_ judge"];
+        return cell;
+    }else {
+        ESUserMoreCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESUserMoreCell"];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        return cell;
+    }
+}
+
+#pragma mark
+#pragma mark lazy init
+- (UITableView *)tableView
+{
+    if (_tableView == nil) {
+        _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        _tableView.delegate = self;
+        _tableView.tableFooterView = [[UIView alloc] init];
+        [_tableView registerClass:[ESUserMoreCell class] forCellReuseIdentifier:@"ESUserMoreCell"];
+        [_tableView registerClass:[ESUserInfoCell class] forCellReuseIdentifier:@"ESUserInfoCell"];
+        [_tableView registerClass:[ESOrderStateCell class] forCellReuseIdentifier:@"ESOrderStateCell"];
+        [_tableView registerClass:[ESAllOrderCell class] forCellReuseIdentifier:@"ESAllOrderCell"];
+    }
+    return _tableView;
+}
+
+@end

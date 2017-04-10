@@ -1,0 +1,290 @@
+//
+//  AppDelegate.m
+//  EasyShop
+//
+//  Created by wcz on 16/3/23.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "AppDelegate.h"
+#import "ESTabBarController.h"
+#import "ESLoginViewController.h"
+#import "ESRegisterController.h"
+#import "ESWelcomeController.h"
+#import "GSTimeTool.h"
+#import "StatusWindows.h"
+#import "EaseMob.h"
+#import "WXApi.h"
+#import <AlipaySDK/AlipaySDK.h>
+#import <TencentOpenAPI/TencentOAuth.h>
+#import "JPUSHService.h"
+#import "AppDelegate+EaseMob.h"
+#import "StatusBarScrollViewTool.h"
+#import "IQKeyboardManager.h"
+@interface AppDelegate ()<WXApiDelegate>
+
+@end
+
+@implementation AppDelegate
+
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOption{
+    self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    IQKeyboardManager *manager = [IQKeyboardManager sharedManager];
+    manager.enable = YES;
+    manager.shouldResignOnTouchOutside = YES;
+    manager.shouldToolbarUsesTextFieldTintColor = YES;
+    manager.enableAutoToolbar = NO;
+    
+   
+    //注册调用环信
+       [self easemobApplication:application didFinishLaunchingWithOptions:launchOption];
+    //注册微信
+    [WXApi registerApp:kWeixin_AppId withDescription:@"就手国际"];
+    
+    //注册极光推送
+    if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
+        //可以添加自定义categories
+        [JPUSHService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge |
+                                                          UIUserNotificationTypeSound |
+                                                          UIUserNotificationTypeAlert)
+                                              categories:nil];
+    } else {
+        //categories 必须为nil
+        [JPUSHService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
+                                                          UIRemoteNotificationTypeSound |
+                                                          UIRemoteNotificationTypeAlert)
+                                              categories:nil];
+    }//setupWithOption 这个是那个字典提示的内容
+    [JPUSHService setupWithOption:nil
+                           appKey:kJPush_AppKey
+                          channel:nil
+                 apsForProduction:NO
+            advertisingIdentifier:nil];
+    
+//    ESLoginViewController *tabBarVc = [[ESLoginViewController alloc] init];
+//    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:tabBarVc];
+//    self.window.rootViewController = nav;
+    [self setupRootController];
+    
+    [self.window makeKeyAndVisible];
+    return YES;
+}
+
+- (void)setupRootController
+{
+    if ([GSTimeTool isManualLoginOverTime]) {//超过登录时间
+        [kUserManager clearLoginAccount];
+    }else{//自动登录
+        [kUserManager doUserAutoLogin];
+    }
+    ESWelcomeController*welcomeVc=[[ESWelcomeController alloc]init];
+    self.window.rootViewController=welcomeVc;
+//    ESTabBarController *tabBar = [[ESTabBarController alloc] init];
+//    self.tabbarController = tabBar;
+//    self.window.rootViewController = tabBar;
+}
+//作用是锁定屏幕竖屏
+-(UIInterfaceOrientationMask)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window{
+    return UIInterfaceOrientationMaskPortrait;
+}
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+    //作用 回到顶部
+    [super touchesBegan:touches withEvent:event];
+    
+    CGPoint location = [[[event allTouches] anyObject] locationInView:self.window];
+    CGRect statusBarFrame = [UIApplication sharedApplication].statusBarFrame;
+    //CGRectContainsPoint判断statusBarFrame是否包含location这个点
+    if (CGRectContainsPoint(statusBarFrame, location)) {
+        [StatusBarScrollViewTool scrollViewScrollToTop];
+    }
+    
+}
+
+- (void)applicationWillResignActive:(UIApplication *)application {
+   //只会显示比零大的数字
+    //设计思路 当后台有客服信息的时候，就发送一个通知，然后把当前的信息数目传递过来，然后跟新当前的数字
+//    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(updateIconNum:) name:KKUpdateApplicationIconBadgeNumber object:nil];
+    NSInteger totalNum =  [[EaseMob sharedInstance].chatManager loadTotalUnreadMessagesCountFromDatabase];
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:totalNum];
+    // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+    // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+}
+-(void)updateIconNum:(NSNotification*)noti{
+//    NSInteger total=[noti.object integerValue];
+//    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:total];
+}
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
+    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    
+    
+    
+    //保存进入后台时间
+    [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:kEnterBackgroundTimeKey];
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+    // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+    //清空badge
+    [application setApplicationIconBadgeNumber:0];
+    [application cancelAllLocalNotifications];
+    
+    //判断超时，重新登录
+    if ([GSTimeTool isEnterBackgroundOverTime]) {//超过30分钟，进入自动登录
+        [kUserManager doUserAutoLogin];
+        NSLog(@"超时，进行自动登录...");
+    }
+    
+    
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+}
+
+- (void)applicationWillTerminate:(UIApplication *)application {
+    // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+}
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+    //注册设备token
+    DZLog(@"%@",[NSString stringWithFormat:@"Device Token: %@", deviceToken]);
+    
+    [JPUSHService registerDeviceToken:deviceToken];
+}
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+    //注册设备token失败
+    DZLog(@"did Fail To Register For Remote Notifications With Error: %@", error);
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+{
+    DZLog(@"收到通知:%@", [self logDic:userInfo]);
+    [JPUSHService handleRemoteNotification:userInfo];
+}
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    DZLog(@"收到通知:%@", [self logDic:userInfo]);
+    [JPUSHService handleRemoteNotification:userInfo];
+}
+
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString *,id> *)options
+{
+    return [self handleOpenUrl:url];
+}
+
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
+{
+    return [self handleOpenUrl:url];
+}
+
+//这里是客户端返回
+- (BOOL)handleOpenUrl:(NSURL *)url
+{
+    if ([url.host isEqualToString:@"safepay"]) {
+        //跳转支付宝钱包进行支付，处理支付结果
+        [[AlipaySDK defaultService] processOrderWithPaymentResult:url standbyCallback:^(NSDictionary *resultDic) {
+            DZLog(@"result = %@",resultDic);
+            
+            NSNumber *resultStatus = [resultDic objectForKey:@"resultStatus"];
+            if (resultStatus.integerValue == 9000) {//支付成功
+                DZLog(@"%@",@"支付宝支付成功");
+                [ESToast showSuccess:@"支付成功！"];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kDidPaySuccessNotification object:nil];
+            }else{//支付失败
+                NSLog(@"支付宝支付失败");
+                [ESToast showError:@"支付失败！"];
+            }
+        }];
+        return YES;
+    }
+    return  [WXApi handleOpenURL:url delegate:self] ||
+            [TencentOAuth HandleOpenURL:url];
+}
+//微信
+#pragma mark - WXApiDelegate
+- (void)onResp:(BaseResp *)resp
+{
+    /*
+     errCode 错误码
+     WXSuccess           = 0,    < 成功
+     WXErrCodeCommon     = -1,   < 普通错误类型
+     WXErrCodeUserCancel = -2,   < 用户点击取消并返回
+     WXErrCodeSentFail   = -3,   < 发送失败
+     WXErrCodeAuthDeny   = -4,   < 授权失败
+     WXErrCodeUnsupport  = -5,   < 微信不支持
+     */
+    
+    
+    if([resp isKindOfClass:[PayResp class]]){//微信支付
+        //支付返回结果，实际支付结果需要去微信服务器端查询
+        NSString *strMsg = [NSString stringWithFormat:@"支付结果"];
+        
+        switch (resp.errCode) {
+            case WXSuccess:
+            {
+                strMsg = @"支付结果：成功！";
+                NSLog(@"支付成功－PaySuccess，retcode = %d", resp.errCode);
+                [ESToast showSuccess:@"支付成功！"];
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:kDidPaySuccessNotification object:nil];
+            }
+                break;
+            default:
+            {
+                strMsg = [NSString stringWithFormat:@"支付结果：失败！retcode = %d, retstr = %@", resp.errCode,resp.errStr];
+                NSLog(@"错误，retcode = %d, retstr = %@", resp.errCode,resp.errStr);
+                [ESToast showError:@"支付失败！"];
+            }
+                break;
+        }
+    }
+    
+    if ([resp isKindOfClass:[SendAuthResp class]]) {//微信登录
+        
+        SendAuthResp *saResp=(SendAuthResp *)resp;
+        if (saResp.errCode == WXSuccess) {//登录成功
+            [[NSNotificationCenter defaultCenter] postNotificationName:kDidWechatLoginNotification object:saResp.code];
+        }
+    }
+   
+    if ([resp isKindOfClass:[SendMessageToWXResp class]]) {//微信分享
+        SendMessageToWXResp *smResp = (SendMessageToWXResp *)resp;
+        if (smResp.errCode == WXSuccess) {
+            [ESToast showSuccess:@"分享成功"];
+        }else{
+            [ESToast showError:@"分享失败"];
+        }
+    }
+}
+
+#pragma mark - Tool
+// log NSSet with UTF8
+// if not ,log will be \Uxxx
+- (NSString *)logDic:(NSDictionary *)dic {
+    if (![dic count]) {
+        return nil;
+    }
+    NSString *tempStr1 =
+    [[dic description] stringByReplacingOccurrencesOfString:@"\\u"
+                                                 withString:@"\\U"];
+    NSString *tempStr2 =
+    [tempStr1 stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];
+    NSString *tempStr3 =
+    [[@"\"" stringByAppendingString:tempStr2] stringByAppendingString:@"\""];
+    NSData *tempData = [tempStr3 dataUsingEncoding:NSUTF8StringEncoding];
+    NSString *str =
+    [NSPropertyListSerialization propertyListFromData:tempData
+                                     mutabilityOption:NSPropertyListImmutable
+                                               format:NULL
+                                     errorDescription:NULL];
+    return str;
+}
+
+
+@end

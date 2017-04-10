@@ -1,0 +1,73 @@
+//
+//  ESSureMessageView.m
+//  EasyShop
+//
+//  Created by guojian on 16/5/22.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESSureMessageView.h"
+
+@interface ESSureMessageView()
+
+/** itlt */
+@property (nonatomic,strong) UILabel *titleLabel;
+
+@end
+
+@implementation ESSureMessageView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        self.backgroundColor = [UIColor whiteColor];
+        
+        [self addSubview:self.titleLabel];
+        [self addSubview:self.textView];
+        [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.equalTo(@50);
+            make.height.equalTo(@20);
+            make.top.equalTo(@5);
+            make.left.equalTo(@20);
+        }];
+        [self.textView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.equalTo(@(-10));
+            make.top.equalTo(@5);
+            make.bottom.equalTo(@(-5));
+            make.left.equalTo(self.titleLabel.mas_right).with.offset(5);
+        }];
+    }
+    return self;
+}
+
+
+-(UITextView *)textView{
+    if (_textView==nil) {
+        _textView=[[UITextView alloc]init];
+        _textView.scrollEnabled=YES;
+        _textView.textAlignment=NSTextAlignmentLeft;
+        _textView.font=[UIFont systemFontOfSize:13];
+    }
+    return _textView;
+}
+- (UILabel *)titleLabel
+{
+    if (!_titleLabel) {
+        _titleLabel = [[UILabel alloc] init];
+        _titleLabel.font = ADeanFONT15;
+        _titleLabel.text = @"留言：";
+        _titleLabel.textColor = [UIColor blackColor];
+    }
+    return _titleLabel;
+}
+
+- (UITextField *)textField
+{
+    if (!_textField) {
+        _textField = [[UITextField alloc] init];
+    }
+    return _textField;
+}
+
+
+@end

@@ -1,0 +1,117 @@
+//
+//  ESUserInfoCell.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/9.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESUserInfoCell.h"
+
+@interface ESUserInfoCell()
+
+@property (nonatomic, strong) UIImageView     *userImg;//用户图像
+@property (nonatomic, strong) UILabel         *userName;//用户名字
+@property (nonatomic, strong) UIButton        *loginButton;//登陆按钮
+
+@end
+
+@implementation ESUserInfoCell
+
+- (void)setUserInfo:(UserInfo *)userInfo
+{
+    _userInfo = userInfo;
+    
+    [self.userImg sd_setImageWithURL:[NSURL URLWithString:_userInfo.logo]
+                    placeholderImage:[UIImage imageNamed:@"user"]];
+    self.userName.text = _userInfo.username;
+}
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        [self setupViews];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        UILabel*lable=[[UILabel alloc]init];
+        lable.alpha=0.1;
+        lable.backgroundColor=[UIColor grayColor];
+        [self.contentView addSubview:lable];
+        [lable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.bottom.equalTo(@0);
+            make.height.equalTo(@(1.5));
+        }];
+    }
+    return self;
+}
+
+- (void)setupViews
+{
+    self.userImg.image = [UIImage imageNamed:@"user"];
+    [self.contentView addSubview:_userImg];
+    [_userImg mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(@0);
+        make.left.equalTo(self.contentView.mas_left).with.offset(20);
+        make.height.equalTo(@100);
+        make.width.equalTo(@100);
+    }];
+    
+    self.userName.text = @"您还没有登陆";
+    [self.contentView addSubview:_userName];
+    [_userName mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(@0);
+        make.left.equalTo(self.userImg.mas_right).with.offset(20);
+        make.height.equalTo(@20);
+        make.width.equalTo(@100);
+    }];
+    
+    [self.contentView addSubview:_loginButton];
+    [_loginButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(@0);
+        make.left.equalTo(self.userName.mas_right).with.offset(0);
+        make.height.equalTo(@30);
+        make.width.equalTo(@80);
+    }];
+}
+
+- (UIImageView *)userImg
+{
+    if (!_userImg) {
+        _userImg =[[UIImageView alloc] init];
+        _userImg.layer.cornerRadius = 50;
+        _userImg.layer.masksToBounds = YES;
+        _userImg.contentMode = UIViewContentModeCenter;
+    }
+    return _userImg;
+}
+- (UILabel *)userName
+{
+    if (!_userName) {
+        _userName = [[UILabel alloc] init];
+        _userName.backgroundColor = [UIColor clearColor];
+        _userName.font = ADeanFONT13;
+        _userName.textColor = [UIColor grayColor];
+        _userName.textAlignment = NSTextAlignmentLeft;
+    }
+    return _userName;
+}
+
+- (UIButton *)loginButton
+{
+    if (!_loginButton) {
+        _loginButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _loginButton.layer.cornerRadius = 10;
+        _loginButton.layer.masksToBounds = YES;
+        [_loginButton setTitle:@"点击登陆" forState:UIControlStateNormal];
+        [_loginButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [_loginButton setBackgroundColor:[UIColor redColor]];
+        [_loginButton addTarget:self action:@selector(loginButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _loginButton;
+}
+-(void)loginButtonAction
+{
+    
+}
+
+@end

@@ -1,0 +1,88 @@
+//
+//  ESCountryTableViewCell.m
+//  EasyShop
+//
+//  Created by wcz on 16/5/31.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESCountryTableViewCell.h"
+
+@interface ESCountryTableViewCell ()
+
+@property (nonatomic, strong) UIImageView *photoImageView;//图片
+@property (nonatomic ,strong) UILabel*descritionLable;//下面的文字
+@property (nonatomic ,strong) UIView *bgView;
+@end
+
+@implementation ESCountryTableViewCell
+
+- (void)setActivityInfo:(ActivityInfo *)activityInfo
+{
+    _activityInfo = activityInfo;
+    self.descritionLable.text=activityInfo.descriptions;
+    [self.photoImageView sd_setImageWithURL:[NSURL URLWithString:_activityInfo.cover]
+                             placeholderImage:[UIImage imageNamed:@"bg"]];
+}
+-(UILabel *)descritionLable{
+    if (_descritionLable==nil) {
+        _descritionLable=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, 0, 23)];
+        _descritionLable.textAlignment=NSTextAlignmentLeft;
+        _descritionLable.text=@"用于胃酸过多、消化不良、胃痛、胃灼热胸作闷等胃病。";
+        _descritionLable.backgroundColor=[UIColor  whiteColor];
+        _descritionLable.font=[UIFont systemFontOfSize:15];
+    }
+    return _descritionLable;
+}
+-(UIView *)bgView{
+    if (_bgView==nil) {
+        _bgView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, ScreenWidth, 30)];
+        _bgView.backgroundColor=[UIColor lightGrayColor];
+        _bgView.alpha=0.2;
+    }
+    return _bgView;
+}
+-(UIImageView *)photoImageView
+{
+    if (!_photoImageView)
+    {
+        _photoImageView = [[UIImageView alloc] init];
+        _photoImageView.contentMode = UIViewContentModeScaleAspectFill;
+    }
+    return _photoImageView;
+}
+
+-(id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        [self.contentView addSubview:self.photoImageView];
+        [self.photoImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(@0);
+            make.right.left.equalTo(@0);
+            make.height.equalTo(@(ScreenWidth*408/617.0));
+            
+        }];
+        [self.contentView addSubview:self.descritionLable];
+        [self.descritionLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.photoImageView.mas_bottom).offset(0);
+            make.height.equalTo(@40);
+            make.left.equalTo(@(10));
+            make.right.equalTo(@(-10));
+            
+        }];
+        [self.contentView addSubview:self.bgView];
+        [self.bgView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.descritionLable.mas_bottom).offset(0);
+            make.left.equalTo(@(0));
+            make.right.equalTo(@(0));
+            make.height.equalTo(@5);
+        }];
+        
+        
+        
+        
+            }
+    return self;
+}
+
+@end

@@ -1,0 +1,94 @@
+//
+//  FavoritesRequest.h
+//  EasyShopService
+//
+//  Created by guojian on 16/5/2.
+//  Copyright © 2016年 naijoug. All rights reserved.
+//
+
+#import "BaseRequest.h"
+
+/** 8.1 获取用户关注商品列表 */
+@interface GetFavoritesGoodsRequest : BaseRequest
+
+/** 类型（1:心愿单 ；2：到货提醒; 0：收藏） */
+@property (nonatomic,strong) NSNumber *type;
+/** 页码 */
+@property (nonatomic,strong) NSNumber *page;
+/** 记录数 */
+@property (nonatomic,strong) NSNumber *n;
+@end
+
+typedef NS_ENUM(NSInteger,FavoritesType) {
+    FavoritesType_Collect = 0, //收藏
+    FavoritesType_Wish,        //心愿单
+    FavoritesType_Remind,      //到货提醒
+};
+
+/** 8.2 添加用户关注商品 */
+@interface AddFavoritesGoodsRequest : BaseRequest
+
+/** 商品id */
+@property (nonatomic,copy) NSString *goods_id;
+/** 类型（1:心愿单 ；2：到货提醒; 0：收藏） */
+@property (nonatomic,strong) NSNumber *type;
+
+@end
+
+/** 8.3 取消用户关注商品 */
+@interface CancelFavoritesGoodsRequest : BaseRequest
+
+/** 商品id */
+@property (nonatomic,copy) NSString *goods_id;
+/** 类型（1:心愿单 ；2：到货提醒; 0：收藏） */
+@property (nonatomic,strong) NSNumber *type;
+
+@end
+
+/** 8.4 收藏店铺 */
+@interface AddFavoritesShopRequest : BaseRequest
+
+/** 商店id */
+@property (nonatomic,copy) NSString *shop_id;
+
+@end
+
+
+/** 8.5 取消收藏店铺 */
+@interface CancelFavoritesShopRequest : BaseRequest
+
+/** 商店id */
+@property (nonatomic,copy) NSString *shop_id;
+
+@end
+
+/** 8.6 获取当前所有收藏店铺 */
+@interface GetFavoritesShopRequest : BaseRequest
+
+@end
+
+/** 8.7 获取当前用户足迹 */
+@interface GetFootprintRequest : BaseRequest
+
+/** 页码 */
+@property (nonatomic,strong) NSNumber *page;
+/** 记录数 */
+@property (nonatomic,strong) NSNumber *n;
+
+@end
+/** 删除用户足迹 */
+@interface DelFootprintRequest : BaseRequest
+
+/** 用户id （多个id 用","隔开） */
+@property (nonatomic,copy) NSString *fid;
+
+@end
+
+
+
+
+
+
+
+
+

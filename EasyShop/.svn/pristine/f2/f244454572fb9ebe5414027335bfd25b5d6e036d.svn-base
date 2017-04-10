@@ -1,0 +1,105 @@
+//
+//  ESShopPriceCell.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/3/27.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESShopPriceCell.h"
+
+@interface ESShopPriceCell()
+
+@property (nonatomic, strong) UILabel *originalPrice;
+@property (nonatomic, strong) UILabel *oldPrice;
+@property (nonatomic, strong) UILabel *freight;
+
+@end
+
+@implementation ESShopPriceCell
+
+- (void)setGoodsInfo:(GoodsDetailInfo *)goodsInfo
+{
+    _goodsInfo = goodsInfo;
+    
+    self.originalPrice.text = [NSString stringWithFormat:@"¥%@",_goodsInfo.price];
+    self.oldPrice.text = [NSString stringWithFormat:@"¥%@",_goodsInfo.market_price];
+    self.freight.text = [NSString stringWithFormat:@"运费：%@",_goodsInfo.free_freight];
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        [self intalizedView];
+    }
+    return self;
+}
+
+-(void)intalizedView
+{
+    self.originalPrice.text = [NSString stringWithFormat:@"¥%d",119];
+    self.oldPrice.text = [NSString stringWithFormat:@"¥%d",229];
+    self.freight.text = [NSString stringWithFormat:@"运费：%.2f",55.00];
+    
+    //颜色
+    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:self.originalPrice.text];
+    [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:13] range:[self.originalPrice.text rangeOfString:@"¥"]];
+    [self.originalPrice setAttributedText:str];
+    
+    //横线
+    NSUInteger length = [self.oldPrice.text length];
+    NSMutableAttributedString *attri = [[NSMutableAttributedString alloc] initWithString:self.oldPrice.text];
+    [attri addAttribute:NSStrikethroughStyleAttributeName value:@(NSUnderlinePatternSolid | NSUnderlineStyleSingle) range:NSMakeRange(0, length)];
+    [attri addAttribute:NSStrikethroughColorAttributeName value:ADeanHEXCOLOR(0x999999) range:NSMakeRange(2, length-2)];
+    [self.oldPrice setAttributedText:attri];
+}
+
+- (UILabel *)originalPrice {
+    if (!_originalPrice) {
+        _originalPrice = [[UILabel alloc] init];
+        [self addSubview:_originalPrice];
+        _originalPrice.font = ADeanFONT21;
+        _originalPrice.textAlignment = NSTextAlignmentLeft;
+        _originalPrice.textColor = RGB(233, 40, 46);
+        [_originalPrice mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.mas_left).with.offset(15);
+            make.height.equalTo(@15);
+            make.bottom.equalTo(self.mas_bottom).with.offset(-5);
+        }];
+    }
+    return _originalPrice;
+}
+- (UILabel *)oldPrice {
+    if (!_oldPrice) {
+        _oldPrice = [[UILabel alloc] init];
+        [self addSubview:_oldPrice];
+        _oldPrice.font = ADeanFONT11;
+        _oldPrice.numberOfLines = 10;
+        _oldPrice.textAlignment = NSTextAlignmentLeft;
+        _oldPrice.textColor = ADeanHEXCOLOR(0x999999);
+        [_oldPrice mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.originalPrice.mas_right).with.offset(5);
+            make.bottom.equalTo(self.mas_bottom).with.offset(-5);
+//            make.width.equalTo(@30);
+            make.height.equalTo(@10);
+        }];
+    }
+    return _oldPrice;
+}
+- (UILabel *)freight {
+    if (!_freight) {
+        _freight = [[UILabel alloc] init];
+        [self addSubview:_freight];
+        _freight.font = ADeanFONT11;
+        _freight.textAlignment = NSTextAlignmentLeft;
+        _freight.textColor = ADeanHEXCOLOR(0x999999);
+        [_freight mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.oldPrice.mas_right).with.offset(10);
+            make.bottom.equalTo(self.mas_bottom).with.offset(-5);
+//            make.width.equalTo(@100);
+            make.height.equalTo(@10);
+        }];
+    }
+    return _freight;
+}
+@end

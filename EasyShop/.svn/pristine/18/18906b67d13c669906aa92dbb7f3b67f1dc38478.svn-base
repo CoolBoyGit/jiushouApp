@@ -1,0 +1,86 @@
+//
+//  ESSureBottonView.m
+//  EasyShop
+//
+//  Created by 脉融LCJ on 16/5/15.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESSureBottonView.h"
+#import "ESPayListController.h"
+
+@interface ESSureBottonView()
+
+@property (nonatomic, strong) UIButton *sureButton;
+@property (nonatomic, strong) UILabel  *amountLab;
+
+@end
+
+@implementation ESSureBottonView
+
+- (void)setConfirmInfo:(OrderConfirmInfo *)confirmInfo
+{
+    _confirmInfo = confirmInfo;
+    
+    self.amountLab.text = [NSString stringWithFormat:@"合计：¥%0.2f",_confirmInfo.cost];
+}
+
+-(instancetype)initWithFrame:(CGRect)frame
+{
+    if ([super initWithFrame:frame]) {
+        [self setUpViews];
+    }
+    return self;
+}
+
+-(void)setUpViews
+{
+    [self addSubview:self.sureButton];
+    [self.sureButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.bottom.right.equalTo(@0);
+        make.width.equalTo(@113.5);
+    }];
+    
+    self.amountLab.text = @"合计：¥199";
+    NSMutableAttributedString *attributedString1 = [[NSMutableAttributedString alloc] initWithString:self.amountLab.text];
+    [attributedString1 addAttribute:NSForegroundColorAttributeName value:[UIColor blackColor] range:[self.amountLab.text rangeOfString:@"合计："]];
+    self.amountLab.attributedText = attributedString1;
+    [self addSubview:self.amountLab];
+    [self.amountLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.bottom.equalTo(@0);
+        make.right.equalTo(self.sureButton.mas_left).with.offset(-10);
+        make.width.equalTo(@100);
+    }];
+}
+
+-(UILabel *)amountLab
+{
+    if (!_amountLab) {
+        _amountLab = [[UILabel alloc] init];
+        _amountLab.textAlignment = NSTextAlignmentRight;
+        _amountLab.font = [UIFont systemFontOfSize:15];
+        _amountLab.textColor = [UIColor redColor];
+    }
+    return _amountLab;
+}
+-(UIButton *)sureButton
+{
+    if (!_sureButton) {
+        _sureButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _sureButton.backgroundColor = [UIColor redColor];
+        [_sureButton setTitle:@"确认订单" forState:UIControlStateNormal];
+        [_sureButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        _sureButton.titleLabel.font = [UIFont systemFontOfSize:15];
+        [_sureButton addTarget:self action:@selector(sureAction) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _sureButton;
+}
+
+-(void)sureAction
+{
+    if (self.sureBlock) {
+        self.sureBlock();
+    }
+}
+
+@end

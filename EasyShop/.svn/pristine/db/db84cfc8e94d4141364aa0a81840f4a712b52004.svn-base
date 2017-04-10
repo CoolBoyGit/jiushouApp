@@ -1,0 +1,151 @@
+//
+//  ShopBottomCell.m
+//  MFBank
+//
+//  Created by YANQI on 15/11/4.
+//  Copyright © 2015年 MFBank. All rights reserved.
+//
+
+#import "ESShopBottomView.h"
+
+@interface ESShopBottomView()
+{
+    
+}
+@property (nonatomic, strong) UILabel                       *priceLabel;
+@property (nonatomic, strong) UIButton                      *submitBtn;
+@property (nonatomic, strong) UIButton                      *selectBtn;
+
+/** 是否是全选 */
+@property (nonatomic,assign,readonly) BOOL isAllSelected;
+
+@end
+
+@implementation ESShopBottomView
+
+- (BOOL)isAllSelected
+{
+    if (self.cartInfo.shopsItems && self.cartInfo.shopsItems.count > 0) {
+        for (CartShopInfo *info in self.cartInfo.shopsItems) {
+            for (CartGoodsInfo *goodsInfo in info.goodsItems) {
+                if (goodsInfo.status.integerValue == 0) {//未选中
+                    return NO;
+                }
+            }
+        }
+        return YES;
+    }
+    return NO;
+}
+
+- (void)setCartInfo:(CartInfo *)cartInfo
+{
+    _cartInfo = cartInfo;
+    
+    self.selectBtn.selected = self.isAllSelected;
+    
+    float price         = _cartInfo.cartInfo.price_sum.floatValue;
+    NSInteger amount    = _cartInfo.cartInfo.goods_sum.integerValue;
+    
+    NSString *priceStr = [NSString stringWithFormat:@"¥%0.2f",price];
+    NSString *numTotal = [NSString stringWithFormat:@"合计: %@    共%ld件",priceStr,(long)amount];
+    NSMutableAttributedString *attributedString1 = [[NSMutableAttributedString alloc] initWithString:numTotal];
+    [attributedString1 addAttribute:NSForegroundColorAttributeName value:ADeanHEXCOLOR(0xff7800) range:NSMakeRange(4, priceStr.length )];
+    [attributedString1 addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:[numTotal rangeOfString:priceStr]];
+    
+    self.priceLabel.attributedText = attributedString1;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = [UIColor whiteColor];
+        [self setupViews];
+    }
+    return self;
+}
+
+- (void)setupViews
+{
+    self.submitBtn.alpha = 1.0f;
+    self.priceLabel.frame = CGRectMake(100, 12, 230, 20);
+    self.selectBtn.alpha = 1.0f;
+}
+
+#pragma mark view init
+- (UIButton *)selectBtn
+{
+    if (!_selectBtn) {
+        _selectBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_selectBtn setTitle:@"全选" forState:UIControlStateNormal];
+        _selectBtn.titleLabel.font = [UIFont systemFontOfSize:15];
+        [_selectBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [_selectBtn setBackgroundColor:[UIColor clearColor]];
+        [_selectBtn setImage:[UIImage imageNamed:@"shopcart_unselect_icon"] forState:UIControlStateNormal];
+        [_selectBtn setImage:[UIImage imageNamed:@"shopcart_selected_icon"] forState:UIControlStateSelected];
+        [_selectBtn addTarget:self action:@selector(selectBtnAction) forControlEvents:UIControlEventTouchUpInside];
+        _selectBtn.imageEdgeInsets = UIEdgeInsetsMake(0, -20, 0, 0);
+        _selectBtn.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 10);
+        [self addSubview:_selectBtn];
+        [_selectBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.equalTo(@0);
+            make.left.equalTo(self.mas_left).with.offset(10);
+            make.height.equalTo(@30);
+            make.width.equalTo(@70);
+        }];
+    }
+    return _selectBtn;
+}
+- (UILabel *)priceLabel
+{
+    if (!_priceLabel) {
+        _priceLabel = [[UILabel alloc] init];
+        _priceLabel.backgroundColor = [UIColor clearColor];
+        _priceLabel.textAlignment = NSTextAlignmentCenter;
+        _priceLabel.textColor = [UIColor lightGrayColor];
+        _priceLabel.text = @"";
+        _priceLabel.font = [UIFont systemFontOfSize:15.f];
+        [self addSubview:_priceLabel];
+        [_priceLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.equalTo(@0);
+            make.left.equalTo(self.selectBtn.mas_right).with.offset(10);
+            make.height.equalTo(@30);
+            make.right.equalTo(self.submitBtn.mas_left).with.offset(-10);
+        }];
+    }
+    return _priceLabel;
+}
+
+- (UIButton *)submitBtn
+{
+    if (!_submitBtn) {
+        _submitBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_submitBtn setTitle:@"结算" forState:UIControlStateNormal];
+        [_submitBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [_submitBtn setBackgroundColor:ADeanHEXCOLOR(0xff7800)];
+        _submitBtn.titleLabel.font = ADeanFONT13;
+        [_submitBtn addTarget:self action:@selector(submitBtnAction) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_submitBtn];
+        [_submitBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.top.bottom.equalTo(@0);
+            make.width.equalTo(@50);
+        }];
+    }
+    return _submitBtn;
+}
+
+- (void)selectBtnAction
+{
+    if (self.allSelectedBlock) {
+        self.allSelectedBlock(self.isAllSelected);
+    }
+}
+- (void)submitBtnAction
+{
+    if (self.submitBlock) {
+        self.submitBlock();
+    }
+}
+
+@end

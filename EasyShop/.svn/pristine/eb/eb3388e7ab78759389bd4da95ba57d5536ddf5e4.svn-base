@@ -1,0 +1,272 @@
+//
+//  ESForgetPasswordController.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/7.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESForgetPasswordController.h"
+#import "ESResetViewController.h"
+#import "ESSmsButton.h"
+
+#import "ESInputTextField.h"
+
+@interface ESForgetPasswordController ()
+
+@property (nonatomic, strong) ESInputTextField *mobileNumTextField;
+@property (nonatomic, strong) ESInputTextField *passWordTextField;
+@property (nonatomic, strong) ESInputTextField *codeTextField;
+
+/** Indicator */
+@property (nonatomic,strong) ESIndicator *indicator;
+
+/** smsButtom */
+@property (nonatomic,weak) ESSmsButton *smsButton;
+
+@end
+
+@implementation ESForgetPasswordController
+
+- (ESIndicator *)indicator
+{
+    if (!_indicator) {
+        _indicator = [ESIndicator indicatorToView:self.view];
+    }
+    return _indicator;
+}
+
+- (ESInputTextField *)mobileNumTextField
+{
+    if (_mobileNumTextField ==nil) {
+        _mobileNumTextField = [[ESInputTextField alloc] initWithImage:[UIImage imageNamed:@""]];
+        _mobileNumTextField.keyboardType = UIKeyboardTypeNumberPad;
+        _mobileNumTextField.placeholder = @"手机号/账号";
+    }
+    return _mobileNumTextField;
+}
+
+- (ESInputTextField *)codeTextField
+{
+    if (_codeTextField ==nil) {
+        _codeTextField = [[ESInputTextField alloc] initWithImage:nil];
+        _codeTextField.keyboardType = UIKeyboardTypeNumberPad;
+        _codeTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _codeTextField.placeholder = @"验证码";
+    }
+    return _codeTextField;
+}
+
+- (ESInputTextField *)passWordTextField
+{
+    if (_passWordTextField ==nil) {
+        _passWordTextField = [[ESInputTextField alloc] initWithImage:nil];
+        _passWordTextField.keyboardType = UIKeyboardTypeNumberPad;
+        _passWordTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _passWordTextField.secureTextEntry = YES;
+        _passWordTextField.placeholder = @"密码";
+    }
+    return _passWordTextField;
+}
+
+-(void)exitKeyboard{
+    [self.view  endEditing:YES];
+}
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    
+    [self addNotification];
+    
+    self.title = @"重置密码";
+    
+    self.view.backgroundColor = [UIColor whiteColor];
+  UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(exitKeyboard)];
+    [self.view addGestureRecognizer:tap];
+    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    //    backButton.backgroundColor = [UIColor blueColor];
+    [backButton setImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
+    [backButton addTarget:self action:@selector(backButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:backButton];
+    [backButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.view.mas_left).with.offset(15);
+        make.top.equalTo(self.view.mas_top).with.offset(25);
+        make.width.mas_equalTo(@15);
+        make.height.mas_equalTo(@15);
+    }];
+    UILabel *nameLabel = [[UILabel alloc] init];
+    nameLabel.font = ADeanFONT15;
+    nameLabel.text = @"忘记密码";
+    nameLabel.backgroundColor=[UIColor blackColor];
+    nameLabel.textAlignment = NSTextAlignmentCenter;
+    nameLabel.textColor = [UIColor blackColor];
+    [self.view addSubview:nameLabel];
+    [nameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(@(0));
+        make.top.equalTo(@(ScreenHeight/6));
+    }];
+    nameLabel.hidden = YES;
+    
+    [self.view addSubview:self.mobileNumTextField];
+    
+    // 手机号
+    [self.mobileNumTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@10);
+        make.width.equalTo(@(ScreenWidth - 80));
+        make.height.equalTo(@44);
+        make.top.equalTo(nameLabel.mas_bottom).offset(40);
+    }];
+    
+    ESSmsButton *getVerifyCodeButton = [ESSmsButton buttonWithType:UIButtonTypeCustom];
+    getVerifyCodeButton.backgroundColor = RGBA(255, 255, 255, .6);
+    getVerifyCodeButton.layer.cornerRadius = 5;
+    getVerifyCodeButton.layer.masksToBounds = YES;
+    [getVerifyCodeButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [getVerifyCodeButton setTitle:@"获取验证码" forState:UIControlStateNormal];
+//    [getVerifyCodeButton addTarget:self action:@selector(getVerifyCodeAction) forControlEvents:UIControlEventTouchUpInside];
+    getVerifyCodeButton.titleLabel.font = ADeanFONT15;
+    [self.view addSubview:getVerifyCodeButton];
+    [getVerifyCodeButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(@(-40));
+        make.width.equalTo(@(90));
+        make.height.equalTo(@25 );
+        make.centerY.equalTo(self.mobileNumTextField.mas_centerY).offset(0);
+    }];
+    self.smsButton = getVerifyCodeButton;
+    
+    [self.view addSubview:self.codeTextField];
+    [self.codeTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@10);
+        make.right.equalTo(@(ScreenWidth - 80));
+        make.height.equalTo(@44);
+        make.top.equalTo(self.mobileNumTextField.mas_bottom).offset(20);
+    }];
+    //密码
+    [self.view addSubview:self.passWordTextField];
+    [self.passWordTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@10);
+        make.width.equalTo(@(ScreenWidth - 80));
+        make.height.equalTo(@44);
+        make.top.equalTo(self.codeTextField.mas_bottom).offset(20);
+    }];
+    
+    UIButton *registerButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    registerButton.backgroundColor = RGB(233, 40, 46);
+    registerButton.layer.cornerRadius = 2;
+    registerButton.layer.masksToBounds = YES;
+    [registerButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [registerButton setTitle:@"确定" forState:UIControlStateNormal];
+    //    registerButton.backgroundColor = [UIColor whiteColor];
+    registerButton.titleLabel.font = ADeanFONT15;
+    [registerButton addTarget:self action:@selector(registerAction) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:registerButton];
+    [registerButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@(40));
+        make.right.equalTo(@(-40));
+        make.top.equalTo(self.passWordTextField.mas_bottom).offset(30);
+        make.height.equalTo(@38);
+    }];
+
+}
+
+- (void)dealloc
+{
+    [self removeNotification];
+}
+
+#pragma mark - NSNotification
+
+- (void)addNotification
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textDidChange:) name:UITextFieldTextDidChangeNotification object:self.mobileNumTextField];
+}
+- (void)removeNotification
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)textDidChange:(NSNotification *)notification
+{
+    UITextField *textField = notification.object;
+    if (textField == self.mobileNumTextField) {
+        self.smsButton.phone = textField.text;
+    }
+}
+
+- (void)registerAction
+{
+//    ESResetViewController *controller = [[ESResetViewController alloc] init];
+////    controller.isNavHidden = YES;
+//    [self.navigationController pushViewController:controller animated:YES];
+    
+    [self resetPassword];
+    
+}
+
+- (void)backButtonAction
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+}
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+}
+
+
+#pragma mark - Networking
+
+- (void)resetPassword
+{
+    UserResetRequest *request = [UserResetRequest request];
+    request.mobile      = self.mobileNumTextField.text;
+    request.password    = self.passWordTextField.text;
+    request.verify      = self.codeTextField.text;
+    
+    @weakify(self);
+    [self.indicator startAnimationWithMessage:@"正在重置密码"];
+    [ESService userResetRequest:request success:^{
+        @strongify(self);
+        [self endGSNetworking];
+        
+        [ESToast showSuccess:@"重置密码成功!"];
+        
+        //登录状态，则重置本地存储的密码
+        [kUserManager resetLoginPassword:request.password];
+        
+        [self.navigationController popViewControllerAnimated:YES];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+    
+    
+}
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.indicator stopAnimation];
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

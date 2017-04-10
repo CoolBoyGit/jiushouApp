@@ -1,0 +1,13 @@
+//
+//  ESFootViewGray.h
+//  EasyShop
+//
+//  Created by LDZPro on 16/6/30.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESFootViewGray : UITableViewHeaderFooterView
+@property (nonatomic,strong)OrderDetailInfo*detailInfo;
+@end

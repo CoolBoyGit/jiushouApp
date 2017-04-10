@@ -1,0 +1,163 @@
+//
+//  ESThirdRegisterView.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/3.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESThirdRegisterView.h"
+#import "ESInputTextField.h"
+#import "ESSmsButton.h"
+
+@interface ESThirdRegisterView ()
+
+@property (nonatomic, strong) ESInputTextField *mobileNumTextField;
+@property (nonatomic, strong) ESInputTextField *codeTextField;
+@property (nonatomic, strong) ESInputTextField *verifyTextField;
+/** smsButtom */
+@property (nonatomic,weak) ESSmsButton *smsButton;
+
+@end
+
+@implementation ESThirdRegisterView
+
+- (ESInputTextField *)mobileNumTextField
+{
+    if (_mobileNumTextField ==nil) {
+        _mobileNumTextField = [[ESInputTextField alloc] initWithImage:nil needChange:YES];
+        _mobileNumTextField.keyboardType = UIKeyboardTypeNumberPad;
+        _mobileNumTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _mobileNumTextField.placeholder = @"手机号/账号";
+    }
+    return _mobileNumTextField;
+}
+
+- (ESInputTextField *)codeTextField
+{
+    if (_codeTextField ==nil) {
+        _codeTextField = [[ESInputTextField alloc] initWithImage:nil];
+        _codeTextField.keyboardType = UIKeyboardTypeNumberPad;
+        _codeTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _codeTextField.placeholder = @"验证码";
+    }
+    return _codeTextField;
+}
+
+- (ESInputTextField *)verifyTextField
+{
+    if (_verifyTextField ==nil) {
+        _verifyTextField = [[ESInputTextField alloc] initWithImage:nil];
+        _verifyTextField.keyboardType = UIKeyboardTypeNumberPad;
+        _verifyTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _verifyTextField.placeholder = @"动态码";
+    }
+    return _verifyTextField;
+}
+
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame])
+    {
+        [self addNotification];
+        
+        self.backgroundColor = [UIColor whiteColor];
+        [self addSubview:self.mobileNumTextField];
+        [self.mobileNumTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@40);
+            make.right.equalTo(@(-40));
+            make.height.equalTo(@44);
+            make.top.equalTo(@0);
+        }];
+        [self.mobileNumTextField clearButtonRectForBounds:CGRectMake(0, 0, 10, 10)];
+        ESSmsButton *getVerifyCodeButton = [ESSmsButton buttonWithType:UIButtonTypeCustom];
+        //getVerifyCodeButton.backgroundColor = RGBA(255, 255, 255, .6);
+        getVerifyCodeButton.backgroundColor=RGB(233, 40, 46);
+        getVerifyCodeButton.layer.cornerRadius = 2;
+        getVerifyCodeButton.layer.masksToBounds = YES;
+        [getVerifyCodeButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [getVerifyCodeButton setTitle:@"获取验证码" forState:UIControlStateNormal];
+        getVerifyCodeButton.titleLabel.font = ADeanFONT13;
+        [self addSubview:getVerifyCodeButton];
+        self.smsButton = getVerifyCodeButton;
+        
+        [getVerifyCodeButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.equalTo(@-40);
+            make.width.equalTo(@(80));
+            make.height.equalTo(@20);
+            make.centerY.equalTo(self.mobileNumTextField.mas_centerY).offset(0);
+        }];
+        
+        [self addSubview:self.verifyTextField];
+        [self.verifyTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@40);
+            make.right.equalTo(@(-40));
+            make.height.equalTo(@44);
+            make.top.equalTo(self.mobileNumTextField.mas_bottom).offset(15);
+        }];
+        
+        [self addSubview:self.codeTextField];
+        [self.codeTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@40);
+            make.width.equalTo(@(ScreenWidth - 80));
+            make.height.equalTo(@44);
+            make.top.equalTo(self.verifyTextField.mas_bottom).offset(15);
+        }];
+        
+        UIButton *registerButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        registerButton.backgroundColor = RGB(233, 40, 46);
+        registerButton.layer.cornerRadius = 4;
+        registerButton.layer.masksToBounds = YES;
+        [registerButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [registerButton setTitle:@"立即绑定" forState:UIControlStateNormal];
+        //    registerButton.backgroundColor = [UIColor whiteColor];
+        registerButton.titleLabel.font = ADeanFONT13;
+        [registerButton addTarget:self action:@selector(registerAction) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:registerButton];
+        [registerButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@(40));
+            make.right.equalTo(@(-40));
+            make.top.equalTo(self.codeTextField.mas_bottom).offset(20);
+            make.height.equalTo(@30);
+        }];
+
+    }
+    
+    return self;
+}
+
+- (void)dealloc
+{
+    [self removeNotification];
+}
+
+- (void)addNotification
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textDidChange:) name:UITextFieldTextDidChangeNotification object:self.mobileNumTextField];
+}
+- (void)removeNotification
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)textDidChange:(NSNotification *)notification
+{
+    UITextField *textField = notification.object;
+    if (textField == self.mobileNumTextField) {
+        self.smsButton.phone = textField.text;
+    }
+}
+
+
+- (void)registerAction
+{
+    NSString *moblie = self.mobileNumTextField.text;
+    NSString *smsCode = self.verifyTextField.text;
+    
+    if (self.bindBlock) {
+        self.bindBlock(moblie,smsCode);
+    }
+}
+
+@end

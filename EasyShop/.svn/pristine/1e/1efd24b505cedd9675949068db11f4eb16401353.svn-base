@@ -1,0 +1,79 @@
+//
+//  ESWelcomeController.m
+//  
+//
+//  Created by jiushou on 16/8/13.
+//
+//
+
+#import "ESWelcomeController.h"
+#import "WelcomeScro.h"
+#import "ESTabBarController.h"
+@interface ESWelcomeController ()
+@property (nonatomic,copy) GoBlock goBlock;
+@end
+
+@implementation ESWelcomeController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    if ([self isFirstOpenApp]) {
+        [self showGuide];
+    }else{
+        [self buttonoAction];
+    }
+    
+}
+-(void)showGuide{
+    NSArray*imageArray=@[@"iphone53",@"iphone5",@"iphone52"];
+    WelcomeScro*scrolle=[[WelcomeScro alloc]initWithImageArray:imageArray andFrame:CGRectMake(0, 0, ScreenWidth, ScreenHeight) andBlock:^{
+        [self buttonoAction];
+    }];
+    [self.view addSubview:scrolle];
+  
+    UIButton*button=[[UIButton alloc]initWithFrame:CGRectMake(ScreenWidth-60, 40, 40, 20)];
+    button.backgroundColor=[UIColor colorWithRed:236/255.0 green:40/255.0 blue:46/255.0 alpha:0.3];
+    
+    button.titleLabel.font=[UIFont systemFontOfSize:13];
+    button.layer.cornerRadius=10;
+    button.layer.masksToBounds=YES;
+    [button setTitle:@"跳过" forState:UIControlStateNormal];
+    [button addTarget:self action:@selector(buttonoAction) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:button];
+}
+-(void)buttonoAction{
+    ESTabBarController *tabBar = [[ESTabBarController alloc] init];
+    UIViewController*view=[[UIViewController alloc]init];
+    view.view.frame=CGRectMake(0, 0, ScreenWidth, ScreenHeight);
+    view.view.backgroundColor=[UIColor yellowColor];
+    [UIApplication sharedApplication].delegate.window.rootViewController=view;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2*NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        
+        [UIApplication sharedApplication].delegate.window.rootViewController=tabBar;
+    });
+
+}
+-(BOOL)isFirstOpenApp{
+    NSUserDefaults*userDe=[NSUserDefaults standardUserDefaults];
+    NSString*number=[userDe objectForKey:@"isFirstOpenApp"];
+    if (number!=nil) {
+        NSInteger starNumber =[number integerValue];
+        NSString *str=[NSString stringWithFormat:@"%ld",(long)++starNumber];
+        [userDe setObject:str forKey:@"isFirstOpenApp"];
+        [userDe synchronize];
+        
+        return NO;
+    }else{
+        [userDe setObject:@"1" forKey:@"isFirstOpenApp"];
+        [userDe synchronize];
+        
+        return YES;
+    }
+    
+    
+    
+}
+
+
+
+@end

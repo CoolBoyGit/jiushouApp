@@ -1,0 +1,14 @@
+//
+//  Song.m
+//  EasyShop
+//
+//  Created by jiushou on 16/7/11.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESSong.h"
+
+@implementation ESSong
+
+@end
+

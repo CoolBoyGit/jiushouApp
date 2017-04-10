@@ -1,0 +1,195 @@
+//
+//  ESShopCommentCell.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/5.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESShopCommentCell.h"
+#import "ESImageCollectionViewCell.h"
+
+@interface ESShopCommentCell ()<UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout>
+
+@property (nonatomic, strong) UILabel *userMobile;//用户
+@property (nonatomic, strong) UILabel *timeLable;//评价时间
+@property (nonatomic, strong) UILabel *commentLabel;//评价内容
+@property (nonatomic, strong) UILabel *lineLabel;//分割线
+@property (nonatomic, strong) UICollectionView *collectionview;
+
+
+@end
+
+
+
+@implementation ESShopCommentCell
+
+//- (void)setEvaluationInfo:(GoodsEvaluationInfo *)evaluationInfo
+//{
+//    _evaluationInfo = evaluationInfo;
+//    
+//    self.userMobile.text = _evaluationInfo.member_name;
+//    self.timeLable.text  = _evaluationInfo.create_time.stringValue;
+//    self.commentLabel.text = _evaluationInfo.content;
+//    //    [self.imageScrollView updateViewInfoWithInfo:arr type:0];
+//}
+
+- (UICollectionView *)collectionview
+{
+    if (_collectionview == nil) {
+        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+        flowLayout.minimumInteritemSpacing = 10;
+        flowLayout.minimumLineSpacing = 10;
+        flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+        //             flowLayout.itemSize = CGSizeMake(ScreenWidth, 125);
+        _collectionview = [[UICollectionView alloc]initWithFrame:CGRectZero collectionViewLayout:flowLayout];
+        _collectionview.dataSource = self;
+        _collectionview.pagingEnabled = YES;
+        _collectionview.showsVerticalScrollIndicator = NO;
+        _collectionview.showsHorizontalScrollIndicator = NO;
+        _collectionview.delegate = self;
+        [_collectionview registerClass:[ESImageCollectionViewCell class] forCellWithReuseIdentifier:@"ESImageCollectionViewCell"];
+        _collectionview.backgroundColor = [UIColor whiteColor];
+    }
+    return _collectionview;
+}
+
+#pragma mark
+#pragma mark Init & Add
+- (UILabel *)lineLabel {
+    if (!_lineLabel) {
+        _lineLabel = [[UILabel alloc] init];
+        _lineLabel.backgroundColor = ADeanHEXCOLOR(0xeeeeee);
+    }
+    return _lineLabel;
+}
+- (UILabel *)userMobile {
+    if (!_userMobile) {
+        _userMobile = [[UILabel alloc] init];
+        _userMobile.font = ADeanFONT14;
+        _userMobile.textAlignment = NSTextAlignmentLeft;
+        _userMobile.textColor = ADeanHEXCOLOR(0x333333);
+    }
+    return _userMobile;
+}
+- (UILabel *)timeLable {
+    if (!_timeLable) {
+        _timeLable = [[UILabel alloc] init];
+        _timeLable.font = ADeanFONT14;
+        _timeLable.textAlignment = NSTextAlignmentRight;
+        _timeLable.textColor = ADeanHEXCOLOR(0x999999);
+    }
+    return _timeLable;
+}
+- (UILabel *)commentLabel {
+    
+    if (!_commentLabel) {
+        _commentLabel = [[UILabel alloc] init];
+        _commentLabel.numberOfLines = 0;
+        _commentLabel.font = ADeanFONT14;
+        _commentLabel.textColor = ADeanHEXCOLOR(0x999999);
+    }
+    return _commentLabel;
+}
+//- (ImageViewScrollView *)imageScrollView {
+//    if (!_imageScrollView) {
+//        _imageScrollView = [[ImageViewScrollView alloc] init];
+//        _imageScrollView.iDelegate = (id<ImageViewScrollViewDelegate>)self;
+//    }
+//    return _imageScrollView;
+//}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        [self intalizedView];
+    }
+    return self;
+}
+
+
+-(void)intalizedView
+{
+    
+    [self.contentView addSubview:self.userMobile];
+    [self.userMobile mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@(15));
+        make.top.equalTo(@(10));
+        make.width.equalTo(@200);
+        make.height.equalTo(@20);
+    }];
+    
+    [self.contentView addSubview:self.timeLable];
+    [self.timeLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(@(-10));
+        make.top.equalTo(@(10));
+        make.width.equalTo(@100);
+        make.height.equalTo(@20);
+    }];
+    [self.contentView addSubview:self.lineLabel];
+    [self.lineLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@20);
+        make.right.equalTo(@(-20));
+        make.top.equalTo(self.timeLable.mas_bottom).offset(5);
+        make.height.equalTo(@0.5);
+    }];
+    
+    [self.contentView addSubview:self.commentLabel];
+    [self.commentLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(@(-10));
+        make.top.equalTo(self.lineLabel.mas_bottom).offset(5);
+        make.left.equalTo(@(20));
+    }];
+    
+    [self.contentView addSubview:self.collectionview];
+    [self.collectionview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.commentLabel.mas_bottom).offset(10);
+        make.left.right.equalTo(@0);
+        make.bottom.equalTo(@(-10));
+    }];
+    
+//    [self.contentView addSubview:self.imageScrollView];
+//    [self.imageScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.equalTo(@(30));
+//        make.right.equalTo(@(-10));
+//        make.top.equalTo(self.commentLabel.mas_bottom).with.offset(18);
+//        make.height.equalTo(@50);
+//    }];
+}
+
+- (void)setModel:(id)model
+{
+    self.lineLabel.alpha = 1.0f;
+    NSString *mobile = [@"13270720072" stringByReplacingCharactersInRange:NSMakeRange(3, 5) withString:@"*****"];
+    self.userMobile.text = [NSString stringWithFormat:@"用户%@",mobile];
+    self.timeLable.text = @"2012-1-12";
+    self.commentLabel.text = @"好用，快递很给力，下次还来。";
+//    NSArray *arr = @[@"page1",@"page1",@"page1"];
+//    [self.imageScrollView updateViewInfoWithInfo:arr type:0];
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    return 10;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    return CGSizeMake((ScreenWidth - 50)/4, (ScreenWidth - 50)/4);
+}
+
+-(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+{
+    return UIEdgeInsetsMake(0, 10, 0, 10);
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESImageCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ESImageCollectionViewCell" forIndexPath:indexPath];
+//    cell.model = nil;
+    return cell;
+}
+
+
+
+@end

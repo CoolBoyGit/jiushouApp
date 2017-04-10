@@ -1,0 +1,65 @@
+//
+//  ICCouponController.m
+//  iCarePregnant
+//
+//  Created by wcz on 16/6/22.
+//  Copyright © 2016年 oenius. All rights reserved.
+//
+
+#import "ICCouponController.h"
+#import "ESCouponViewCell.h"
+
+@interface ICCouponController ()<UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout>
+
+@property (nonatomic, strong) UICollectionView *collectionview;
+
+@end
+
+@implementation ICCouponController
+
+
+- (UICollectionView *)collectionview
+{
+    if (_collectionview == nil) {
+        
+        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc]init];
+        _collectionview = [[UICollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:flowLayout];
+        _collectionview.dataSource = self;
+        _collectionview.delegate = self;
+        _collectionview.backgroundColor = [UIColor whiteColor];
+        [_collectionview registerClass:[ESCouponViewCell class] forCellWithReuseIdentifier:@"ESCouponViewCell"];
+    }
+    return _collectionview;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    [self.view addSubview:self.collectionview];
+    [self.collectionview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(@0);
+    }];
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    return 8;
+}
+
+-(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+{
+    return UIEdgeInsetsMake(10, 0, 0, 0);
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    return CGSizeMake(ScreenWidth - 20, 90);
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESCouponViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ESCouponViewCell" forIndexPath:indexPath];
+    cell.model = nil;
+    return cell;
+}
+@end

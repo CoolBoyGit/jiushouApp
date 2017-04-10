@@ -1,0 +1,234 @@
+//
+//  ESAddressListCell.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/20.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESAddressListCell.h"
+
+@interface ESAddressListCell()
+
+@property (nonatomic, strong) UIButton    *defaultBtn;//默认地址
+@property (nonatomic, strong) UIButton    *delegateBtn;//删除按钮
+@property (nonatomic, strong) UILabel      *middleLine;//中间线
+@property (nonatomic, strong) UILabel     *userNameLabel;//用户名
+@property (nonatomic, strong) UILabel     *isCertifyLabel;//是否认证
+@property (nonatomic, strong) UILabel     *mobileLabel;//手机号
+@property (nonatomic, strong) UILabel     *addressLabel;//地址
+@property (nonatomic, strong) UILabel     *identityLabel;//身份证
+
+
+@end
+
+@implementation ESAddressListCell
+
+- (void)setAddressInfo:(AddressInfo *)addressInfo
+{
+    _addressInfo = addressInfo;
+    
+    self.defaultBtn.selected = _addressInfo.ddefault.integerValue;
+    self.userNameLabel.text = _addressInfo.name;
+    NSMutableString*str=[[NSMutableString alloc]initWithString:_addressInfo.mobile];
+    //[str replaceCharactersInRange:NSMakeRange(4, 3) withString:@"****"];
+    self.mobileLabel.text = str;
+    self.addressLabel.text = [NSString stringWithFormat:@"%@%@",_addressInfo.area,_addressInfo.address];
+//    self.identityLabel.text = _addressInfo.persoinid;
+    self.identityLabel.text = [NSString stringWithFormat:@"%@",@"1234456789"]; 
+}
+//-(void)setH:(CGFloat)H{
+//    [self.addressLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.top.mas_equalTo(self.userNameLabel.mas_bottom).with.offset(10);
+//        make.left.mas_equalTo(self.userNameLabel.mas_left).with.offset(0);
+//        make.height.equalTo(@(H));
+//        make.width.mas_equalTo(@(ScreenWidth-40));
+//    }];
+//
+//}
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        [self setupViews];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    return self;
+}
+
+- (void)setupViews
+{
+    [self.contentView addSubview:self.defaultBtn];
+    [self.defaultBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@10);
+        make.top.equalTo(@5);
+        make.width.equalTo(@110);
+        make.height.equalTo(@20);
+    }];
+    
+    [self.contentView addSubview:self.delegateBtn];
+    [self.delegateBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(@(-10));
+        make.top.equalTo(@5);
+        make.width.equalTo(@70);
+        make.height.equalTo(@20);
+    }];
+    
+    [self.contentView addSubview:self.middleLine];
+    [self.middleLine mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.delegateBtn.mas_bottom).with.offset(5);
+        make.left.right.equalTo(@0);
+        make.height.equalTo(@0.5);
+    }];
+    
+    self.userNameLabel.text = @"何根容";
+    [self.contentView addSubview:self.userNameLabel];
+    [self.userNameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.middleLine.mas_bottom).with.offset(5);
+        make.left.equalTo(@20);
+        make.height.equalTo(@20);
+    }];
+    self.mobileLabel.text = [@"13511115686" stringByReplacingCharactersInRange:NSMakeRange(3, 4) withString:@"****"];
+    [self.contentView addSubview:self.mobileLabel];
+    [self.mobileLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.middleLine.mas_bottom).with.offset(5);
+        make.right.mas_equalTo(@(-10));
+        make.height.mas_equalTo(@20);
+    }];
+    self.addressLabel.text = @"广东省江门市蓬莱区胜利路123路";
+    [self.contentView addSubview:self.addressLabel];
+    [self.addressLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.userNameLabel.mas_bottom).with.offset(5);
+        make.left.mas_equalTo(self.userNameLabel.mas_left).with.offset(0);
+        //make.height.mas_equalTo(@20);
+        make.width.mas_equalTo(@(ScreenWidth-40));
+    }];
+    
+    self.identityLabel.text = [NSString stringWithFormat:@"身份证：%@",@"23191030210301031"];
+    [self.contentView addSubview:self.identityLabel];
+    [self.identityLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.addressLabel.mas_bottom).with.offset(5);
+        make.left.mas_equalTo(self.addressLabel.mas_left).with.offset(0);
+        make.height.mas_equalTo(@20);
+        make.width.mas_equalTo(@(ScreenWidth-40));
+    }];
+}
+
+- (UIButton *)defaultBtn
+{
+    if (!_defaultBtn) {
+        _defaultBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_defaultBtn setTitleEdgeInsets:UIEdgeInsetsMake(0, 10, 0, 0)];
+        [_defaultBtn setImageEdgeInsets:UIEdgeInsetsMake(0, -20, 0, 0)];
+        [_defaultBtn setImage:[UIImage imageNamed:@"shopcart_unselect_icon"] forState:UIControlStateNormal];
+        [_defaultBtn setImage:[UIImage imageNamed:@"shopcart_selected_icon"] forState:UIControlStateSelected];
+        _defaultBtn.titleLabel.font = [UIFont systemFontOfSize:15];
+        [_defaultBtn setTitle:@"默认地址" forState:UIControlStateNormal];
+        [_defaultBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+        [_defaultBtn setBackgroundColor:[UIColor whiteColor]];
+        [_defaultBtn addTarget:self action:@selector(defaultBtnAction:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _defaultBtn;
+}
+- (UIButton *)delegateBtn
+{
+    if (!_delegateBtn) {
+        _delegateBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_delegateBtn setImage:[UIImage imageNamed:@"delegate"] forState:UIControlStateNormal];
+        _delegateBtn.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        _delegateBtn.titleLabel.font = [UIFont systemFontOfSize:15];
+        [_delegateBtn setTitleEdgeInsets:UIEdgeInsetsMake(0, 10, 0, 0)];
+        [_delegateBtn setTitle:@"删除" forState:UIControlStateNormal];
+        [_delegateBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+        [_delegateBtn setBackgroundColor:[UIColor whiteColor]];
+        [_delegateBtn addTarget:self action:@selector(delegateBtnAction:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _delegateBtn;
+}
+- (UILabel *)middleLine
+{
+    if (!_middleLine) {
+        _middleLine = [[UILabel alloc] init];
+        _middleLine.backgroundColor = [UIColor grayColor];
+    }
+    return _middleLine;
+}
+- (UILabel *)userNameLabel
+{
+    if (!_userNameLabel) {
+        _userNameLabel = [[UILabel alloc] init];
+        _userNameLabel.font = ADeanFONT15;
+        _userNameLabel.textColor = [UIColor grayColor];//ADeanHEXCOLOR(0x00508c);
+        _userNameLabel.backgroundColor = [UIColor clearColor];
+    }
+    return _userNameLabel;
+}
+- (UILabel *)isCertifyLabel
+{
+    if (!_isCertifyLabel) {
+        _isCertifyLabel = [[UILabel alloc] init];
+        _isCertifyLabel.textAlignment = NSTextAlignmentCenter;
+        _isCertifyLabel.font = ADeanFONT15;
+        _isCertifyLabel.layer.cornerRadius = 10;
+        _isCertifyLabel.layer.masksToBounds = YES;
+        _isCertifyLabel.layer.borderWidth = 1;
+        _isCertifyLabel.layer.borderColor = [UIColor redColor].CGColor;
+        _isCertifyLabel.textColor = [UIColor redColor];//ADeanHEXCOLOR(0x00508c);
+        _isCertifyLabel.backgroundColor = [UIColor clearColor];
+    }
+    return _isCertifyLabel;
+}
+- (UILabel *)mobileLabel
+{
+    if (!_mobileLabel) {
+        _mobileLabel = [[UILabel alloc] init];
+        _mobileLabel.textAlignment = NSTextAlignmentRight;
+        _mobileLabel.font = ADeanFONT15;
+        _mobileLabel.textColor = [UIColor grayColor];
+        _mobileLabel.backgroundColor = [UIColor clearColor];
+    }
+    return _mobileLabel;
+}
+- (UILabel *)addressLabel
+{
+    if (!_addressLabel) {
+        
+        _addressLabel = [[UILabel alloc] init];
+        _addressLabel.textAlignment = NSTextAlignmentLeft;
+        _addressLabel.font = ADeanFONT15;
+        _addressLabel.numberOfLines=0;
+        _addressLabel.textColor = [UIColor grayColor];
+        _addressLabel.backgroundColor = [UIColor clearColor];
+    }
+    return _addressLabel;
+}
+- (UILabel *)identityLabel
+{
+    if (!_identityLabel) {
+        _identityLabel = [[UILabel alloc] init];
+        _identityLabel.textAlignment = NSTextAlignmentLeft;
+        _identityLabel.font = ADeanFONT15;
+        _identityLabel.textColor = [UIColor grayColor];
+        _identityLabel.backgroundColor = [UIColor clearColor];
+    }
+    return _identityLabel;
+}
+
+
+
+-(void)defaultBtnAction:(UIButton *)btn
+{
+    if (!self.defaultBtn.isSelected) {//未选中
+        if (self.defaultBlock) {
+            self.defaultBlock();
+        }
+    }
+}
+-(void)delegateBtnAction:(UIButton *)btn
+{
+    if (self.deleteBlock) {
+        self.deleteBlock();
+    }
+}
+
+@end

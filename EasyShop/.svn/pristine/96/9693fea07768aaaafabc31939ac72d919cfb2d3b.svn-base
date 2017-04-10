@@ -1,0 +1,13 @@
+//
+//  WarningControlView.h
+//  
+//
+//  Created by jiushou on 16/8/1.
+//
+//
+
+#import <Foundation/Foundation.h>
+
+@interface WarningControlView : NSObject
++(void)showTitle:(NSString *)title  andMessage:(NSString*)str;
+@end

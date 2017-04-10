@@ -1,0 +1,109 @@
+//
+//  ESLogisticsCell.m
+//  EasyShop
+//
+//  Created by 脉融LCJ on 16/5/12.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESLogisticsCell.h"
+#import "GSTimeTool.h"
+
+@interface ESLogisticsCell()
+
+/** 物流信息 */
+@property (nonatomic,strong) UILabel *titleLabel;
+/** 物流 */
+@property (nonatomic,strong) UILabel  *shipLabel;
+/** 时间 */
+@property (nonatomic,strong) UILabel  *timeLabel;
+
+@end
+
+@implementation ESLogisticsCell
+
+- (void)setOrderInfo:(OrderDetailInfo *)orderInfo
+{
+    _orderInfo = orderInfo;
+    
+    self.titleLabel.text = orderInfo.shipping_name;
+    self.shipLabel.text = orderInfo.shipping_message;
+    self.timeLabel.text = [GSTimeTool formatterNumber:orderInfo.shipping_time toType:GSTimeType_YYYYMMddHHmm];
+}
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        
+        [self.contentView addSubview:self.titleLabel];
+        [self.contentView addSubview:self.shipLabel];
+        [self.contentView addSubview:self.timeLabel];
+        [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@15);
+            make.right.top.equalTo(@0);
+            make.bottom.equalTo(self.mas_bottom).with.dividedBy(3).offset(0);
+        }];
+        [self.shipLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.titleLabel.mas_left);
+            make.right.equalTo(@0);
+            make.top.equalTo(self.titleLabel.mas_bottom);
+            make.height.equalTo(self.titleLabel.mas_height);
+        }];
+        [self.timeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.shipLabel.mas_left);
+            make.right.equalTo(@0);
+            make.top.equalTo(self.shipLabel.mas_bottom);
+            make.height.equalTo(self.titleLabel.mas_height);
+        }];
+
+    }
+    return self;
+}
+
+
+
+- (void)setupViews
+{
+    NSArray *array = @[@"物流信息",@"从深圳出发，发往广州",@"2016-05-12 09：30：54"];
+    for (int i = 0; i < array.count; i++) {
+        UILabel *lable = [[UILabel alloc] initWithFrame:CGRectMake(20, 13+13*i, 200, 13)];
+        lable.font = [UIFont systemFontOfSize:11];
+        lable.text = array[i];
+        [self.contentView addSubview:lable];
+    }
+}
+
+
+- (UILabel *)titleLabel
+{
+    if (!_titleLabel) {
+        _titleLabel = [[UILabel alloc] init];
+        _titleLabel.font = [UIFont systemFontOfSize:11];
+        _titleLabel.text = @"物流信息";
+    }
+    return _titleLabel;
+}
+
+- (UILabel *)shipLabel
+{
+    if (!_shipLabel) {
+        _shipLabel = [[UILabel alloc] init];
+        _shipLabel.font = [UIFont systemFontOfSize:11];
+        _shipLabel.text = @"--";
+    }
+    return _shipLabel;
+}
+- (UILabel *)timeLabel
+{
+    if (!_timeLabel) {
+        _timeLabel = [[UILabel alloc] init];
+        _timeLabel.font = [UIFont systemFontOfSize:11];
+        _timeLabel.text = @"--";
+    }
+    return _timeLabel;
+}
+
+@end
+

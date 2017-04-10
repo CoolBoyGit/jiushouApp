@@ -1,0 +1,15 @@
+//
+//  ESGoodsStockCell.h
+//  
+//
+//  Created by jiushou on 16/7/21.
+//
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESGoodsStockCell : UITableViewCell
+
+@property (nonatomic,strong) GoodsStockMessageInfo*info;
+
+@end

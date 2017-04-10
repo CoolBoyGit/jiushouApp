@@ -1,0 +1,40 @@
+//
+//  ESGoodsStockCell.m
+//  
+//
+//  Created by jiushou on 16/7/21.
+//
+//
+
+#import "ESGoodsStockCell.h"
+@interface ESGoodsStockCell()
+/** contentView */
+@property (nonatomic,strong) UIView *bgView;
+/** titelLabel */
+@property (nonatomic,strong) UILabel *titleLabel;
+/** 图片 */
+@property (nonatomic,strong) UIImageView *GoodImageView;
+/** 商品名字 */
+@property (nonatomic,strong) UILabel *nameLabel;
+/** 库存数量 */
+@property (nonatomic,strong) UILabel *stockLabel;
+@end
+@implementation ESGoodsStockCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+}
+-(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    if (self=[super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        
+    }
+    return self;
+}
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

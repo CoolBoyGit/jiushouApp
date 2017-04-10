@@ -1,0 +1,406 @@
+//
+//  ESShopSearchController.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/9.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESShopSSearchController.h"
+#import "ESShopSearchCell.h"
+#import "ESShopSearchReusableView.h"
+#import "ESSearchGoodsCell.h"
+#import "ESHomeShopDetailController.h"
+
+#import "SHDropDown.h"
+#import "HomeTitleView.h"
+//#import "HomeTitleView.h"
+
+#import "ESHomeSearchView.h"
+
+@interface ESShopSearchController ()<UICollectionViewDataSource, UICollectionViewDelegate,UICollectionViewDelegateFlowLayout,ESHomeSearchViewDelegate>
+
+@property (nonatomic, strong) UICollectionView *hotCollectView;
+
+@property (nonatomic, strong) UITextField *searchTextField;
+
+/** 自动关键字 （item ： Keyword ） */
+@property (nonatomic,strong) NSArray *autoItems;
+/** 热搜关键字 (item : KeyWord ) */
+@property (nonatomic,strong) NSArray *hotItems;
+/** 李四关键字 */
+@property (nonatomic,strong) NSArray *historyItems;
+
+/** 页码 */
+@property (nonatomic,assign) NSInteger page;
+/** 搜索商品item (item: GoodsInfo ) */
+@property (nonatomic,strong) NSMutableArray *goodsItems;
+
+@end
+
+@implementation ESShopSearchController
+
+- (NSArray *)historyItems
+{
+    return kUserManager.historyItems;
+}
+
+- (UITextField *)searchTextField
+{
+    if (_searchTextField== nil) {
+        _searchTextField =[[UITextField alloc]initWithFrame:CGRectMake(0, 0, ScreenWidth-80 - 40, 30)];
+        _searchTextField.layer.cornerRadius = 5;
+        _searchTextField.placeholder = @"搜索";
+        _searchTextField.layer.borderColor = [UIColor lightGrayColor].CGColor;
+        _searchTextField.layer.borderWidth = .5;
+    }
+    return _searchTextField;
+}
+
+- (UICollectionView *)hotCollectView
+{
+    if (_hotCollectView == nil) {
+        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+//        flowLayout.delegate = self;
+//        flowLayout.delegate = self;
+//        flowLayout.minimumInteritemSpacing = 10;
+//        flowLayout.minimumLineSpacing = 10;
+//        flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+        //        flowLayout.itemSize = CGSizeMake(ScreenWidth, 125);
+        _hotCollectView = [[UICollectionView alloc]initWithFrame:CGRectZero collectionViewLayout:flowLayout];
+        _hotCollectView.showsVerticalScrollIndicator = NO;
+        _hotCollectView.showsHorizontalScrollIndicator = NO;
+        [_hotCollectView registerClass:[ESShopSearchReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"ESShopSearchReusableView"];
+        [_hotCollectView registerClass:[ESShopSearchCell class] forCellWithReuseIdentifier:@"ESShopSearchCell"];
+        [_hotCollectView registerClass:[ESSearchGoodsCell class] forCellWithReuseIdentifier:kIDSearchGoodsCell];
+        _hotCollectView.backgroundColor = [UIColor whiteColor];
+        _hotCollectView.delegate = self;
+        _hotCollectView.dataSource = self;
+    }
+    return _hotCollectView;
+}
+
+
+- (NSMutableArray *)goodsItems
+{
+    if (!_goodsItems) {
+        _goodsItems = [NSMutableArray array];
+    }
+    return _goodsItems;
+}
+
+#pragma mark - LifeCycle
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+//    self.navigationItem.title = @"搜索";
+    self.navigationItem.titleView = self.searchTextField;
+    
+    UIBarButtonItem *rightBarItem = [[UIBarButtonItem alloc] initWithTitle:@"查询" style:UIBarButtonItemStylePlain target:self action:@selector(rightAction)];
+    self.navigationItem.rightBarButtonItem = rightBarItem;
+//    [self initalizedCumstomNav];
+
+//    HomeTitleView *titleView = [[HomeTitleView alloc] initWithTile:self.navigationItem.title?self.navigationItem.title:self.title withBackRuturn:self.navigationController.viewControllers.count > 1];
+//    titleView.delegate = self;
+    ESHomeSearchView *titleView = [[ESHomeSearchView alloc] initWithFrame:CGRectMake(0, 30, 250, 30)];
+    titleView.isAllowToPush = NO;
+    titleView.delegate = self;
+    self.navigationItem.titleView = titleView;
+//    [self.view addSubview:titleView];
+    self.navigationItem.title = @"商品详情";
+    [self addNotification];
+    
+    [self.view addSubview:self.hotCollectView];
+    [self.hotCollectView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(@0);
+        make.top.equalTo(@0);
+    }];
+    @weakify(self);
+    self.hotCollectView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        @strongify(self);
+        [self refrshList];
+    }];
+    self.hotCollectView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+        @strongify(self);
+        [self moreList];
+    }];
+    
+    [self fetchHotWord];
+}
+
+- (void)dealloc
+{
+    [self removeNotification];
+}
+
+- (void)leftBtnPressed
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)rightAction
+{
+    [self handleSearch];
+}
+
+- (void)handleSearch
+{
+    if ([self.searchTextField.text isEqualToString:@""]) {
+        [ESToast showError:@"请输入查询关键字！"];
+        return;
+    }
+    
+    [self refrshList];
+}
+
+#pragma mark - NSNotification
+
+- (void)addNotification
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textDidChange:) name:UITextFieldTextDidChangeNotification object:self.searchTextField];
+}
+- (void)removeNotification
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)textDidChange:(NSNotification *)notification
+{
+    UITextField *textField = notification.object;
+    if (textField == self.searchTextField) {
+        [self fetchAutoWord];
+    }
+}
+
+#pragma mark -- ESHomeSearchViewDelegate
+- (void)addHistoryKeyword:(NSString *)keyword{
+    [kUserManager addHistoryKeyword:keyword];
+}
+
+#pragma mark - UICollectionViewDataSource
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
+    return 3;
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    if (section == 0) {//热搜
+        return self.hotItems.count;
+    }else if (section == 1){//历史
+        return self.historyItems.count;
+    }else if (section == 2){//搜索的商品
+        return self.goodsItems.count;
+    }
+    return 0;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section == 0 || indexPath.section == 1) {
+        
+        NSString *keyword = nil;
+        if (indexPath.section == 0) {
+            KeyWord *item = self.hotItems[indexPath.item];
+            keyword = item.keyword;
+        }else{
+            keyword = self.historyItems[indexPath.item];
+        }
+        
+        CGFloat width = [keyword widthOfFont:[UIFont systemFontOfSize:11]];
+        
+        return CGSizeMake(width + 25, 40);
+    }else if(indexPath.section == 2){//商品列表
+        return CGSizeMake(self.view.width, kHeightSearchGoodsCell);
+    }
+    return CGSizeZero;
+    
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section == 0 || indexPath.section == 1) {
+        ESShopSearchCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ESShopSearchCell" forIndexPath:indexPath];
+        NSString *keyword = nil;
+        if (indexPath.section == 0) {
+            KeyWord *item = self.hotItems[indexPath.item];
+            keyword = item.keyword;
+        }else{
+            keyword = self.historyItems[indexPath.item];
+        }
+        cell.keyword = keyword;
+        
+        return cell;
+    }else if (indexPath.section == 2){//商品
+        ESSearchGoodsCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kIDSearchGoodsCell forIndexPath:indexPath];
+        cell.goodsInfo = [self.goodsItems objectAtIndex:indexPath.item];
+        return cell;
+    }
+    return 0;
+    
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
+{
+    if (section == 0 || section == 1) {//热搜、历史
+        return CGSizeMake(ScreenWidth, 40);
+    }else{
+        return CGSizeZero;
+    }
+    
+}
+
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section == 0 || indexPath.section == 1) {
+        if (kind == UICollectionElementKindSectionHeader) {
+            
+            ESShopSearchReusableView *reusableview = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"ESShopSearchReusableView" forIndexPath:indexPath];
+            reusableview.title =  indexPath.section == 0 ? @"热搜" : @"历史";
+            return reusableview;
+            
+        }
+    }
+    
+    return nil;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section == 0 || indexPath.section == 1) {//热搜
+        NSString *keyword = nil;
+        if (indexPath.section == 0) {
+            KeyWord *item = self.hotItems[indexPath.item];
+            keyword = item.keyword;
+        }else{
+            keyword = self.historyItems[indexPath.item];
+        }
+        if (![NSString isEmptyString:keyword]) {//不为空
+            self.searchTextField.text = keyword;
+            [self refrshList];
+        }
+        
+    }else if (indexPath.section == 2){//商品
+        GoodsInfo *info = [self.goodsItems objectAtIndex:indexPath.item];
+        ESHomeShopDetailController *detail = [[ESHomeShopDetailController alloc] init];
+        detail.goods_id = info.gid;
+        [self.navigationController pushViewController:detail animated:YES];
+    }
+}
+
+
+#pragma mark - Networkinge
+
+#pragma mark - 自动关键字
+- (void)fetchAutoWord
+{
+    AutoWordListRequest *request = [AutoWordListRequest request];
+    request.word = self.searchTextField.text;
+    
+    @weakify(self);
+    [ESService autoWordListRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        self.autoItems = response;
+        
+        NSMutableArray *mArr = [NSMutableArray array];
+        for (KeyWord *item in response) {
+            [mArr addObject:item.keyword];
+        }
+        
+        if (mArr.count > 0) {
+            //显示下拉框
+            [SHDropDown dropdownWithItems:[mArr copy] atPoint:CGPointMake(80, 58) width:(ScreenWidth-80 - 50) selectedBlock:^(NSInteger selectedIndex) {
+                //设置内容
+                self.searchTextField.text = [mArr objectAtIndex:selectedIndex];
+                [self refrshList];
+            }];
+        }
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+#pragma mark 搜索关键字
+- (void)fetchHotWord
+{
+    GetSearchHotWordRequest *request = [GetSearchHotWordRequest request];
+    request.n = @20;
+    
+    @weakify(self);
+    [ESService getSearchHotWordRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        self.hotItems = response;
+        
+        [self.hotCollectView reloadData];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+#pragma mark 搜索商品
+- (void)refrshList
+{
+    if ([self.searchTextField.text isEqualToString:@""]) {
+        [self endGSNetworking];
+        return;
+    }
+    
+    //每次查询新的关键字，都讲关键字存入本地
+    [kUserManager addHistoryKeyword:self.searchTextField.text];
+    
+    self.page = 1;
+    [self searchGoods];
+}
+- (void)moreList
+{
+    self.page ++;
+    [self searchGoods];
+}
+- (void)searchGoods
+{
+    if ([self.searchTextField.text isEqualToString:@""]) {
+        [self endGSNetworking];
+        return;
+    }
+    
+    SearchRequest *request = [SearchRequest request];
+    request.key = self.searchTextField.text;
+    request.page = [NSNumber numberWithInteger:self.page];
+    request.n    = @20;
+    
+    @weakify(self);
+    [ESService searchRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        self.hotCollectView.mj_footer.hidden = response.count < 20;
+        if (self.page == 1) {
+            [self.goodsItems removeAllObjects];
+        }
+        
+        [self.goodsItems addObjectsFromArray:response];
+        [self.hotCollectView reloadData];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.hotCollectView.mj_header endRefreshing];
+    [self.hotCollectView.mj_footer endRefreshing];
+}
+
+@end

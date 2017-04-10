@@ -1,0 +1,142 @@
+//
+//  ICCouponController.m
+//  iCarePregnant
+//
+//  Created by wcz on 16/6/22.
+//  Copyright © 2016年 oenius. All rights reserved.
+//
+
+#import "ICCouponController.h"
+#import "ESCouponViewCell.h"
+
+@interface ICCouponController ()<UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout>
+
+@property (nonatomic, strong) UICollectionView *collectionview;
+
+/** from */
+@property (nonatomic,assign) NSInteger page;
+/** 卡券 */
+@property (nonatomic,strong) NSMutableArray *couponItems;
+
+@end
+
+@implementation ICCouponController
+
+- (NSMutableArray *)couponItems
+{
+    if (!_couponItems) {
+        _couponItems = [NSMutableArray array];
+    }
+    return _couponItems;
+}
+
+- (UICollectionView *)collectionview
+{
+    if (_collectionview == nil) {
+        
+        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc]init];
+        _collectionview = [[UICollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:flowLayout];
+        _collectionview.dataSource = self;
+        _collectionview.delegate = self;
+        _collectionview.backgroundColor = [UIColor whiteColor];
+        [_collectionview registerClass:[ESCouponViewCell class] forCellWithReuseIdentifier:@"ESCouponViewCell"];
+    }
+    return _collectionview;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    [self.view addSubview:self.collectionview];
+    [self.collectionview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(@0);
+    }];
+    
+    @weakify(self);
+    self.collectionview.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        @strongify(self);
+        [self refreshList];
+    }];
+    self.collectionview.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+        @strongify(self);
+        [self moreList];
+    }];
+    
+    
+    [self refreshList];
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    return self.couponItems.count;
+}
+
+-(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+{
+    return UIEdgeInsetsMake(10, 0, 0, 0);
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    return CGSizeMake(ScreenWidth - 20, 90);
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESCouponViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ESCouponViewCell" forIndexPath:indexPath];
+//    cell.contentView.layer.cornerRadius=10;
+//    cell.contentView.layer.masksToBounds=YES;
+//    cell.model = nil;
+    cell.couponInfo = [self.couponItems objectAtIndex:indexPath.item];
+    
+    return cell;
+}
+
+#pragma mark - Networking
+- (void)refreshList
+{
+    self.page = 1;
+    [self fetchCoupon];
+}
+- (void)moreList
+{
+    self.page ++ ;
+    [self fetchCoupon];
+}
+
+
+- (void)fetchCoupon
+{
+    CouponRequest *request = [CouponRequest request];
+    request.type = self.type;
+    request.page = [NSNumber numberWithInteger:self.page];
+    request.n = @20;
+    
+    @weakify(self);
+    [ESService couponRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        if (self.page == 1) {
+            [self.couponItems removeAllObjects];
+        }
+        self.collectionview.mj_footer.hidden = response.count < 20;
+        
+        [self.couponItems addObjectsFromArray:response];
+        [self.collectionview reloadData];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.collectionview.mj_header endRefreshing];
+    [self.collectionview.mj_footer endRefreshing];
+}
+
+@end

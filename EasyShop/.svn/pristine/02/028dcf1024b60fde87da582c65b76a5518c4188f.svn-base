@@ -1,0 +1,26 @@
+//
+//  WarningControlView.m
+//  
+//
+//  Created by jiushou on 16/8/1.
+//
+//
+#import <UIKit/UIKit.h>
+#import "WarningControlView.h"
+
+@implementation WarningControlView
++(void)showTitle:(NSString *)title  andMessage:(NSString*)str{
+    UIAlertController*com=[UIAlertController alertControllerWithTitle:title message:str preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction*cancelActio=[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        
+    }];
+    UIAlertAction *okAction=[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        
+    }];
+    [com addAction:cancelActio];
+    [com addAction:okAction];
+    [[AppDelegate shared] presentViewController:com animated:YES completion:^{
+        
+    }];
+}
+@end

@@ -1,0 +1,103 @@
+
+//
+//  ICShareInfoView.m
+//  iCarePregnant
+//
+//  Created by wcz on 16/5/23.
+//  Copyright © 2016年 oenius. All rights reserved.
+//
+
+#import "ICShareInfoView.h"
+#import "TIBTButton.h"
+
+@interface ICShareInfoView ()
+
+@property (nonatomic, strong) NSArray *array;
+
+@end
+
+@implementation ICShareInfoView
+
+- (NSArray *)array
+{
+    if (_array == nil) {
+        _array = @[
+                   @{
+                    @"title":@"朋友圈",
+                    @"image":@"loginWithOther0",
+                    },
+                   @{
+                       @"title":@"微信",
+                       @"image":@"loginWithOther1",
+                       },
+                   @{
+                       @"title":@"微博",
+                       @"image":@"loginWithOther2",
+                       },
+                   @{
+                       @"title":@"复制",
+                       @"image":@"loginWithOther2",
+                       },
+
+                   
+                   ];
+    }
+    return _array;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame])
+    {
+        self.backgroundColor = [UIColor whiteColor];
+        [self intalizedView];
+    }
+    return self;
+}
+
+- (void)intalizedView
+{
+    CGFloat width = ScreenWidth / 3;
+    for (int i = 0; i < 3; i ++)
+    {
+        TIBTButton *button = [[TIBTButton alloc] initWithFrame:CGRectMake(width * i, 10, width, width - 10)];
+        button.descLabel.text = self.array[i][@"title"];
+        button.picImgView.image = [UIImage imageNamed:self.array[i][@"image"]];
+        button.backgroundColor = [UIColor whiteColor];
+        button.picImgView.contentMode = UIViewContentModeCenter;
+        button.picImgView.frame = CGRectMake(0, 5, button.bounds.size.width, button.bounds.size.height - 30);
+
+        button.descLabel.frame = CGRectMake(0, CGRectGetMaxY(button.picImgView.frame) + 2, button.bounds.size.width, 20);
+        button.tag = i;
+        [button addTarget:self action:@selector(selectShareButton:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:button];
+    }
+    
+    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [cancelButton addTarget:self action:@selector(cancelButton) forControlEvents:UIControlEventTouchUpInside];
+    [cancelButton setTitle:@"取 消" forState:UIControlStateNormal];
+    cancelButton.backgroundColor = [UIColor whiteColor];
+    [cancelButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+    [self addSubview:cancelButton];
+    [cancelButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(@0);
+        make.height.equalTo(@44);
+    }];
+}
+
+- (void)cancelButton
+{
+    if (_callBack) {
+        _callBack();
+    }
+}
+
+- (void)selectShareButton:(UIButton *)button
+{
+    if (_selectShareButton)
+    {
+        _selectShareButton(button.tag);
+    }
+}
+
+@end

@@ -1,0 +1,250 @@
+//
+//  ESAddressListController.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/20.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESAddressListController.h"
+#import "ESAddressListCell.h"
+#import "ESNewAddressController.h"
+#import "ESChangeAddressController.h"
+@interface ESAddressListController()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong) UITableView *tableView;
+
+/** 地址items （item ：AddressInfo ） */
+@property (nonatomic,strong) NSArray *addressItems;
+
+/** indicator */
+@property (nonatomic,strong) ESIndicator *indicator;
+@property (nonatomic,assign) CGFloat H;
+@end
+
+@implementation ESAddressListController
+
+- (ESIndicator *)indicator
+{
+    if (!_indicator) {
+        _indicator = [ESIndicator indicatorToView:self.view];
+    }
+    return _indicator;
+}
+
+#pragma mark - LifeCycle
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
+    TitleCenter;
+    self.title = @"收货地址";
+//    [self initalizedCumstomNav];
+    [self.view addSubview:self.tableView];
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.equalTo(@0);
+        make.bottom.equalTo(@(-49));
+    }];
+    self.tableView.rowHeight=44;
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    //button.frame = CGRectMake(0, ScreenHeight-44-64, ScreenWidth, 44);
+    [button setTitle:@"新增收货地址" forState:UIControlStateNormal];
+    [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    
+    button.titleLabel.font=[UIFont systemFontOfSize:15];
+    button.backgroundColor = RGB(233, 40, 46);
+    [button addTarget:self action:@selector(btnClick) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:button];
+    [button mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.equalTo(@(ScreenWidth));
+        make.bottom.equalTo(@0);
+        make.left.equalTo(@0);
+        make.height.equalTo(@49);
+    }];
+    
+    [self fetchAddressList];
+}
+-(void)viewWillAppear:(BOOL)animated{
+    [self fetchAddressList];
+}
+-(void)btnClick
+{
+    ESNewAddressController *vc = [[ESNewAddressController alloc] init];
+    @weakify(self);
+    vc.successBlock         = ^{
+        @strongify(self);
+        [self fetchAddressList];
+    };
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+#pragma mark
+#pragma mark - tableview代理方法;
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return self.addressItems.count;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 1;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    CGFloat H=[self getHeightForRowAddressInfo:[self.addressItems objectAtIndex:indexPath.section]];
+    self.H=H;
+    NSLog(@"%f",H);
+    return H;
+}
+/*自动计算Label的高度*/
+-(CGFloat)getHeightForRowAddressInfo :(AddressInfo*)addressInfo{
+    NSString*str=[NSString stringWithFormat:@"%@%@",addressInfo.area,addressInfo.address];
+    CGRect rect=[str boundingRectWithSize:CGSizeMake(ScreenWidth-40, 1000) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:15]} context:nil];
+    
+    return rect.size.height+90;
+    
+    
+    
+    
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    return 10;
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
+    if (self.isOrder) {
+        if (self.addressBlock) {
+            AddressInfo *info = [self.addressItems objectAtIndex:indexPath.section];
+            self.addressBlock(info);
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+    }else{
+        //用来修改收货地址
+        ESNewAddressController*vc=[[ESNewAddressController alloc]init];
+        AddressInfo *info = [self.addressItems objectAtIndex:indexPath.section];
+        vc.info=info;
+        vc.isChangeAddress=YES;
+        [self.navigationController pushViewController:vc animated:YES];
+    }
+    //            NormalWebViewController *vc = [[NormalWebViewController alloc] init];
+    //            vc.hidesBottomBarWhenPushed = YES;
+    //            [self.navigationController pushViewController:vc animated:NO];
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESAddressListCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESAddressListCell"];
+    cell.addressInfo = [self.addressItems objectAtIndex:indexPath.section];
+    cell.H=self.H;
+    @weakify(self);
+    cell.defaultBlock = ^{
+      @strongify(self);
+        [self setDefaultAtIndexPath:indexPath];
+    };
+    cell.deleteBlock = ^{
+        @strongify(self);
+        [self deleteAddressAtIndexPath:indexPath];
+    };
+    return cell;
+}
+
+#pragma mark
+#pragma mark lazy init
+- (UITableView *)tableView
+{
+    if (_tableView == nil) {
+        _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+        _tableView.dataSource = self;
+        _tableView.backgroundColor=KCommontTableViewBagroudColor;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+        _tableView.delegate = self;
+        _tableView.tableFooterView = [[UIView alloc] init];
+        [_tableView registerClass:[ESAddressListCell class] forCellReuseIdentifier:@"ESAddressListCell"];
+        @weakify(self);
+        _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+            @strongify(self);
+            [self fetchAddressList];
+        }];
+    }
+    return _tableView;
+}
+
+#pragma mark - Networking
+
+#pragma mark - 删除地址
+- (void)deleteAddressAtIndexPath:(NSIndexPath *)indexPath
+{
+    AddressInfo *info = [self.addressItems objectAtIndex:indexPath.section];
+    
+    DeleteAddressRequest *request = [DeleteAddressRequest request];
+    request.aid = info.aid;
+    
+    @weakify(self);
+    [self.indicator startAnimationWithMessage:@"正在删除地址..."];
+    [ESService deleteAddressRequest:request success:^{
+        @strongify(self);
+        [self endGSNetworking];
+        
+        [ESToast showSuccess:@"删除地址成功！"];
+        [self fetchAddressList];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+#pragma mark - 设置默认地址
+- (void)setDefaultAtIndexPath:(NSIndexPath *)indexPath
+{
+    AddressInfo *info = [self.addressItems objectAtIndex:indexPath.section];
+    
+    SetDefaultRequest *request = [SetDefaultRequest request];
+    request.aid = info.aid;
+    
+    @weakify(self);
+    [self.indicator startAnimationWithMessage:@"正在设置默认地址..."];
+    [ESService setDefaultRequest:request success:^{
+        @strongify(self);
+        [self endGSNetworking];
+        
+        [ESToast showSuccess:@"设置默认地址成功！"];
+        [self fetchAddressList];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+#pragma mark - 请求地址列表
+- (void)fetchAddressList
+{
+    GetAddressListRequest *request = [GetAddressListRequest request];
+    
+    @weakify(self);
+    [ESService getAddressListRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        self.addressItems = response;
+        
+        [self.tableView reloadData];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.indicator stopAnimation];
+    [self.tableView.mj_header endRefreshing];
+}
+
+@end

@@ -1,0 +1,195 @@
+//
+//  ESShopCommentCell.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/5.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESShopCommentCell.h"
+#import "ESImageCollectionViewCell.h"
+#import "GSTimeTool.h"
+#import "ImagesSkimView.h"
+
+@interface ESShopCommentCell ()<UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout>
+
+@property (nonatomic, strong) UILabel *userMobile;//用户
+@property (nonatomic, strong) UILabel *timeLable;//评价时间
+@property (nonatomic, strong) UILabel *commentLabel;//评价内容
+@property (nonatomic, strong) UILabel *lineLabel;//分割线
+@property (nonatomic, strong) UICollectionView *collectionview;
+
+@end
+
+
+
+@implementation ESShopCommentCell
+
+- (void)setItem:(GoodEvaluationItem *)item
+{
+    _item = item;
+    self.lineLabel.frame=_item.lineFrame;
+    self.userMobile.frame = _item.nameFrame;
+    self.timeLable.frame = _item.timeFrame;
+    self.commentLabel.frame = _item.contentFrame;
+    self.collectionview.frame = _item.imageFrame;
+    self.userMobile.text=[_item.evaluationInfo.member_name stringByReplacingCharactersInRange:NSMakeRange(3, 4) withString:@"****"];
+    //self.userMobile.text = _item.evaluationInfo.member_name;
+    self.timeLable.text = [GSTimeTool formatterNumber:_item.evaluationInfo.create_time toType:GSTimeType_YYMMddHHmm];
+    self.commentLabel.text = _item.evaluationInfo.content;
+}
+
+- (UICollectionView *)collectionview
+{
+    if (_collectionview == nil) {
+        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+        flowLayout.minimumInteritemSpacing = 10;
+        flowLayout.minimumLineSpacing = 10;
+        flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+        //             flowLayout.itemSize = CGSizeMake(ScreenWidth, 125);
+        _collectionview = [[UICollectionView alloc]initWithFrame:CGRectZero collectionViewLayout:flowLayout];
+        _collectionview.dataSource = self;
+        _collectionview.pagingEnabled = YES;
+        _collectionview.showsVerticalScrollIndicator = NO;
+        _collectionview.showsHorizontalScrollIndicator = NO;
+        _collectionview.delegate = self;
+        [_collectionview registerClass:[ESImageCollectionViewCell class] forCellWithReuseIdentifier:@"ESImageCollectionViewCell"];
+        _collectionview.backgroundColor = [UIColor whiteColor];
+    }
+    return _collectionview;
+}
+
+#pragma mark
+#pragma mark Init & Add
+- (UILabel *)lineLabel {
+    if (!_lineLabel) {
+        _lineLabel = [[UILabel alloc] init];
+        _lineLabel.backgroundColor = [UIColor grayColor];
+    }
+    return _lineLabel;
+}
+- (UILabel *)userMobile {
+    if (!_userMobile) {
+        _userMobile = [[UILabel alloc] init];
+        _userMobile.font = ADeanFONT14;
+        _userMobile.textAlignment = NSTextAlignmentLeft;
+        _userMobile.textColor = ADeanHEXCOLOR(0x333333);
+    }
+    return _userMobile;
+}
+- (UILabel *)timeLable {
+    if (!_timeLable) {
+        _timeLable = [[UILabel alloc] init];
+        _timeLable.font = ADeanFONT14;
+        _timeLable.textAlignment = NSTextAlignmentRight;
+        _timeLable.textColor = ADeanHEXCOLOR(0x999999);
+    }
+    return _timeLable;
+}
+- (UILabel *)commentLabel {
+    
+    if (!_commentLabel) {
+        _commentLabel = [[UILabel alloc] init];
+        _commentLabel.numberOfLines = 0;
+        _commentLabel.font = ADeanFONT14;
+        _commentLabel.textColor = ADeanHEXCOLOR(0x999999);
+    }
+    return _commentLabel;
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        [self.contentView addSubview:self.lineLabel];
+
+        [self.contentView addSubview:self.userMobile];
+        
+        [self.contentView addSubview:self.timeLable];
+
+        
+        [self.contentView addSubview:self.commentLabel];
+        
+        [self.contentView addSubview:self.collectionview];
+    }
+    return self;
+}
+
+
+-(void)intalizedView
+{
+    [self.contentView addSubview:self.lineLabel];
+    [self.lineLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@20);
+        make.right.equalTo(@(-20));
+        make.top.equalTo(@1);
+        make.height.equalTo(@0.5);
+    }];
+
+    [self.contentView addSubview:self.userMobile];
+    [self.userMobile mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@(15));
+        make.top.equalTo(@(6.5));
+        make.width.equalTo(@200);
+        make.height.equalTo(@20);
+    }];
+    
+    [self.contentView addSubview:self.timeLable];
+    [self.timeLable mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(@(-10));
+        make.top.equalTo(@(6.5));
+        make.width.equalTo(@120);
+        make.height.equalTo(@20);
+    }];
+    
+    
+    [self.contentView addSubview:self.commentLabel];
+    [self.commentLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(@(-10));
+        make.top.equalTo(self.timeLable.mas_bottom).offset(2);
+        make.left.equalTo(@(20));
+    }];
+    
+    [self.contentView addSubview:self.collectionview];
+    [self.collectionview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.commentLabel.mas_bottom).offset(5);
+        make.left.right.equalTo(@0);
+        make.bottom.equalTo(@(-10));
+    }];
+    
+}
+
+
+#pragma mark - UICollectionViewDataSource
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    return self.item.evaluationInfo.image.count;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESImageCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ESImageCollectionViewCell" forIndexPath:indexPath];
+    cell.imageUrl = [self.item.evaluationInfo.image objectAtIndex:indexPath.item];
+    return cell;
+}
+
+#pragma mark - UICollectionViewDelegateFlowLayout
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    CGFloat imageWH = self.item.imageFrame.size.height;
+    return CGSizeMake(imageWH, imageWH);
+}
+
+-(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+{
+    return UIEdgeInsetsMake(0, 5, 0, 5);
+}
+
+#pragma mark - UICollectionViewDelegate
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    [ImagesSkimView showImages:self.item.evaluationInfo.image atIndex:indexPath.item];
+}
+
+
+@end

@@ -1,0 +1,558 @@
+//
+//  ESService.h
+//  EasyShopService
+//
+//  Created by guojian on 16/5/2.
+//  Copyright © 2016年 naijoug. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "ESServiceHeader.h"
+#import "EXTScope.h"
+#import "ESIndicator.h"
+#import "ESToast.h"
+
+typedef void (^FailureBlock)(NSError *error);   //网络请求失败block
+typedef void (^ArrayBlock)(NSArray *response);  //网络请求成功返回数组数据
+typedef void (^OkBlock)();                      //网络请求成功
+
+@interface ESService : NSObject
+
+@end
+
+#pragma mark - 4 - 用户管理
+@interface ESService (User)
+
+/**
+ *  4.1 获取当前已登录用户的个人资料
+ */
++ (NSURLSessionTask *)userRequest:(UserRequest *)request
+                          success:(void (^)(UserInfo *response))success
+                          failure:(FailureBlock)failure;
+
+/**
+ *  4.2 用户注册
+ */
++ (NSURLSessionTask *)userAddRequest:(UserAddRequest *)request
+                             success:(void (^)(NSString *response))success
+                             failure:(FailureBlock)failure;
+/**
+ *  4.3 用户登录
+ */
++ (NSURLSessionTask *)userLoginRequest:(UserLoginRequest *)request
+                               success:(void (^)(LoginInfo *response))success
+                               failure:(FailureBlock)failure;
+
+/**
+ *  4.4 编辑用户资料
+ */
++ (NSURLSessionTask *)userEditRequest:(UserEditRequest *)request
+                              success:(OkBlock)success
+                              failure:(FailureBlock)failure;
+
+/**
+ *  4.5 用户退出登录
+ */
++ (NSURLSessionTask *)userLogoutRequest:(UserLogoutRequest *)request
+                                success:(OkBlock)success
+                                failure:(FailureBlock)failure;
+/**
+ *  4.6 绑定第三方
+ */
++ (NSURLSessionTask *)userBindingRequest:(UserBindingRequest *)request
+                                success:(OkBlock)success
+                                failure:(FailureBlock)failure;
+
+/**
+ *  4.7 重置用户密码
+ */
++ (NSURLSessionTask *)userResetRequest:(UserResetRequest *)request
+                               success:(OkBlock)success
+                               failure:(FailureBlock)failure;
+
+@end
+
+#pragma mark - 5 - 通用接口
+@interface ESService (Common)
+
+/**
+ *  5.1 获取验证码
+ */
++ (NSURLSessionTask *)getVerifyRequest:(GetVerifyRequest *)request
+                               success:(void (^)(NSData *response))success
+                               failure:(FailureBlock)failure;
+
+/**
+ *  5.2 获取短信验证码
+ */
++ (NSURLSessionTask *)getSmsVerifyRequest:(GetSmsVerifyRequest *)request
+                                  success:(OkBlock)success
+                                  failure:(FailureBlock)failure;
+/**
+ *  5.3 获取地区和地区代号
+ */
++ (NSURLSessionTask *)getDistrictRequest:(GetDistrictRequest *)request
+                                 success:(ArrayBlock)success
+                                 failure:(FailureBlock)failure;
+
+/**
+ *  5.4 获取公告
+ */
++ (NSURLSessionTask *)getAnnouncementRequest:(GetAnnouncementRequest *)request
+                                     success:(ArrayBlock)success
+                                     failure:(FailureBlock)failure;
+
+/**
+ *  5.5 获取店铺信息
+ */
++ (NSURLSessionTask *)getShopInfoRequest:(GetShopInfoRequest *)request
+                                 success:(void (^)(ShopInfo *response))success
+                                 failure:(FailureBlock)failure;
+
+/**
+ *  5.6 图片上传（'jpg', 'gif', 'png', 'jpeg'）
+ */
++ (NSURLSessionTask *)fileUploadRequest:(FileUploadRequest *)request
+                                success:(void (^)(NSArray *response))success
+                                failure:(FailureBlock)failure;
+
+/**
+ *  5.8 获取物流信息追踪
+ */
++ (NSURLSessionTask *)getOrderTracesRequest:(GetOrderTracesRequest *)request
+                                    success:(void (^)(OrderTracesInfo *response))success
+                                    failure:(FailureBlock)failure;
+
+@end
+
+#pragma mark - 6 - 用户收货地址管理
+@interface ESService (Address)
+
+/**
+ *  6.1 获取用户默认地址或指定id地址
+ */
++ (NSURLSessionTask *)addressRequest:(AddressRequest *)request
+                             success:(void (^)(AddressInfo *response))success
+                             failure:(FailureBlock)failure;
+
+/**
+ *  6.2 获取用户地址列表
+ */
++ (NSURLSessionTask *)getAddressListRequest:(GetAddressListRequest *)request
+                                     success:(ArrayBlock)success
+                                     failure:(FailureBlock)failure;
+
+/**
+ *  6.3 删除指定id地址
+ */
++ (NSURLSessionTask *)deleteAddressRequest:(DeleteAddressRequest *)request
+                                   success:(OkBlock)success
+                                   failure:(FailureBlock)failure;
+
+/**
+ *  6.4 设置指定id地址为默认地址
+ */
++ (NSURLSessionTask *)setDefaultRequest:(SetDefaultRequest *)request
+                                success:(OkBlock)success
+                                failure:(FailureBlock)failure;
+
+/**
+ *  6.5 新增用户收货地址
+ */
++ (NSURLSessionTask *)addAddressRequest:(AddAddressRequest *)request
+                                success:(OkBlock)success
+                                failure:(FailureBlock)failure;
+
+/**
+ *  6.6 编辑用户收货地址
+ */
++ (NSURLSessionTask *)editAddressRequest:(EditAddressRequest *)request
+                                 success:(OkBlock)success
+                                 failure:(FailureBlock)failure;
+
+@end
+
+#pragma mark - 7 - 商品相关
+@interface ESService (Goods)
+
+/**
+ *  7.1 获取商品列表
+ */
++ (NSURLSessionTask *)goodsRequest:(GoodsRequest *)request
+                           success:(ArrayBlock)success
+                           failure:(FailureBlock)failure;
+
+/**
+ *  7.2 获取商品导航分类列表
+ */
++ (NSURLSessionTask *)getNavListRequest:(GetNavListRequest *)request
+                                success:(ArrayBlock)success
+                                failure:(FailureBlock)failure;
+
+/**
+ *  7.3 获取分类下的每个活动专场
+ */
++ (NSURLSessionTask *)getActivityListRequest:(GetActivityListRequest *)request
+                                     success:(ArrayBlock)success
+                                     failure:(FailureBlock)failure;
+
+/**
+ *  7.4 获取活动专场下的商品列表
+ */
++ (NSURLSessionTask *)getActivityGoodsListRequest:(GetActivityGoodsListRequest *)request
+                                          success:(ArrayBlock)success
+                                          failure:(FailureBlock)failure;
+
+/**
+ *  7.5 获取商品详情
+ */
++ (NSURLSessionTask *)getGoodsDetailRequest:(GetGoodsDetailRequest *)request
+                                    success:(void (^)(GoodsDetailInfo *response))success
+                                    failure:(FailureBlock)failure;
+
+/**
+ *  7.6 获取推荐商品列表
+ */
++ (NSURLSessionTask *)getRelatedGoodsRequest:(GetRelatedGoodsRequest *)request
+                                    success:(ArrayBlock)success
+                                    failure:(FailureBlock)failure;
+
+/**
+ *  7.7 获取商品分类信息
+ */
++ (NSURLSessionTask *)getGoodsCategoryRequest:(GetGoodsCategoryRequest *)request
+                                      success:(ArrayBlock)success
+                                      failure:(FailureBlock)failure;
+
+/**
+ *  7.8 获取商品评论
+ */
++ (NSURLSessionTask *)getGoodsEvaluationRequest:(GetGoodsEvaluationRequest *)request
+                                        success:(ArrayBlock)success
+                                        failure:(FailureBlock)failure;
+
+/**
+ *  7.9 获取商品评论信息统计
+ */
++ (NSURLSessionTask *)getEvaluationInfoRequest:(GetEvaluationInfoRequest *)request
+                                       success:(void (^)(EvaluationInfo *response))success
+                                       failure:(FailureBlock)failure;
+
+/**
+ *  7.10 获取导航商品列表（type = 1 今日新上）
+ */
++ (NSURLSessionTask *)subGoodsListRequest:(SubGoodsListRequest *)request
+                                  success:(ArrayBlock)success
+                                  failure:(FailureBlock)failure;
+
+/**
+ *  7.10 抢购
+ */
++ (NSURLSessionTask *)panicRequestWithSuccess:(void (^)(PanicInfo *response))success
+                                      failure:(FailureBlock)failure;
+
+
+@end
+
+#pragma mark - 8 - 用户关注
+@interface ESService (Favorites)
+
+/**
+ *  8.1 获取用户关注商品
+ */
++ (NSURLSessionTask *)getFavoritesGoodsRequest:(GetFavoritesGoodsRequest *)request
+                                        success:(ArrayBlock)success
+                                        failure:(FailureBlock)failure;
+
+/**
+ *  8.2 获取用户关注商品
+ */
++ (NSURLSessionTask *)addFavoritesGoodsRequest:(AddFavoritesGoodsRequest *)request
+                                       success:(OkBlock)success
+                                       failure:(FailureBlock)failure;
+
+/**
+ *  8.3 取消用户关注商品
+ */
++ (NSURLSessionTask *)cancelFavoritesGoodsRequest:(CancelFavoritesGoodsRequest *)request
+                                          success:(OkBlock)success
+                                          failure:(FailureBlock)failure;
+
+/**
+ *  8.4 收藏店铺
+ */
++ (NSURLSessionTask *)addFavoritesShopRequest:(AddFavoritesShopRequest *)request
+                                      success:(OkBlock)success
+                                      failure:(FailureBlock)failure;
+
+/**
+ *  8.5 取消收藏店铺
+ */
++ (NSURLSessionTask *)cancelFavoritesShopRequest:(CancelFavoritesShopRequest *)request
+                                         success:(OkBlock)success
+                                         failure:(FailureBlock)failure;
+
+/**
+ *  8.6 获取用户关注店铺列表
+ */
++ (NSURLSessionTask *)getFavoritesShopRequest:(GetFavoritesShopRequest *)request
+                                      success:(ArrayBlock)success
+                                      failure:(FailureBlock)failure;
+
+/**
+ *  8.7 获取当前用户足迹
+ */
++ (NSURLSessionTask *)getFootprintRequest:(GetFootprintRequest *)request
+                                  success:(ArrayBlock)success
+                                  failure:(FailureBlock)failure;
+
+@end
+
+#pragma mark - 9 - 商品评价
+@interface ESService (Evaluate)
+
+/**
+ *  9.1 获取个人待评价商品
+ */
++ (NSURLSessionTask *)evaluateRequest:(EvaluateRequest *)request
+                              success:(ArrayBlock)success
+                              failure:(FailureBlock)failure;
+
+/**
+ *  9.2 增加商品评价
+ */
++ (NSURLSessionTask *)addEvaluationRequest:(AddEvaluationRequest *)request
+                                   success:(OkBlock)success
+                                   failure:(FailureBlock)failure;
+
+@end
+
+#pragma mark - 10 - 购物车
+@interface ESService (Cart)
+
+/**
+ *  10.1 查询购物车商品（需要登录）
+ */
++ (NSURLSessionTask *)cartRequest:(CartRequest *)request
+                          success:(void (^)(CartInfo* response))success
+                          failure:(FailureBlock)failure;
+/**
+ *  10.2 往购物车添加商品（需要登录）
+ */
++ (NSURLSessionTask *)addCartGoodsRequest:(AddCartGoodsRequest *)request
+                                  success:(OkBlock)success
+                                  failure:(FailureBlock)failure;
+
+/**
+ *  10.3 编辑购物车增加商品（需要登录）
+ */
++ (NSURLSessionTask *)editCartGoodsRequest:(EditCartGoodsRequest *)request
+                                  success:(OkBlock)success
+                                  failure:(FailureBlock)failure;
+
+/**
+ *  10.4 删除购物车增加商品（需要登录）
+ */
++ (NSURLSessionTask *)deleteCartGoodsRequest:(DeleteCartGoodsRequest *)request
+                                   success:(OkBlock)success
+                                   failure:(FailureBlock)failure;
+/**
+ *  10.5 统计购物车中商品件数和总价（不包括运费）（需要登录）
+ */
++ (NSURLSessionTask *)getCartInfoRequest:(GetCartInfoRequest *)request
+                                   success:(void (^)(CartPriceInfo* response))success
+                                   failure:(FailureBlock)failure;
+
+/**
+ *  10.6 更新购物车中商品要结算的状态（需要登录）
+ */
++ (NSURLSessionTask *)editStatusRequest:(EditStatusRequest *)request
+                                success:(OkBlock)success
+                                failure:(FailureBlock)failure;
+
+
+@end
+
+#pragma mark - 11 - 订单处理
+@interface ESService (Order)
+
+/**
+ *  11.1 获取订单（需要登录）
+ */
++ (NSURLSessionTask *)orderRequest:(OrderRequest *)request
+                           success:(ArrayBlock)success
+                           failure:(FailureBlock)failure;
+
+/**
+ *  11.2 获取订单详细信息（需要登录）
+ */
++ (NSURLSessionTask *)getOrderDetailRequest:(GetOrderDetailRequest *)request
+                                    success:(void (^)(OrderDetailInfo *response))success
+                                    failure:(FailureBlock)failure;
+
+/**
+ *  11.3 确认订单（需要登录）
+ */
++ (NSURLSessionTask *)orderConfirmRequest:(OrderConfirmRequest *)request
+                                  success:(void (^)(OrderConfirmInfo *response))success
+                                  failure:(FailureBlock)failure;
+
+/**
+ *  11.4 生成订单（需要登录）
+ */
++ (NSURLSessionTask *)createOrderRequest:(CreateOrderRequest *)request
+                                 success:(OkBlock)success
+                                 failure:(FailureBlock)failure;
+
+/**
+ *  11.5 取消订单（需要登录）
+ */
++ (NSURLSessionTask *)cancelOrderRequest:(CancelOrderRequest *)request
+                                 success:(OkBlock)success
+                                 failure:(FailureBlock)failure;
+
+/**
+ *  11.6 确认收货（需要登录）
+ */
++ (NSURLSessionTask *)comfirmOrderRequest:(ComfirmOrderRequest *)request
+                                 success:(OkBlock)success
+                                 failure:(FailureBlock)failure;
+
+@end
+
+#pragma mark - 12 - 分享
+
+@interface ESService (Share)
+
+/**
+ *  12.1、12.2 获取分享内容
+ */
++ (NSURLSessionTask *)shareFeedRequest:(ShareFeedRequest *)request
+                               success:(ArrayBlock)success
+                               failure:(FailureBlock)failure;
+
+/**
+ *  12.3、12.4 推送、转发一条消息
+ */
++ (NSURLSessionTask *)sharePushRequest:(SharePushRequest *)request
+                               success:(OkBlock)success
+                               failure:(FailureBlock)failure;
+
+/**
+ *  12.5 分页获取我关注的分享内容
+ */
++ (NSURLSessionTask *)shareMyFollowRequest:(ShareMyFollowRequest *)request
+                                   success:(ArrayBlock)success
+                                   failure:(FailureBlock)failure;
+
+/**
+ *  12.6 关注一个用户
+ */
++ (NSURLSessionTask *)shareFollowRequest:(ShareFollowRequest *)request
+                                 success:(OkBlock)success
+                                 failure:(FailureBlock)failure;
+
+/**
+ *  12.7 喜欢+1
+ */
++ (NSURLSessionTask *)shareDigRequest:(ShareDigRequest *)request
+                              success:(OkBlock)success
+                              failure:(FailureBlock)failure;
+
+/**
+ *  12.8 喜欢-1
+ */
++ (NSURLSessionTask *)shareDedigRequest:(ShareDedigRequest *)request
+                                success:(OkBlock)success
+                                failure:(FailureBlock)failure;
+
+/**
+ *  12.9 获取指定用户信息
+ */
++ (NSURLSessionTask *)shareUserInfoRequest:(ShareUserInfoRequest *)request
+                                   success:(ArrayBlock)success
+                                   failure:(FailureBlock)failure;
+
+
+@end
+
+#pragma mark - 13 - 支付接口
+@interface ESService (Pay)
+
+/**
+ *  13.1 获取微信支付信息
+ */
++ (NSURLSessionTask *)getWeixinPayMsgRequest:(GetPayMsgRequest *)request
+                                     success:(void (^)(WeixinPayInfo *response))success
+                                     failure:(FailureBlock)failure;
+/**
+ *  13.2 获取支付宝支付信息
+ */
++ (NSURLSessionTask *)getAliPayMsgRequest:(GetPayMsgRequest *)request
+                                  success:(void (^)(NSString *response))success
+                                  failure:(FailureBlock)failure;
+
+
+
+@end
+
+#pragma mark - 15 - 搜索接口
+@interface ESService (Search)
+
+/**
+ *  15.1 热门关键字
+ */
++ (NSURLSessionTask *)getSearchHotWordRequest:(GetSearchHotWordRequest *)request
+                                      success:(ArrayBlock)success
+                                      failure:(FailureBlock)failure;
+
+/**
+ *  15.2 自动完成关键字
+ */
++ (NSURLSessionTask *)autoWordListRequest:(AutoWordListRequest *)request
+                                  success:(ArrayBlock)success
+                                  failure:(FailureBlock)failure;
+
+/**
+ *  15.3 搜索接口
+ */
++ (NSURLSessionTask *)searchRequest:(SearchRequest *)request
+                            success:(ArrayBlock)success
+                            failure:(FailureBlock)failure;
+
+@end
+
+#pragma mark - 16 - 优惠券接口
+@interface ESService (Coupon)
+
+/**
+ *  16.1 查询用户个人中心优惠券
+ */
++ (NSURLSessionTask *)couponRequest:(CouponRequest *)request
+                            success:(ArrayBlock)success
+                            failure:(FailureBlock)failure;
+
+
+/**
+ *  16.2 查询用户可以领取的优惠券
+ */
++ (NSURLSessionTask *)queryCouponRequest:(QueryCouponRequest *)request
+                                  success:(ArrayBlock)success
+                                  failure:(FailureBlock)failure;
+
+/**
+ *  16.3 获取优惠券
+ */
++ (NSURLSessionTask *)getCouponRequest:(GetCouponRequest *)request
+                               success:(ArrayBlock)success
+                               failure:(FailureBlock)failure;
+
+/**
+ *  16.4 获取优惠券
+ */
++ (NSURLSessionTask *)selectCouponRequest:(SelectCouponRequest *)request
+                                  success:(ArrayBlock)success
+                                  failure:(FailureBlock)failure;
+
+@end
+

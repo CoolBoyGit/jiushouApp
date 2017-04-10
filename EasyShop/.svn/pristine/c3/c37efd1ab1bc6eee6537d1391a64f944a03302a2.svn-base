@@ -1,0 +1,69 @@
+//
+//  TipViewAnimation.m
+//  EasyShop
+//
+//  Created by jiushou on 16/7/9.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "TipViewAnimation.h"
+
+@implementation TipViewAnimation
+
+
+-(instancetype)initWithFrame:(CGRect)frame andTip:(NSString*)str{
+    if (self=[super initWithFrame:frame]) {
+        self.frame=kKeyWindow.frame;
+        [self setUpView:str andFrame:frame];
+    }
+    
+    return self;
+}
+-(void)setUpView:(NSString*)str andFrame:(CGRect)frame{
+
+//    
+    self.backgroundColor=[UIColor colorWithRed:160/255.0 green:160/255.0 blue:160/255.0 alpha:0.5];
+    UILabel*label=[[UILabel alloc]init];
+    
+    //label.center=tipsView.center;
+    
+    label.textAlignment=NSTextAlignmentCenter;
+    label.backgroundColor=[UIColor colorWithWhite:0.702 alpha:1.000];
+    label.textColor=[UIColor blackColor];
+    label.text=str;
+    label.layer.cornerRadius=3;
+    label.layer.masksToBounds=YES;
+    label.font=[UIFont systemFontOfSize:15];
+    CGFloat width=[str widthOfFont:[UIFont systemFontOfSize:15]];
+    label.frame=CGRectMake((ScreenWidth-width-20)/2.0, kKeyWindow.centerY-80, width+20, 40);
+    [self addSubview:label];
+    
+    CABasicAnimation *scaleAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+    scaleAnimation.fromValue = [NSNumber numberWithFloat:1.0];
+    scaleAnimation.toValue = [NSNumber numberWithFloat:0.95];
+    scaleAnimation.autoreverses = YES;
+    scaleAnimation.fillMode = kCAFillModeForwards;
+    scaleAnimation.repeatCount = 1;
+    scaleAnimation.duration = 1;
+    [label.layer addAnimation:scaleAnimation forKey:@"scaleAnimation"];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        sleep(1);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self removeFromSuperview];
+        });
+    });
+
+}
+-(void)show{
+    [kKeyWindow addSubview:self];
+}
+/*
+// Only override drawRect: if you perform custom drawing.
+// An empty implementation adversely affects performance during animation.
+- (void)drawRect:(CGRect)rect {
+    // Drawing code
+}
+*/
+
+@end

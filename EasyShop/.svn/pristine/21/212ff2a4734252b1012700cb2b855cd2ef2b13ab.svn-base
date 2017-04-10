@@ -1,0 +1,125 @@
+//
+//  ESOrderStateView.m
+//  EasyShop
+//
+//  Created by 脉融LCJ on 16/5/11.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESOrderStateView.h"
+
+@interface ESOrderStateView()
+
+@property(nonatomic, strong) UILabel *stateLab;
+@property(nonatomic, strong) UIImageView *stateImg;
+
+@end
+
+@implementation ESOrderStateView
+
+- (void)setOrderInfo:(OrderDetailInfo *)orderInfo
+{
+    _orderInfo = orderInfo;
+    
+    switch (_orderInfo.orderStatus) {
+        case OrderStatus_WaitPay://等待支付
+        {
+            self.stateImg.image = [UIImage imageNamed:@"user_dispatchgoods"];
+            self.stateLab.text = @"等待买家付款";
+        }
+            break;
+        case OrderStatus_WaitSend://等待发货
+        {    NSString*title=nil;
+            switch (_orderInfo.refund_status.intValue) {
+                case 0:
+                    title=@"待发货";
+                    break;
+                case 2:
+                    title=@"正在审核";
+                    break;
+                case 3:
+                    title=@"通过审核";
+                    break;
+                case 4:
+                    title=@"拒绝退款";
+                    break;
+                case 5:
+                    title=@"退款完成";
+                    break;
+                case 6:
+                    title=@"退款中";
+                    break;
+                default:
+                    break;
+            }
+
+        
+
+            self.stateImg.image = [UIImage imageNamed:@"user_dispatchgoods"];
+            self.stateLab.text=title;
+        }
+            break;
+        case OrderStatus_WaitReply://等待评价
+        {
+            self.stateImg.image = [UIImage imageNamed:@"user_dispatchgoods"];
+            self.stateLab.text = @"待评价";
+        }
+            break;
+        case OrderStatus_WaitSure://待收货
+        {
+            self.stateImg.image = [UIImage imageNamed:@"user_dispatchgoods"];
+            self.stateLab.text = @"卖家已发货";
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+-(instancetype)initWithFrame:(CGRect)frame
+{
+    if ([super initWithFrame:frame]) {
+        [self setUpViews];
+        self.backgroundColor = [UIColor whiteColor];
+    }
+    return self;
+}
+
+-(void)setUpViews
+{
+    [self addSubview:self.stateImg];
+    [self.stateImg mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.height.equalTo(@40);
+        make.left.equalTo(@20);
+        make.centerY.equalTo(@0);
+    }];
+    
+    [self addSubview:self.stateLab];
+    [self.stateLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.equalTo(@200);
+        make.height.equalTo(@30);
+        make.left.equalTo(self.stateImg.mas_right).with.offset(10);
+        make.centerY.equalTo(@0);
+    }];
+}
+
+-(UIImageView *)stateImg
+{
+    if (!_stateImg) {
+        _stateImg = [[UIImageView alloc] init];
+//        _stateImg.image = [UIImage imageNamed:@"user_dispatchgoods"];
+    }
+    return _stateImg;
+}
+-(UILabel *)stateLab
+{
+    if (!_stateLab) {
+        _stateLab = [[UILabel alloc] init];
+        _stateLab.textColor = [UIColor grayColor];
+        _stateLab.font = [UIFont systemFontOfSize:15];
+        _stateLab.text = @"";
+    }
+    return _stateLab;
+}
+
+@end

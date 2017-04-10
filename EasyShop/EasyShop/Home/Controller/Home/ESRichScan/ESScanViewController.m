@@ -1,0 +1,272 @@
+//
+//  ViewController.m
+//  二维码扫码器
+//
+//  Created by 高备资产 on 16/5/13.
+//  Copyright © 2016年 高备资产. All rights reserved.
+//
+
+#import "ESScanViewController.h"
+#import <AVFoundation/AVFoundation.h>
+#import "ESScanWebController.h"
+#import <ZXingObjC/ZXingObjC.h>
+#import "WarningControlView.h"
+
+@interface ESScanViewController ()<AVCaptureMetadataOutputObjectsDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate,UIAlertViewDelegate>
+{
+    int num;
+    BOOL upOrdown;
+    NSTimer * timer;
+    
+    UIView *_line;
+    
+    float left;
+    float top;
+}
+
+@property (strong,nonatomic)AVCaptureDevice *device;
+@property (strong,nonatomic)AVCaptureDeviceInput *input;
+@property (strong,nonatomic)AVCaptureMetadataOutput *output;
+@property (strong,nonatomic)AVCaptureSession *session;
+@property (strong,nonatomic)AVCaptureVideoPreviewLayer *preview;
+
+@end
+
+
+@implementation ESScanViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title=@"扫一扫";
+    
+    UIBarButtonItem*rightBar=[[UIBarButtonItem alloc]initWithTitle:@"相册" style:UIBarButtonItemStylePlain target:self action:@selector(rightButtonAction)];
+    self.navigationItem.rightBarButtonItem=rightBar;
+    self.navigationController.navigationBar.dk_barTintColorPicker=DKColorPickerWithKey(BG);
+    // Device
+    self.device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    
+    // Input
+    self.input = [AVCaptureDeviceInput deviceInputWithDevice:self.device error:nil];
+    
+    // Output
+    left = CGRectGetWidth(self.view.frame) / 2.0 - 90;
+    top = (ScreenHeight-64)/ 2.0 - 90;
+    self.output = [[AVCaptureMetadataOutput alloc]init];
+    CGRect viewRect =self.view.frame;
+    CGRect containRect =CGRectMake(left, top, 180, 180);
+    CGFloat x =containRect.origin.y/viewRect.size.height;
+    CGFloat y = containRect.origin.x / viewRect.size.width;
+    CGFloat width = containRect.size.height / viewRect.size.height;
+    CGFloat height = containRect.size.width / viewRect.size.width;
+    self.output.rectOfInterest=CGRectMake(x, y, width, height);
+    [self.output setMetadataObjectsDelegate:self queue:dispatch_get_main_queue()];
+   
+    //设置扫描的区域
+    
+    // Session
+    self.session = [[AVCaptureSession alloc]init];
+    [self.session setSessionPreset:AVCaptureSessionPresetHigh];
+    if ([self.session canAddInput:self.input]){
+        [self.session addInput:self.input];
+    }
+    if ([self.session canAddOutput:self.output])
+    {
+        [self.session addOutput:self.output];
+    }
+    
+    // 条码类型
+     self.output.metadataObjectTypes =@[AVMetadataObjectTypeQRCode];
+    
+    // Preview
+    self.preview = [AVCaptureVideoPreviewLayer layerWithSession:self.session];
+    self.preview.videoGravity =AVLayerVideoGravityResizeAspectFill;
+    self.preview.frame =CGRectMake(0,0,self.view.frame.size.width,self.view.frame.size.height);
+    
+    [self.view.layer insertSublayer:self.preview atIndex:0];
+
+    
+
+    _line = [[UIView alloc] initWithFrame:CGRectMake(left, top, 180, 2)];
+    _line.backgroundColor = [UIColor lightGrayColor];
+    [self.view addSubview:_line];
+    
+    //上
+    UIView * view1 = [[UIView alloc]initWithFrame:CGRectMake(0, 64, self.view.bounds.size.width, top-64)];
+    view1.backgroundColor = [UIColor lightTextColor];
+    [self.view addSubview:view1];
+
+     //左
+    UIView * view2 = [[UIView alloc]initWithFrame:CGRectMake(0,top,left, self.view.bounds.size.height)];
+    view2.backgroundColor = [UIColor lightTextColor];
+    [self.view addSubview:view2];
+    //下
+    UIView * view3 = [[UIView alloc]initWithFrame:CGRectMake(left,self.view.bounds.size.height-top-64,self.view.bounds.size.width-left*2, 500)];
+    view3.backgroundColor = [UIColor lightTextColor];
+    [self.view addSubview:view3];
+    //右
+    UIView * view4 = [[UIView alloc]initWithFrame:CGRectMake(self.view.bounds.size.width-left,top,left,self.view.bounds.size.height)];
+    view4.backgroundColor = [UIColor lightTextColor];
+    [self.view addSubview:view4];
+    
+    timer = [NSTimer scheduledTimerWithTimeInterval:.02 target:self selector:@selector(animation1) userInfo:nil repeats:YES];
+    
+}
+-(void)getURLWithImage:(UIImage *)img{
+    
+    UIImage *loadImage= img;
+    CGImageRef imageToDecode = loadImage.CGImage;
+    
+    ZXLuminanceSource *source = [[ZXCGImageLuminanceSource alloc] initWithCGImage:imageToDecode];
+    ZXBinaryBitmap *bitmap = [ZXBinaryBitmap binaryBitmapWithBinarizer:[ZXHybridBinarizer binarizerWithSource:source]];
+    
+    NSError *error = nil;
+    
+    ZXDecodeHints *hints = [ZXDecodeHints hints];
+    
+    ZXMultiFormatReader *reader = [ZXMultiFormatReader reader];
+    ZXResult *result = [reader decode:bitmap
+                                hints:hints
+                                error:&error];
+    if (result) {
+        ESScanWebController*scanVc=[[ESScanWebController alloc]init];
+        scanVc.url=result.text;
+        [self.navigationController pushViewController:scanVc animated:YES];
+        
+    } else {
+        if ([[[UIDevice currentDevice]systemVersion]floatValue]>8.0) {
+            WarningControlView*warning=[[WarningControlView alloc]initShowTitle:nil andMessage:@"点击确定,重新扫描"];
+            warning.cancelBlock=^(){
+                [self.navigationController popViewControllerAnimated:YES];
+            };
+            warning.sucessBlock=^(){
+                [self.session startRunning];
+            
+            };
+            
+        }else{
+            UIAlertView *alter1 = [[UIAlertView alloc] initWithTitle:nil message:@"点击确定,重新扫描" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定",nil];
+            alter1.delegate=self;
+            [alter1 show];
+        }
+
+        
+    }
+}
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    
+    if (buttonIndex==0) {//取消
+        [self.navigationController popViewControllerAnimated:YES];
+    }else{
+        [self.session startRunning];
+    }
+}
+
+-(void)rightButtonAction{
+    // 1.判断相册是否可以打开
+    if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) return;
+    // 2. 创建图片选择控制器
+    UIImagePickerController *ipc = [[UIImagePickerController alloc] init];
+    
+    ipc.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    
+    // 4.设置代理
+    ipc.delegate = self;
+    
+    // 5.modal出这个控制器
+    [self presentViewController:ipc animated:YES completion:nil];
+}
+-(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
+    // 1.取出选中的图片
+    UIImage *pickImage = info[UIImagePickerControllerOriginalImage];
+//    NSData *imageData = UIImagePNGRepresentation(pickImage);
+//    
+//    CIImage *ciImage = [CIImage imageWithData:imageData];
+//    
+//    // 2.从选中的图片中读取二维码数据
+//    // 2.1创建一个探测器?需要5s以上相机支持;要做版本判断
+//    CIDetector *detector = [CIDetector detectorOfType:CIDetectorTypeQRCode context:[CIContext contextWithOptions:nil]options:@{CIDetectorAccuracy: CIDetectorAccuracyHigh}];
+//    
+//    // 2.2利用探测器探测数据
+//    NSArray *feature = [detector featuresInImage:ciImage];
+//    
+//    // 2.3取出探测到的数据
+//    for (CIQRCodeFeature *result in feature) {
+//        NSLog(@"%@",result.messageString);
+//        NSString *urlStr = result.messageString;
+//        ESScanWebController*scanVc=[[ESScanWebController alloc]init];
+//        scanVc.url=urlStr;
+//        [self.navigationController pushViewController:scanVc animated:YES];
+//    }
+//    
+    // 注意: 如果实现了该方法, 当选中一张图片时系统就不会自动关闭相册控制器
+    
+    [picker dismissViewControllerAnimated:YES completion:^{
+        [self getURLWithImage:pickImage];
+    }];
+}
+-(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
+    [picker dismissViewControllerAnimated:YES completion:nil];
+}
+-(void)animation1
+{
+    if (upOrdown == NO) {
+        num ++;
+        _line.frame = CGRectMake(left, top+2*num, 180, 2);
+        if (2*num == 180) {
+            upOrdown = YES;
+        }
+    }
+    else {
+        num --;
+        _line.frame = CGRectMake(left, top+2*num, 180, 2);
+        if (num == 0) {
+            upOrdown = NO;
+        }
+    }
+}
+-(void)viewDidDisappear:(BOOL)animated{
+    [super viewDidDisappear:animated];
+    
+}
+- (void)viewWillAppear:(BOOL)animated;
+{
+    [super viewWillAppear:animated];
+    [self.session startRunning];//出现view就开始扫码
+//    UILabel * label = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 200, 50)];
+//    label.textAlignment = 1;
+//    label.font = [UIFont systemFontOfSize:30];
+//    NSMutableAttributedString * toplabel1textAttributed = [[NSMutableAttributedString alloc]initWithString:@"高备扫一扫"];
+//    [toplabel1textAttributed addAttribute:NSForegroundColorAttributeName value:[UIColor orangeColor] range:NSMakeRange(0,2)];
+//    
+//    label.attributedText = toplabel1textAttributed;
+    self.navigationItem.title =@"扫一扫";
+
+
+}
+
+#pragma mark AVCaptureMetadataOutputObjectsDelegate
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputMetadataObjects:(NSArray *)metadataObjects fromConnection:(AVCaptureConnection *)connection
+{
+    
+    if ([metadataObjects count] >0) {
+        [_session stopRunning];
+        [self.session stopRunning];
+        AVMetadataMachineReadableCodeObject*obj=[metadataObjects lastObject];
+        DZLog(@"%@",[obj stringValue]);
+        ESScanWebController*scanVc=[[ESScanWebController alloc]init];
+        scanVc.url=[obj stringValue];
+        [self.navigationController pushViewController:scanVc animated:YES];
+    }
+    
+    
+}
+#pragma mark - http
+//解密二维码扫描的结果
+- (void)declassify:(NSString *)data {
+//    ViewController2 *viewC = [[ViewController2 alloc]init];
+//    viewC.url = data;
+//    [self.navigationController pushViewController:viewC animated:YES];
+}
+
+
+@end

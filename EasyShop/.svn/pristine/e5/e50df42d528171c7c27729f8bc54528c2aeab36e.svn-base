@@ -1,0 +1,15 @@
+//
+//  ESScoreHeaderView.h
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/21.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESScoreHeaderView : UIView
+
+@property (nonatomic, strong) UILabel     *scoreRecordLab;//积分纪录
+@property (nonatomic ,strong) NSString*imageStr;
+@end

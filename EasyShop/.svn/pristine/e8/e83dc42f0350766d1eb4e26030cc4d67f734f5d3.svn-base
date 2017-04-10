@@ -1,0 +1,97 @@
+//
+//  ImagesSkimView.m
+//  EasyShop
+//
+//  Created by guojian on 16/7/18.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ImagesSkimView.h"
+
+@interface ImagesSkimView()
+
+/** 所在位置 */
+@property (nonatomic,assign) NSInteger atIndex;
+/** images */
+@property (nonatomic,strong) NSArray *images;
+
+/** scrollView */
+@property (nonatomic,weak) UIScrollView *scrollView;
+
+
+@end
+
+@implementation ImagesSkimView
+{
+    CGFloat left,top,width,height;
+    CGFloat margin;
+}
+
++ (void)showImages:(NSArray *)images atIndex:(NSInteger)atIndex
+{
+    ImagesSkimView *skim = [[ImagesSkimView alloc] init];
+    skim.images = images;
+    skim.atIndex = atIndex;
+    [skim showView];
+}
+
+- (void)setImages:(NSArray *)images
+{
+    _images = images;
+    
+    width = ScreenWidth;
+    height = ScreenHeight;
+    for (int i = 0 ; i < images.count ; i++) {
+        UIImageView *imageView = [[UIImageView alloc] init];
+        imageView.contentMode = UIViewContentModeScaleAspectFit;
+        imageView.frame = CGRectMake(i*width, 0, width, height);
+        [imageView sd_setImageWithURL:[NSURL URLWithString:[images objectAtIndex:i]] placeholderImage:[UIImage imageNamed:@"bg"]];
+        [self.scrollView addSubview:imageView];
+    }
+    self.scrollView.contentSize = CGSizeMake(width * images.count, height);
+}
+
+- (void)setAtIndex:(NSInteger)atIndex
+{
+    _atIndex = atIndex;
+    
+    [self.scrollView setContentOffset:CGPointMake(ScreenWidth*atIndex, 0) animated:NO];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        self.frame = kKeyWindow.bounds;
+        self.hidden = YES;
+        
+        UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
+        scrollView.backgroundColor =  [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
+        scrollView.pagingEnabled = YES;
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction)];
+        [scrollView addGestureRecognizer:tap];
+        [self addSubview:scrollView];
+        self.scrollView = scrollView;
+    }
+    return self;
+}
+
+- (void)tapAction
+{
+    [self hideView];
+}
+
+- (void)showView
+{
+    self.hidden = NO;
+    [kKeyWindow addSubview:self];
+}
+
+- (void)hideView
+{
+    self.hidden = YES;
+    [self removeFromSuperview];
+}
+
+
+
+@end

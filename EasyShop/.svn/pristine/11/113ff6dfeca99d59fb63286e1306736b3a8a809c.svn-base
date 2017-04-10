@@ -1,0 +1,19 @@
+//
+//  ESSureShopHeaderView.h
+//  EasyShop
+//
+//  Created by guojian on 16/5/21.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+static NSString *const kIDESSureShopHeader = @"kIDESCartShopHeader";
+static CGFloat kHeightESSureShopHeader = 50;
+
+@interface ESSureShopHeaderView : UITableViewHeaderFooterView
+
+/** 确认商店信息 */
+@property (nonatomic,strong) OrderConfirmShopInfo *shopInfo;
+
+@end

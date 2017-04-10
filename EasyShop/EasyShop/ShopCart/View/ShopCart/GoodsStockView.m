@@ -1,0 +1,117 @@
+//
+//  GoodsStockView.m
+//  EasyShop
+//
+//  Created by guojian on 16/7/20.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "GoodsStockView.h"
+#import "ESGoodsStockCell.h"
+@interface GoodsStockView()<UITableViewDelegate,UITableViewDataSource>
+
+@property (nonatomic,strong) UITableView *tableView;
+@property (nonatomic,strong) NSArray *stockItems;
+@end
+
+@implementation GoodsStockView
+
++(void)showWithStockInfo:(NSMutableArray*)array
+{
+    GoodsStockView *stockView = [[GoodsStockView alloc] init];
+    stockView.stockItems = array;
+    [stockView addSubview:stockView.tableView];
+    CGFloat tableH = 30;
+    if (stockView.stockItems && stockView.stockItems.count > 0) {
+        tableH += stockView.stockItems.count * 90;
+    }
+    if (tableH > ScreenHeight/2) {
+        tableH = ScreenHeight/2;
+    }
+    
+    [stockView. tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.equalTo([NSNumber numberWithFloat:tableH]);
+        make.centerY.equalTo(stockView.mas_centerY);
+        make.left.right.equalTo(@0);
+    }];
+
+    [stockView showView];
+}
+
+-(UITableView *)tableView{
+    if (_tableView==nil) {
+        _tableView=[[UITableView alloc]init];
+        _tableView.separatorStyle=UITableViewCellSeparatorStyleNone;
+        [_tableView registerClass:[ESGoodsStockCell class] forCellReuseIdentifier:@"ESGoodsStockCell"];
+        _tableView.delegate=self;
+        _tableView.dataSource=self;
+    }
+    return _tableView;
+}
+
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        self.frame = kKeyWindow.bounds;
+        self.backgroundColor    = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
+        self.hidden = YES;
+        
+        UIControl *control = [[UIControl alloc] initWithFrame:self.bounds];
+        [control addTarget:self action:@selector(hideView) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:control];
+        
+        self.tableView.tableHeaderView = ({
+            UILabel *label      = [[UILabel alloc] init];
+            label.frame         = CGRectMake(0, 0, ScreenWidth, 30);
+            label.text          = @"亲，快抢光了";
+            label.textAlignment = NSTextAlignmentCenter;
+            label.textColor     = [UIColor lightGrayColor];
+            label;
+        });
+        
+    }
+    return self;
+}
+
+//- (void)layoutSubviews
+//{
+//    [super layoutSubviews];
+//    
+//    //计算table的高度
+//    
+//    
+//}
+
+- (void)showView
+{
+    [self.tableView reloadData];
+    self.hidden = NO;
+    [kKeyWindow addSubview:self];
+}
+
+- (void)hideView
+{
+    self.hidden = YES;
+    [self removeFromSuperview];
+}
+
+#pragma mark - UITableViewDataSource
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return self.stockItems.count;
+}
+
+-(UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    ESGoodsStockCell *cell=[tableView dequeueReusableCellWithIdentifier:@"ESGoodsStockCell"];
+    cell.info= [self.stockItems objectAtIndex:indexPath.row];
+    
+    return cell;
+}
+
+#pragma mark - UITableViewDelegate
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 90;
+}
+
+
+@end

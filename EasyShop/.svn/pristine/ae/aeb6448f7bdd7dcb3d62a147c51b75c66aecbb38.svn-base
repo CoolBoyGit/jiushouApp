@@ -1,0 +1,123 @@
+
+//
+//  HomePushCell.m
+//  MFBank
+//
+//  Created by mairong on 15/12/19.
+//  Copyright © 2015年 MFBank. All rights reserved.
+//
+
+#import "ESOrderStateCell.h"
+#import "TIBTUIButton.h"
+#import "ESRemindController.h"
+#import "ICCollectShopController.h"
+#import "ESMyOrderPageController.h"
+#import "ESMyFootController.h"
+@interface ESOrderStateCell()
+
+@end
+@implementation ESOrderStateCell
+-(void)setItemArray:(NSMutableArray *)itemArray{
+    _itemArray=itemArray;
+  //  NSLog(@"%ld",itemArray.count);
+}
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    return self;
+}
+-(void)setImgArr:(NSArray *)imgArr
+{
+    _imgArr = imgArr;
+    int count = (int)imgArr.count;
+    CGFloat w = ScreenWidth / count;
+    for (int i = 0; i < count; i++) {
+        TIBTUIButton *btn = [[TIBTUIButton alloc]initWithFrame:CGRectMake(w*(i%5), 0, w, 70)];
+        btn.tag = i;
+        btn.backgroundColor = [UIColor whiteColor];
+        btn.layer.cornerRadius = 5.0f;
+        
+        [btn addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+        btn.leftImg.contentMode = UIViewContentModeScaleToFill;
+        NSString *image = imgArr[i];
+        btn.leftImg.image = [UIImage imageNamed:image];
+        btn.rightLabel.text = self.titleArr[i] ;
+        [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [self.contentView addSubview:btn];
+        if (self.tag==1) {
+           
+            UILabel*label=[[UILabel alloc]initWithFrame:CGRectMake(w*(i%5)+w-25, 15, 15, 15)];
+            label.font=[UIFont systemFontOfSize:11];
+            label.textColor=RGB(233, 40, 46);
+            label.layer.cornerRadius=7.5;
+            label.layer.masksToBounds=YES;
+            label.layer.borderColor=RGB(233, 40, 46).CGColor;
+            label.textAlignment=NSTextAlignmentCenter;
+           
+            label.layer.borderWidth=0.5;
+            if (_itemArray.count==0) {
+                
+            }else{
+                NSString*cout=[_itemArray objectAtIndex:i];
+                label.text=cout;
+                int newCount=[ cout intValue];
+                if (newCount==0 ) {
+                    label.hidden=YES;
+                }else{
+                    label.hidden=NO;
+                }
+            }
+           
+            [self.contentView addSubview:label];
+        }else{
+            
+        }
+    }
+}
+- (void)btnClick:(id)sender
+{
+    UIButton *btn = (UIButton *)sender;
+    if (self.tag == 0) {
+        if (btn.tag == 0) {//我的收藏 0是收藏
+            ESLoginVerify
+            
+            ESMyFootController*vc=[[ESMyFootController alloc]init];
+            vc.flag=0;
+            [[AppDelegate shared]pushViewController:vc animated:YES];                   }
+        if (btn.tag == 1){//心愿单 1是心愿单
+            ESLoginVerify
+            ESMyFootController*vc=[[ESMyFootController alloc]init];
+            vc.flag=1;
+            [[AppDelegate shared]pushViewController:vc animated:YES];
+//            ICCollectShopController *vc = [[ICCollectShopController alloc] init];
+//            vc.isCollet = NO;
+//            [[AppDelegate shared] pushViewController:vc animated:YES];
+        }
+        if (btn.tag == 2) {//到货提醒 2是到货提醒
+            ESLoginVerify
+            ESMyFootController*vc=[[ESMyFootController alloc]init];
+            vc.flag=2;
+            [[AppDelegate shared]pushViewController:vc animated:YES];
+//            ESRemindController *vc = [[ESRemindController alloc] init];
+//            vc.hidesBottomBarWhenPushed = YES;
+//            [[AppDelegate shared] pushViewController:vc animated:YES];
+        }
+            return;
+    }
+    
+    if (self.tag == 1) {
+        ESLoginVerify
+        
+        ESMyOrderPageController *controller = [[ESMyOrderPageController alloc] init];
+        controller.selectIndex = (int)btn.tag + 1;
+        controller.hidesBottomBarWhenPushed = YES;
+        [[AppDelegate shared] pushViewController:controller animated:YES];
+    }
+}
+@end
+
+

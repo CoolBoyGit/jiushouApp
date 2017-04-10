@@ -1,0 +1,367 @@
+//
+//  ESBlindViewController.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/2.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESBlindViewController.h"
+#import "ESThirdRegisterView.h"
+#import "ESThirdBlindView.h"
+
+@interface ESBlindViewController ()<UIScrollViewDelegate>
+
+@property (nonatomic, strong) UIView *lineView;
+@property (nonatomic, weak) UILabel *registerLabel;
+@property (nonatomic, weak) UILabel *blindLabel;
+@property (nonatomic,strong)UIScrollView *scrollview;
+/** Indicator */
+@property (nonatomic,strong) ESIndicator *indicator;
+@property (nonatomic,strong) UIButton *noAccountsButton;
+@property (nonatomic,strong) UIButton *haveAccountsButton;
+@end
+
+@implementation ESBlindViewController
+//-(UIButton *)noAccountsButton{
+//    if (_noAccountsButton==nil) {
+//        _noAccountsButton=[UIButton buttonWithType:UIButtonTypeCustom];
+//        _noAccountsButton.backgroundColor=[UIColor redColor];
+//        [_noAccountsButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+//    }
+//}
+- (ESIndicator *)indicator
+{
+    if (!_indicator) {
+        _indicator = [ESIndicator indicatorToView:self.view];
+    }
+    return _indicator;
+}
+
+- (UIView *)lineView
+{
+    if (_lineView == nil) {
+        _lineView = [[UIView alloc]initWithFrame:CGRectZero];
+    }
+    return _lineView;
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+}
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+}
+-(void)exitKeyboard{
+    [self.view endEditing:YES];
+}
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.navigationController.navigationBar.hidden=YES;
+    self.view.backgroundColor = [UIColor whiteColor];
+    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [backButton setImage:[UIImage imageNamed:@"leftButton"] forState:UIControlStateNormal];
+    [backButton addTarget:self action:@selector(backButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:backButton];
+    [backButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.view.mas_left).with.offset(15);
+        make.top.equalTo(self.view.mas_top).with.offset(30);
+        make.width.mas_equalTo(@20);
+        make.height.mas_equalTo(@20);
+    }];
+
+    self.scrollview = [[UIScrollView alloc] init];
+    self.scrollview.pagingEnabled = YES;
+    self.scrollview.alwaysBounceHorizontal=YES;
+    [self.scrollview setShowsHorizontalScrollIndicator:NO];
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(exitKeyboard)];
+    [self.scrollview addGestureRecognizer:tap];
+    self.scrollview.contentSize = CGSizeMake(ScreenWidth *2, ScreenHeight/6.0);
+    self.scrollview.delegate = self;
+    [self.view addSubview:self.scrollview];
+    [self.scrollview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@0);
+        make.width.equalTo(@(ScreenWidth));
+        make.top.equalTo(@(ScreenHeight/6));
+        make.bottom.equalTo(@0);
+    }];
+    //绑定的页面
+    ESThirdRegisterView *registerView= [[ESThirdRegisterView alloc] init];
+    registerView.backgroundColor = [UIColor whiteColor];
+    [self.scrollview addSubview:registerView];
+    [registerView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.top.equalTo(@0);
+        make.width.equalTo(@(ScreenWidth));
+        make.height.equalTo(@(ScreenHeight/6 * 5));
+    }];
+    @weakify(self);
+    registerView.bindBlock = ^(NSString *moblie,NSString *smsCode){
+        @strongify(self);
+        if ([self isMobileNumberClassification:moblie]) {
+            
+        }else{
+            TipViewAnimation*tipsView=[[TipViewAnimation alloc]initWithFrame:self.view.bounds andTip:@"请输入正确手机号码"];
+            [tipsView show];
+            return;
+        }
+        if (smsCode.length==0) {
+            TipViewAnimation*tipsView=[[TipViewAnimation alloc]initWithFrame:self.view.bounds andTip:@"请输入注册码"];
+            [tipsView show];
+            return;
+        }
+        [self userBindingMoblie:moblie code:smsCode pwd:nil];
+    };
+    //绑定注册
+    ESThirdBlindView *blindView= [[ESThirdBlindView alloc] init];
+    blindView.backgroundColor = [UIColor whiteColor];
+    [self.scrollview addSubview:blindView];
+    [blindView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@0);
+        make.left.equalTo(@(ScreenWidth));
+        make.width.equalTo(@(ScreenWidth));
+        make.height.equalTo(@(ScreenHeight/6 * 5));
+    }];
+    blindView.bindBlock = ^(NSString *moblie,NSString *smsCode,NSString *pwd){
+        @strongify(self);
+        if ([self isMobileNumberClassification:moblie]) {
+            
+        }else{
+            TipViewAnimation*tipsView=[[TipViewAnimation alloc]initWithFrame:self.view.bounds andTip:@"请输入正确手机号码"];
+            [tipsView show];
+            return;
+        }
+        if (smsCode.length==0) {
+            TipViewAnimation*tipsView=[[TipViewAnimation alloc]initWithFrame:self.view.bounds andTip:@"请输入注册码"];
+            [tipsView show];
+            return;
+        }
+        if (pwd.length==0) {
+            TipViewAnimation*tipsView=[[TipViewAnimation alloc]initWithFrame:self.view.bounds andTip:@"请输入密码"];
+            [tipsView show];
+            return;
+        }
+
+        [self userBindingMoblie:moblie code:smsCode pwd:pwd];
+    };
+
+    UILabel *registLabel = [[UILabel alloc] init];
+    registLabel.text = @"您已有就手账号";
+    registLabel.userInteractionEnabled=YES;
+    registLabel.font = [UIFont systemFontOfSize:15];
+    registLabel.textColor = LoginComColor;
+    registLabel.textAlignment  = NSTextAlignmentCenter;
+    UITapGestureRecognizer* tap1=[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(pushScrollview)];
+    [registLabel addGestureRecognizer:tap1];
+    self.registerLabel = registLabel;
+    [self.view addSubview:registLabel];
+    [registLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@40);
+        make.right.equalTo(self.view.mas_centerX);
+        make.height.equalTo(@35);
+        make.bottom.equalTo(self.scrollview.mas_top);
+    }];
+    UILabel *blindLabel = [[UILabel alloc] init];
+    blindLabel.userInteractionEnabled=YES;
+    blindLabel.text = @"您没有就手账号";
+    self.blindLabel = blindLabel;
+    blindLabel.textColor = LoginComColor;
+    blindLabel.font = [UIFont systemFontOfSize:15];
+    blindLabel.textAlignment  = NSTextAlignmentCenter;
+    UITapGestureRecognizer *tap2=[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(pushRegisterAndBlind)];
+    [blindLabel addGestureRecognizer:tap2];
+    [self.view addSubview:blindLabel];
+    [blindLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(@(-40));
+        make.left.equalTo(self.view.mas_centerX);
+        make.height.equalTo(@35);
+        make.bottom.equalTo(self.scrollview.mas_top);
+    }];
+    
+    UIView *lineView= [[UIView alloc] init];
+    [self.view addSubview:lineView];
+    lineView.backgroundColor = [UIColor whiteColor];
+    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@40);
+        make.right.equalTo(@(-40));
+        make.height.equalTo(@.5);
+        make.bottom.equalTo(blindLabel);
+    }];
+    [self.view addSubview:self.lineView];
+    self.lineView.backgroundColor = RGB(233, 40, 46);
+    [self.lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.registerLabel);
+        make.width.equalTo(@(110));
+        make.height.equalTo(@2);
+        make.bottom.equalTo(lineView);
+    }];
+}
+-(BOOL)isMobileNumberClassification:(NSString*)mobile{
+    /**
+     * 手机号码
+     * 移动：134[0-8],135,136,137,138,139,150,151,157,158,159,182,187,188,1705
+     * 联通：130,131,132,152,155,156,185,186,1709
+     * 电信：133,1349,153,180,189,1700
+     */
+    //    NSString * MOBILE = @"^1((3//d|5[0-35-9]|8[025-9])//d|70[059])//d{7}$";//总况
+    
+    /**
+     10         * 中国移动：China Mobile
+     11         * 134[0-8],135,136,137,138,139,150,151,157,158,159,182,187,188，1705
+     12         */
+    //NSString * CM = @"^1(34[0-8]|(3[5-9]|5[017-9]|8[278])//d|705)//d{7}$";
+    NSString*CM = @"^1(3[4-9]|5[01789]|8[278])\\d{8,8}";
+    /**
+     
+     15         * 中国联通：China Unicom
+     16         * 130,131,132,152,155,156,185,186,1709
+     17         */
+    NSString * CU = @"^1((3[0-2]|5[256]|8[56])\\d|709)\\d{8}";
+    /**
+     20         * 中国电信：China Telecom
+     21         * 133,1349,153,180,189,1700
+     22         */
+    NSString * CT = @"^1((33|53|8[09])\\d|349|700)\\d{8}";
+    
+    
+    /**
+     25         * 大陆地区固话及小灵通
+     26         * 区号：010,020,021,022,023,024,025,027,028,029
+     27         * 号码：七位或八位
+     28         */
+    // NSString * PHS = @"^0(10|2[0-5789]|\\d{3})\\d{7,8}";
+    
+    
+    //    NSPredicate *regextestmobile = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", MOBILE];
+    NSPredicate *regextestcm = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", CM];
+    NSPredicate *regextestcu = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", CU];
+    NSPredicate *regextestct = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", CT];
+    // NSPredicate *regextestphs = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",PHS];
+    
+    if (([regextestcm evaluateWithObject:mobile] == YES)
+        || ([regextestct evaluateWithObject:mobile] == YES)
+        || ([regextestcu evaluateWithObject:mobile] == YES)
+        )
+    {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
+}
+
+-(void)pushScrollview{
+    self.scrollview.contentOffset=CGPointMake(0, self.scrollview.contentOffset.y);
+    [UIView animateWithDuration:1 animations:^{
+        [self.lineView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.equalTo(self.registerLabel);
+            make.width.equalTo(@(110));
+            make.height.equalTo(@2);
+            make.bottom.equalTo(self.scrollview.mas_top);
+        }];
+    }];
+
+}
+-(void)pushRegisterAndBlind{
+    self.scrollview.contentOffset=CGPointMake(ScreenWidth, self.scrollview.contentOffset.y);
+    [UIView animateWithDuration:1 animations:^{
+        [self.lineView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.equalTo(self.blindLabel);
+            make.width.equalTo(@(110));
+            make.height.equalTo(@2);
+            make.bottom.equalTo(self.scrollview.mas_top);
+        }];
+    }];
+}
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    if (scrollView.contentOffset.x /ScreenWidth != 1) {
+        [UIView animateWithDuration:1 animations:^{
+            [self.lineView mas_remakeConstraints:^(MASConstraintMaker *make) {
+                make.centerX.equalTo(self.registerLabel);
+                make.width.equalTo(@(110));
+                make.height.equalTo(@2);
+                make.bottom.equalTo(scrollView.mas_top);
+            }];
+        }];
+        
+    } else
+    {
+        [UIView animateWithDuration:1 animations:^{
+            [self.lineView mas_remakeConstraints:^(MASConstraintMaker *make) {
+                make.centerX.equalTo(self.blindLabel);
+                make.width.equalTo(@(110));
+                make.height.equalTo(@2);
+                make.bottom.equalTo(scrollView.mas_top);
+            }];
+        }];
+        
+    }
+}
+
+- (void)backButtonAction
+{
+    self.navigationController.navigationBar.hidden=NO;
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - Networking
+- (void)userBindingMoblie:(NSString *)moblie code:(NSString *)code pwd:(NSString *)pwd
+{
+    UserBindingRequest *request = [UserBindingRequest request];
+    request.mobile = moblie;
+    request.verify = code;
+    request.password = pwd;
+    request.open_id = self.open_id;
+    switch (self.bindType) {
+        case ESBindType_Wechat://微信
+        {
+            request.type = @1;
+        }
+            break;
+        case ESBindType_QQ://QQ
+        {
+            request.type = @2;
+        }
+            break;
+        default:
+            break;
+    }
+    
+    
+    @weakify(self);
+    [self.indicator startAnimation];
+    [ESService userBindingRequest:request success:^{
+        @strongify(self);
+        [self endGSNetworking];
+        
+        [ESToast showSuccess:@"绑定成功！"];
+        
+        NSDictionary *dict = @{@"type":request.type,@"open_id":request.open_id};
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:kDidBindSuccessNotification object:nil userInfo:dict];
+        
+        [self.navigationController popViewControllerAnimated:YES];
+        
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.indicator stopAnimation];
+}
+
+@end

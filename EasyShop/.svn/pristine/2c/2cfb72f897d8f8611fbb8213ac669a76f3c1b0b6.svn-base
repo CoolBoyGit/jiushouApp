@@ -1,0 +1,44 @@
+//
+//  ESPlayer.m
+//  EasyShop
+//
+//  Created by jiushou on 16/7/11.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESPlayer.h"
+
+@implementation ESPlayer
+
+-(instancetype)init{
+    if (self==[super init]) {
+        NSString*string=[[NSBundle mainBundle]pathForResource:@"亡灵序曲" ofType:@"mp3"];
+        NSURL*fileUrl=[NSURL fileURLWithPath:string];
+        AVPlayerItem*item=[AVPlayerItem playerItemWithURL:fileUrl];
+        self.player=[[AVPlayer alloc]initWithPlayerItem:item];
+
+        [self.player play];
+    }
+    return self;
+}
+
+
+-(AVPlayer *)player{
+    if (_player==nil) {
+//        ESSong *song=[[ESSong alloc]init];
+//        song.songName=@"亡灵序曲";
+        NSString*string=[[NSBundle mainBundle]pathForResource:@"亡灵序曲" ofType:@"mp3"];
+        NSURL*fileUrl=[NSURL fileURLWithPath:string];
+        AVPlayerItem*item=[AVPlayerItem playerItemWithURL:fileUrl];
+        _player=[[AVPlayer alloc]initWithPlayerItem:item];
+    }
+    return _player;
+}
+-(void)startOrendPlayer:(BOOL)isPlayer{
+    if (isPlayer) {
+        [self.player play];
+    }else{
+        [self.player pause];
+    }
+}
+@end

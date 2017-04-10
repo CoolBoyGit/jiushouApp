@@ -1,0 +1,65 @@
+//
+//  ESShopSearchReusableView.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/9.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESShopSearchReusableView.h"
+
+@interface ESShopSearchReusableView ()
+
+@property (nonatomic, strong) UILabel *titleName;
+@property (nonatomic, strong) UIImageView *imageView;
+
+@end
+
+@implementation ESShopSearchReusableView
+
+- (UILabel *)titleName
+{
+    if (_titleName == nil) {
+        _titleName = [[UILabel alloc] init];
+        _titleName.font = [UIFont systemFontOfSize:12];
+        _titleName.textColor = [UIColor lightGrayColor];
+    }
+    return _titleName;
+}
+
+- (UIImageView *)imageView
+{
+    if (_imageView == nil) {
+        _imageView = [[UIImageView alloc] init];
+        _imageView.backgroundColor = [UIColor redColor];
+    }
+    return _imageView;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        
+        [self addSubview:self.imageView];
+        [self.imageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@12);
+            make.centerY.equalTo(@0);
+            make.width.equalTo(@20);
+            make.height.equalTo(@20);
+        }];
+        [self addSubview:self.titleName];
+        [self.titleName mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.imageView.mas_right).offset(5);
+            make.centerY.equalTo(@0);
+        }];
+        
+    }
+    return self;
+}
+
+- (void)setTitle:(NSString *)title
+{
+    self.titleName.text = title;
+}
+
+@end

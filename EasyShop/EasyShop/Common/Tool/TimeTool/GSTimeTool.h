@@ -1,0 +1,138 @@
+//
+//  GSTimeTool.h
+//  StockSuperior
+//
+//  Created by guojian on 15/6/5.
+//  Copyright (c) 2015年 Gupiaogaoshou. All rights reserved.
+//  时间处理工具类
+///{0:yyyy-MM-dd HH:mm:ss.fff}:使用24小时制格式化日期
+//{0:yyyy-MM-dd hh:mm:ss.fff}:使用12小时制格式化日期
+//
+//以下同理,从左至右分别为-年-月-日 时:分:秒.毫秒
+//{0:yyyy-MM-dd HH:mm:ss zzz}
+//{0:yyyy-MM-dd HH:mm:ss.ff zzz}
+//{0:yyyy-MM-dd HH:mm:ss.fff zzz}
+//{0:yyyy-MM-dd HH:mm:ss.ffff zzz}
+#import <Foundation/Foundation.h>
+
+/** 时间格式类型 */
+typedef NS_ENUM(NSInteger, GSTimeType){
+    /** YYYY年MM月dd日 HH:mm */
+    GSTimeType_YYYYYnMMyddrHHmm,
+    /** YYYY-MM-dd HH:mm */
+    GSTimeType_YYYYMMddHHmm,
+    /** YYYYMMdd */
+    GSTimeType_YYYYMMDD,
+    /** YYYY-MM-dd */
+    GSTimeType_YYYYMMdd,
+    
+    /** YY-MM-dd HH:mm */
+    GSTimeType_YYMMddHHmm,
+    /** YY年MM月dd日 */
+    GSTimeType_YYnMMyddr,
+    /** YY.MM.dd */
+    GSTimeType_YYpMMpdd,
+    /** YYMMdd */
+    GSTimeType_YYMMDD,
+    /** YY-MM-dd */
+    GSTimeType_YYMMdd,
+    /** YY-MM */
+    GSTimeType_YYMM,
+    
+    /** MM-dd HH:mm */
+    GSTimeType_MMddHHmm,
+    /** MM月dd日 */
+    GSTimeType_MMyddr,
+    /** MM-dd */
+    GSTimeType_MMdd,
+    
+    /** HHmmss */
+    GSTimeType_HHMMSS,
+    /** HH:mm:ss */
+    GSTimeType_HHmmss,
+    /** HHmm */
+    GSTimeType_HHMM,
+    /** HH:mm */
+    GSTimeType_HHmm,
+};
+
+@interface GSTimeTool : NSObject
+
+/** 进入后台超时（30分钟） */
++ (BOOL)isEnterBackgroundOverTime;
+
+/** 手动登录账号是否已经超时（一个月） */
++ (BOOL)isManualLoginOverTime;
+
+#pragma mark - Time formatter
+/**
+ *  格式化NSDate类型时间
+ *
+ *  @param date   NSDate
+ *  @param toType 格式化类型
+ */
++ (NSString *)formatterDate:(NSDate *)date toType:(GSTimeType)toType;
+/**
+ *  格式化NSNumber时间
+ *
+ *  @param number 时间(标准时间)
+ *  @param type 格式化类型
+ */
++ (NSString *)formatterNumber:(NSNumber *)number toType:(GSTimeType)type;
+
+/**
+ *  格式化HHMMSS时间
+ *
+ *  @param time 时间(HHMMSS格式的数字)
+ */
++ (NSString *)formatterHMSTime:(NSNumber *)time toType:(GSTimeType)type;
+/**
+ *  格式化YYMMDD日期
+ *
+ *  @param date 时间(YYMMDD格式的数字)
+ *  @param type 格式化类型
+ */
++ (NSString *)formatterYMDDate:(NSNumber *)date toType:(GSTimeType)type ;
+
+/**
+ *  格式化YYMMDDHHMM日期
+ *
+ *  @param date 时间(YYMMDDHHMM格式的数字)
+ *  @param type 格式化类型
+ */
++ (NSString *)formatterYMDHMDate:(NSString *)date toType:(GSTimeType)type;
+
+
+#pragma mark - Time Compare
+
+/** 从(YYMMDD日期)到现在的天数 */
++ (NSInteger)daysFromYMDDateToNow:(NSNumber *)date;
+/**
+ *  计算从现在到(YYMMDD日期)的天数
+ */
++ (NSInteger)daysFromNowToYMDDate:(NSNumber *)date;
+
+/**
+ *  计算从(YYMMDD日期)到标准时间(number)的天数
+ *
+ *  @param date   时间(YYMMDD格式的数字)
+ *  @param number 时间(标准时间)
+ */
++ (NSInteger)daysFromYMDDate:(NSNumber *)date toNumber:(NSNumber *)number;
+
++ (NSInteger)daysFromNumber:(NSNumber *)fromNumber toNumber:(NSNumber *)toNumber;
+/** 不计算时间，仅比较年月日计算间隔天数 */
++ (NSInteger)daysFromYMDNumber:(NSNumber *)fromNumber toYMDNumber:(NSNumber *)toNumber;
+
++ (NSInteger)daysFromDate:(NSDate *)fromDate toDate:(NSDate *)toDate;
+
+/** 时间number时间到现在天数 */
++ (NSInteger)daysFromNumberToNow:(NSNumber *)number;
+
+/** 是否是未来时间 */
++ (BOOL)isFutureTimeNumber:(NSNumber *)number;
+
+/** 将生日转化为NSDate */
++ (NSDate *)dateFromBirthday:(NSString *)birthday;
+
+@end

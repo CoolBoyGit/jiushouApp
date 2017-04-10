@@ -1,0 +1,101 @@
+//
+//  AllInPayData.h
+//  EasyShop
+//
+//  Created by guojian on 16/6/23.
+//  Copyright © 2016年 wcz. All rights reserved.
+//  通联支付订单类
+
+#import <Foundation/Foundation.h>
+
+@interface AllInPayData : NSObject
+
+/** 协议字符集 1-UTF-8  2-GBK; 3-GB2312 
+  *  默认 ：1
+ */
+@property (nonatomic,copy) NSString *inputCharset;
+/** 支付通知结果以此为准,后台通知商户网站支付结 果的 url 地址 */
+@property (nonatomic,copy) NSString *receiveUrl;
+/** 协议版本,固定填 v1.0 */
+@property (nonatomic,copy) NSString *version;
+/** 
+ //指定当前语言
+ //固定选择值:1-简体中文 2-繁体中文 3-英文
+ //可不填
+ //非外卡支付只支持简体中文
+ //外卡支付若未指定语言则默认为系统语言，若系统语言不被支持则默认为英文
+ */
+@property (nonatomic,copy) NSString *language;
+/** 订单信息签名方式 */
+@property (nonatomic,copy) NSString *signType;
+/** 通联分配给商户的ID */
+@property (nonatomic,copy) NSString *merchantId;
+
+
+/** 【需要传】 商户当前支付订单号 */  //*****************
+@property (nonatomic,copy) NSString *orderNo;
+/** 【需要传】                         *****************
+ //订单支付金额
+ //分做单位
+ //最小0.01元
+ */
+@property (nonatomic,copy) NSString *orderAmount;
+
+/** 
+ //针对非跨境和非外卡支付
+ //payType=27
+ //支持以下币种: 默认[人民币]-0 人民币-156
+ */
+@property (nonatomic,copy) NSString *orderCurrency;
+/** 
+ //商户生成订单时间戳
+ //必须允许的订单时间范围内
+ */
+@property (nonatomic,copy,readonly) NSString *orderDatetime;
+
+/** 【需要传】 商品名称 */           //*******************
+@property (nonatomic,copy) NSString *productName;
+
+/** 
+ //  【需要传】对于非外卡支付
+ //商户用户号在通联会员系统对应的会员号
+ //@"<USER>201410131001556</USER>"
+ */
+@property (nonatomic,copy) NSString *ext1;
+/** 
+ //通联给商户开通的支付方式
+ //此处必须与商户实际开通的支付方式一致
+ */
+@property (nonatomic,copy) NSString *payType;
+/** 
+ //指定发卡机构
+ //可不填
+ //外卡支付字段: visa、mastercard或者jcb
+ */
+@property (nonatomic,copy) NSString *issuerId;
+/**
+ //固定选择值：GOODS或SERVICES
+ //当币种为人民币时选填
+ //当币种为非人民币时必填，GOODS表示实物贸易，SERVICES表示服务贸易
+ */
+@property (nonatomic,copy) NSString *tradeNature;
+/** 
+ //计算订单签名信息
+ //签名串的顺序与范例(md5加密)
+ */
+@property (nonatomic,copy,readonly) NSString *signMsg;
+/** 
+ //卡号回显需要在订单信息中传入该字段
+ //该字段不参与订单信息的签名计算
+ //若不需要卡号回显的功能该字段可不传入
+ */
+@property (nonatomic,copy) NSString *cardNo;
+
+
+/**
+ *  返回通联支付string
+ */
+- (NSString *)payData;
+
+
+@end

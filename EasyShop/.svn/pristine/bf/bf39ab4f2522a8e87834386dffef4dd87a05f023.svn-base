@@ -1,0 +1,122 @@
+//
+//  OrderResponse.m
+//  EasyShopService
+//
+//  Created by guojian on 16/5/2.
+//  Copyright © 2016年 naijoug. All rights reserved.
+//
+
+#import "OrderResponse.h"
+
+@implementation OrderInfo
+
++ (NSDictionary *)mj_replacedKeyFromPropertyName
+{
+    return @{@"oid":@"id"};
+}
++ (NSDictionary *)mj_objectClassInArray
+{
+    return @{@"order_goods" : [OrderGoodsInfo class]};
+}
+
+@end
+@implementation OrderInfo (Extension)
+
+- (OrderStatus)orderStatus
+{
+    if ([self.order_status isEqualToString:@"ORDER_WAIT_PAY"]) {//等待支付
+        return OrderStatus_WaitPay;
+    }else if ([self.order_status isEqualToString:@"ORDER_PAYED"]){//待发货
+        return OrderStatus_WaitSend;
+    }else if ([self.order_status isEqualToString:@"ORDER_FINISH"]){//待评价
+        return OrderStatus_WaitReply;
+    }else if ([self.order_status isEqualToString:@"ORDER_WAIT_CONFIRM_GOODS"]){//待收货
+        return OrderStatus_WaitSure;
+    }
+    return OrderStatus_Cancel;//已取消 "ORDER_CANCEL"
+}
+
+- (NSString *)orderDisplay
+{
+    switch (self.orderStatus) {
+        case OrderStatus_Cancel:    return @"已取消"; break;
+        case OrderStatus_WaitPay:   return @"待付款"; break;
+        case OrderStatus_WaitSend:  return @"待发货"; break;
+        case OrderStatus_WaitReply: return @"待评价"; break;
+        case OrderStatus_WaitSure:  return @"待收货"; break;
+     }
+}
+
+- (CGFloat)footerHeight
+{
+    switch (self.orderStatus) {
+        case OrderStatus_Cancel://已取消
+        
+            return 46;
+            break;
+        case OrderStatus_WaitSend://待发货
+        case OrderStatus_WaitPay://等待支付 -> 取消订单、立即支付
+        case OrderStatus_WaitReply://待评价 -> 立刻评价
+        case OrderStatus_WaitSure://待收货 -> 确认收货
+            return 81;
+            break;
+    }
+}
+
+@end
+
+
+@implementation OrderDetailInfo
+
+@end
+
+@implementation OrderGoodsInfo
+
++ (NSDictionary *)mj_replacedKeyFromPropertyName
+{
+    return @{@"oid":@"id"};
+}
+
+@end
+
+@implementation OrderConfirmInfo
+
+- (double)cost
+{
+    double dcost = 0;
+    for (OrderConfirmShopInfo *shopInfo in self.shops) {//计算总价
+        dcost += shopInfo.ddescription.cost.doubleValue;
+    }
+    return dcost;
+}
+
+@end
+
+@implementation OrderConfirmShopInfo
+
++ (NSDictionary *)mj_objectClassInArray
+{
+    return @{@"goods" : [OrderConfirmGoodsInfo class]};
+}
+
++ (NSDictionary *)mj_replacedKeyFromPropertyName
+{
+    return @{@"ddescription":@"description"};
+}
+
+@end
+
+@implementation OrderConfirmGoodsInfo
+
++ (NSDictionary *)mj_replacedKeyFromPropertyName
+{
+    return @{@"oid":@"id"};
+}
+
+@end
+
+@implementation OrderConfrimDiscriptionInfo
+
+@end
+
+

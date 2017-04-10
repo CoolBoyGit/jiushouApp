@@ -1,0 +1,137 @@
+//
+//  ESFunctionView.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/3/28.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESFunctionView.h"
+
+@interface ESFunctionView()
+
+@property (nonatomic, strong) UIButton *addToShopCart;//加入购物车
+
+
+@end
+
+
+@implementation ESFunctionView
+
+- (void)setGoodsInfoType:(GoodsInfoType)goodsInfoType
+{
+    _goodsInfoType = goodsInfoType;
+    
+    NSString *title = @"加入购物车";
+    switch (_goodsInfoType) {
+        case GoodsInfoType_Remind:  title = @"到货提醒";    break;
+        case GoodsInfoType_Wish:    title = @"心愿单";     break;
+        case GoodsInfoType_Sell:    title = @"加入购物车";   break;
+    }
+    [self.addToShopCart setTitle:title forState:UIControlStateNormal];
+}
+-(void)setGoodsDetail:(GoodsDetailInfo *)goodsDetail{
+    _goodsDetail=goodsDetail;
+    _dreamBtn.selected=_goodsDetail.isCollect;
+}
+-(void)setIsSelect:(BOOL)isSelect{
+    _dreamBtn.selected=isSelect;
+}
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setupViews];
+        
+    }
+    return self;
+}
+
+- (void)setupViews
+{
+    self.addToShopCart.alpha = 1.0f;
+    self.forumBtn.alpha = 1.0f;
+    self.shopCart.alpha = 1.0f;
+    self.dreamBtn.alpha = 1.0f;
+}
+-(UIButton *)addToShopCart
+{
+    if (!_addToShopCart) {
+        _addToShopCart = [UIButton buttonWithType:UIButtonTypeCustom];
+        _addToShopCart.backgroundColor = [UIColor redColor];
+        [_addToShopCart setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [_addToShopCart setTitle:@"加入购物车" forState:UIControlStateNormal];
+        _addToShopCart.tag = 103;
+        [_addToShopCart addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_addToShopCart];
+        [_addToShopCart mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.mas_left).with.offset(150);
+            make.top.equalTo(self.mas_top).with.offset(0);
+            make.right.equalTo(self.mas_right).with.offset(0);
+            make.height.equalTo(@44);
+        }];
+    }
+    return _addToShopCart;
+}
+-(UIButton *)forumBtn
+{
+    if (!_forumBtn) {
+        _forumBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        _forumBtn.tag = 102;
+        [_forumBtn setImage:[UIImage imageNamed:@"function3"] forState:UIControlStateNormal];
+        [_forumBtn addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_forumBtn];
+        [_forumBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.shopCart.mas_right).with.offset(0);
+            make.top.equalTo(self.mas_top).with.offset(0);
+            make.width.equalTo(@50);
+            make.height.equalTo(@44);
+        }];
+    }
+    return _forumBtn;
+}
+-(UIButton *)shopCart
+{
+    if (!_shopCart) {
+        _shopCart = [UIButton buttonWithType:UIButtonTypeCustom];
+        _shopCart.tag = 101;
+        [_shopCart setImage:[UIImage imageNamed:@"function2"] forState:UIControlStateNormal];
+        
+        [_shopCart addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_shopCart];
+        [_shopCart mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.dreamBtn.mas_right).with.offset(0);
+            make.top.equalTo(self.mas_top).with.offset(0);
+            make.width.equalTo(@50);
+            make.height.equalTo(@44);
+        }];
+    }
+    return _shopCart;
+}
+-(UIButton *)dreamBtn
+{
+    if (!_dreamBtn) {
+        _dreamBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        _dreamBtn.tag = 100;
+        [_dreamBtn setImage:[UIImage imageNamed:@"collect_normal"] forState:UIControlStateNormal];
+        [_dreamBtn setImage:[UIImage imageNamed:@"collect_select"] forState:UIControlStateSelected];
+        [_dreamBtn addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_dreamBtn];
+        [_dreamBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.mas_left).with.offset(0);
+            make.top.equalTo(self.mas_top).with.offset(0);
+            make.width.equalTo(@50);
+            make.height.equalTo(@44);
+        }];
+    }
+    return _dreamBtn;
+}
+
+-(void)btnClick:(UIButton *)btn
+{
+    if (_delegate && [_delegate respondsToSelector:@selector(functionViewAction:)]) {
+        [_delegate functionViewAction:(int)btn.tag];
+    }
+}
+
+@end

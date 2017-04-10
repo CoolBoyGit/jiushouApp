@@ -1,0 +1,30 @@
+//
+//  CouponResponse.h
+//  EasyShop
+//
+//  Created by guojian on 16/6/11.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+/**
+ *  订单优惠券信息
+ */
+@interface CouponInfo : NSObject
+
+/** id 券id */
+@property (nonatomic,copy) NSString *qid;
+/** 券类cid */
+@property (nonatomic,copy) NSString *cid;
+
+/** 优惠券值 */
+@property (nonatomic,copy) NSString *c_value;
+/** 优惠券码 */
+@property (nonatomic,copy) NSString *c_num;
+/** 使用说明 */
+@property (nonatomic,copy) NSString *use_comments;
+/** cover */
+@property (nonatomic,copy) NSString *cover;
+
+@end

@@ -1,0 +1,16 @@
+//
+//  ESShopCommentController.h
+//  EasyShop
+//
+//  Created by wcz on 16/6/5.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESShopCommentController : ESMyViewController
+
+/** 商品id */
+@property (nonatomic,copy)  NSString *goods_id;
+
+@end

@@ -1,0 +1,140 @@
+//
+//  ESSearchShopListController.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/28.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESSearchShopListController.h"
+#import "ESMyFootListCell.h"
+#import "ESHomeShopDetailController.h"
+#import "ESSearchGoodsCell.h"
+@interface ESSearchShopListController ()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong) UITableView *tableView;
+/** 页码 */
+@property (nonatomic,assign) NSInteger page;
+/** 搜索商品item (item: GoodsInfo ) */
+@property (nonatomic,strong) NSMutableArray *goodsItems;
+@end
+
+@implementation ESSearchShopListController
+
+#pragma mark
+#pragma mark lazy init
+- (UITableView *)tableView
+{
+    if (_tableView == nil) {
+        _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+        _tableView.delegate = self;
+        _tableView.tableFooterView = [[UIView alloc] init];
+        [_tableView registerClass:[ESSearchGoodsCell class] forCellReuseIdentifier:@"ESSearchGoodsCell"];
+        
+    }
+    return _tableView;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    [self.view addSubview:self.tableView];
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(@0);
+    }];
+    [self refrshList];
+    @weakify(self);
+    self.tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        @strongify(self);
+        [self refrshList];
+    }];
+    self.tableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+        @strongify(self);
+        [self moreList];
+    }];
+
+}
+-(void)refrshList{
+    self.page=1;
+    [self searchGoods];
+}
+-(void)moreList{
+    self.page++;
+    [self searchGoods];
+}
+- (void)searchGoods
+{
+    
+    SearchRequest *request = [SearchRequest request];
+    request.key = self.keyWordStr;
+    request.page = [NSNumber numberWithInteger:self.page];
+    request.n    = @20;
+    
+    @weakify(self);
+    [ESService searchRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        self.tableView.mj_footer.hidden = response.count < 20;
+        if (self.page == 1) {
+            [self.goodsItems removeAllObjects];
+        }
+        
+        [self.goodsItems addObjectsFromArray:response];
+        NSLog(@"%ld",self.goodsItems.count);
+        [self.tableView reloadData];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+-(NSMutableArray *)goodsItems{
+    if (_goodsItems==nil) {
+        _goodsItems=[NSMutableArray array];
+    }
+    return _goodsItems;
+}
+- (void)endGSNetworking
+{
+    [self.tableView.mj_header endRefreshing];
+    [self.tableView.mj_footer endRefreshing];
+}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    
+    return self.goodsItems.count;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 120;
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
+    
+    ESHomeShopDetailController *detail = [[ESHomeShopDetailController alloc] init];
+    GoodsInfo*info=[self.goodsItems objectAtIndex:indexPath.row];
+    detail.goods_id=info.gid;
+    [self.navigationController pushViewController:detail animated:YES];
+    
+    
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    ESSearchGoodsCell*cell=[tableView dequeueReusableCellWithIdentifier:@"ESSearchGoodsCell"];
+    cell.goodsInfo=[self.goodsItems objectAtIndex:indexPath.row];
+   
+    return cell;
+}
+
+
+@end

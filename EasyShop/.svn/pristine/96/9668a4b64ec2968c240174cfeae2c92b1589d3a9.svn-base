@@ -1,0 +1,39 @@
+//
+//  ESbuttoonViewCell.m
+//  EasyShop
+//
+//  Created by jiushou on 16/6/7.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESbuttoonViewCell.h"
+@interface ESbuttoonViewCell()
+@property(nonatomic,strong)UILabel*moreLabel;
+
+@end
+@implementation ESbuttoonViewCell
+-(UILabel*)moreLabel{
+    if (_moreLabel==nil) {
+        _moreLabel=[[UILabel alloc]init];
+        _moreLabel.textAlignment=NSTextAlignmentCenter;
+        _moreLabel.text=@"查看更多";
+        _moreLabel.font=[UIFont systemFontOfSize:17];
+        _moreLabel.layer.borderColor=[[UIColor grayColor]CGColor];//
+        _moreLabel.layer.borderWidth=0.5f;
+        //_moreLabel.backgroundColor=[UIColor yellowColor];
+    }
+    return _moreLabel;
+}
+-(instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        [self.contentView addSubview:self.moreLabel];
+        [self.moreLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.equalTo(self.contentView);
+            make.left.equalTo(@5);
+            make.right.equalTo(@(-15));
+            make.size.mas_equalTo(CGSizeMake(100, 100));
+        }];
+    }
+    return self;
+}
+@end

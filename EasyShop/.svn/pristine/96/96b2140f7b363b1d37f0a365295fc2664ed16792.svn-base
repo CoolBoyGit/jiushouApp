@@ -1,0 +1,62 @@
+//
+//  ESShopSearchCell.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/9.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESShopSearchCell.h"
+
+@interface ESShopSearchCell ()
+
+@property (nonatomic, strong) UIButton *itemButton;
+
+
+@end
+
+@implementation ESShopSearchCell
+
+- (UIButton *)itemButton
+{
+    if (_itemButton == nil) {
+        _itemButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _itemButton.layer.cornerRadius = 8;
+        _itemButton.layer.borderWidth = .5;
+        _itemButton.layer.borderColor = RGB(224, 224, 224).CGColor;
+    //_itemButton.backgroundColor=[UIColor yellowColor];
+        _itemButton.titleLabel.font = [UIFont systemFontOfSize:13];
+        [_itemButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        _itemButton.userInteractionEnabled = NO;
+    }
+    return _itemButton;
+}
+
+//- (void)setModel:(id)model
+//{
+//    [self.itemButton setTitle:model forState:UIControlStateNormal];
+//}
+
+- (void)setKeyword:(NSString *)keyword
+{
+    _keyword = keyword;
+    
+    [self.itemButton setTitle:keyword forState:UIControlStateNormal];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        [self.contentView addSubview:self.itemButton];
+        [self.itemButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@5);
+            make.top.equalTo(@7);
+            make.right.equalTo(@(-5));
+            make.bottom.equalTo(@(-7));
+        
+        }];
+    }
+    return self;
+}
+
+@end

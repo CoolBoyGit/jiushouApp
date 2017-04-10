@@ -1,0 +1,146 @@
+
+//
+//  ICShareInfoView.m
+//  iCarePregnant
+//
+//  Created by wcz on 16/5/23.
+//  Copyright © 2016年 oenius. All rights reserved.
+//
+
+#import "ICShareInfoView.h"
+#import "TIBTButton.h"
+
+@interface ICShareInfoView ()
+
+@property (nonatomic, strong) NSArray *array;
+
+@end
+
+@implementation ICShareInfoView
+
+- (NSArray *)array
+{
+    if (_array == nil) {
+        _array = @[
+                   @{
+                    @"title":@"朋友圈",
+                    @"image":@"loginWithOther0",
+                    },
+                   @{
+                       @"title":@"微信",
+                       @"image":@"loginWithOther1",
+                       },
+//                   @{
+//                       @"title":@"微博",
+//                       @"image":@"loginWithOther2",
+//                       },
+                   @{
+                       @"title":@"复制链接",
+                       @"image":@"loginWithOther2",
+                       },
+                   
+                   ];
+    }
+    return _array;
+}
+
+- (void)showPopView
+{
+    self.hidden = NO;
+    [kKeyWindow addSubview:self];
+}
+
+- (void)hidePopView
+{
+    self.hidden = YES;
+    [self removeFromSuperview];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame])
+    {
+        self.frame              = kKeyWindow.bounds;
+        self.backgroundColor    = [UIColor colorWithWhite:0.702 alpha:0.5];
+        self.hidden             = YES;
+        
+        UIControl *control = [[UIControl alloc] initWithFrame:self.bounds];
+        [control addTarget:self action:@selector(hidePopView) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:control];
+        
+//        self.backgroundColor = [UIColor whiteColor];
+        
+        [self intalizedView];
+    }
+    return self;
+}
+
+- (void)intalizedView
+{
+    CGFloat contentH = 180;
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, ScreenHeight - contentH, ScreenWidth, contentH)];
+    view.backgroundColor = [UIColor whiteColor];
+    [self addSubview:view];
+    
+    CGFloat width = ScreenWidth / 4;
+    for (int i = 0; i < 3; i ++)
+    {
+        TIBTButton *button = [[TIBTButton alloc] initWithFrame:CGRectMake(width * i, 20, width, width - 15)];
+        button.descLabel.text = self.array[i][@"title"];
+        button.picImgView.image = [UIImage imageNamed:self.array[i][@"image"]];
+        button.backgroundColor = [UIColor whiteColor];
+        button.picImgView.contentMode = UIViewContentModeScaleAspectFit;
+        button.picImgView.frame = CGRectMake(0, 5, button.bounds.size.width, button.bounds.size.height - 35);
+
+        button.descLabel.frame = CGRectMake(0, CGRectGetMaxY(button.picImgView.frame) + 5, button.bounds.size.width, 20);
+        button.descLabel.font = [UIFont systemFontOfSize:13];
+        button.tag = i;
+        [button addTarget:self action:@selector(selectShareButton:) forControlEvents:UIControlEventTouchUpInside];
+        [view addSubview:button];
+        if (button.tag==0||button.tag==1) {
+            
+            if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"weixin://"]]) {
+                
+                
+            }else {
+                button.hidden=YES;
+                
+            }
+            
+        
+        }
+        
+        
+
+    }
+    
+    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [cancelButton addTarget:self action:@selector(cancelButton) forControlEvents:UIControlEventTouchUpInside];
+    [cancelButton setTitle:@"取 消" forState:UIControlStateNormal];
+    cancelButton.backgroundColor = [UIColor whiteColor];
+    [cancelButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+    [self addSubview:cancelButton];
+    [cancelButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(@0);
+        make.height.equalTo(@44);
+    }];
+}
+
+- (void)cancelButton
+{
+//    if (_callBack) {
+//        _callBack();
+//    }
+    [self hidePopView];
+}
+
+- (void)selectShareButton:(UIButton *)button
+{
+    if (_selectShareButton)
+    {
+        _selectShareButton(button.tag);
+    }
+    [self hidePopView];
+}
+
+@end

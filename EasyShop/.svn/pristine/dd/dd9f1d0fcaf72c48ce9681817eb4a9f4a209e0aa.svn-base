@@ -1,0 +1,22 @@
+//
+//  ESCartShopHeaderView.h
+//  EasyShop
+//
+//  Created by guojian on 16/5/15.
+//  Copyright © 2016年 wcz. All rights reserved.
+//  购物车商店header
+
+#import <UIKit/UIKit.h>
+
+static NSString *const kIDESCartShopHeader = @"kIDESCartShopHeader";
+static CGFloat kHeightESCartShopHeader = 50;
+
+@interface ESCartShopHeaderView : UITableViewHeaderFooterView
+
+/** 购物车信息 */
+@property (nonatomic,strong) CartShopInfo *shopInfo;
+
+/** 全选block */
+@property (nonatomic,copy) void (^selectedBlock)(BOOL isSelected);
+
+@end

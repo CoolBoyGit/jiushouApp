@@ -1,0 +1,53 @@
+//
+//  OrderRequest.m
+//  EasyShopService
+//
+//  Created by guojian on 16/5/2.
+//  Copyright © 2016年 naijoug. All rights reserved.
+//
+
+#import "OrderRequest.h"
+
+@implementation OrderRequest
+
+@end
+
+@implementation GetOrderDetailRequest
+
+@end
+
+@implementation OrderConfirmRequest
+
+@end
+
+@implementation CreateOrderRequest
+
+@end
+
+@implementation CancelOrderRequest
+
+@end
+
+@implementation ComfirmOrderRequest
+
+@end
+
+@implementation GetReturnListRequest
+
+@end
+
+@implementation ApplyOrderRequest
+
+@end
+
+@implementation UpdateApplyRequest
+
+@end
+@implementation GetAllOrderCount
+
+
+
+@end
+@implementation GetRefundResultRequest
+
+@end

@@ -1,0 +1,80 @@
+//
+//  ESSearchShopListController.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/28.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESSearchShopListController.h"
+#import "ESMyFootListCell.h"
+#import "ESHomeShopDetailController.h"
+
+@interface ESSearchShopListController ()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong) UITableView *tableView;
+
+@end
+
+@implementation ESSearchShopListController
+
+#pragma mark
+#pragma mark lazy init
+- (UITableView *)tableView
+{
+    if (_tableView == nil) {
+        _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+        _tableView.delegate = self;
+        _tableView.tableFooterView = [[UIView alloc] init];
+        [_tableView registerClass:[ESMyFootListCell class] forCellReuseIdentifier:@"ESMyFootListCell"];
+    }
+    return _tableView;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    [self.view addSubview:self.tableView];
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(@0);
+    }];
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 5;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 120;
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
+    
+    ESHomeShopDetailController *detail = [[ESHomeShopDetailController alloc] init];
+    //    detail.isNavHidden = YES;
+    
+//    detail.goods_id = info.goods_id;
+    [self.navigationController pushViewController:detail animated:YES];
+    
+    //            NormalWebViewController *vc = [[NormalWebViewController alloc] init];
+    //            vc.hidesBottomBarWhenPushed = YES;
+    //            [self.navigationController pushViewController:vc animated:NO];
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESMyFootListCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESMyFootListCell"];
+//    cell.footInfo = [self.footItems objectAtIndex:indexPath.row];
+    return cell;
+}
+
+
+@end

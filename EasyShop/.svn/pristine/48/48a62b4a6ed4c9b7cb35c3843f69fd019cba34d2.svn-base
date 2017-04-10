@@ -1,0 +1,130 @@
+//
+//  NewAddressCell.m
+//  EasyShop
+//
+//  Created by guojian on 16/5/17.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "NewAddressCell.h"
+#import "ESRefoundTexdField.h"
+@interface NewAddressCell()<UITextFieldDelegate>
+{
+    CGFloat left,top,width,height;
+    CGFloat margin;
+}
+/** field */
+@property (nonatomic,strong) ESRefoundTexdField *textField;
+/** button */
+@property (nonatomic,weak) UIButton *button;
+@property (nonatomic,strong) UIView *bgView;
+@end
+
+@implementation NewAddressCell
+
+- (void)setItem:(NewAddressItem *)item
+{
+    if (self.isChangAddress==YES) {
+        _item = item;
+        NSString*title=nil;
+        switch (self.flag) {
+            case 0:
+                title=self.info.name;
+                break;
+               case 1:
+                title=self.info.mobile;
+                break;
+                case 2:
+                title=self.info.personid;
+                break;
+                case 3:
+                title=self.info.area;
+                break;
+                case 4:
+                title=self.info.address;
+                break;
+            default:
+                break;
+        }
+        self.textField.leftStr=_item.placeholer;
+        //self.textField.placeholder = _item.placeholer;
+        self.textField.text = title;
+    }else{
+        _item = item;
+        self.textField.leftStr=_item.placeholer;
+        //self.textField.placeholder = _item.placeholer;
+        self.textField.text = _item.text;
+    }
+    
+    
+    self.textField.enabled = (_item.tapBlock == nil);
+}
+-(UIView *)bgView{
+    if (_bgView==nil) {
+        _bgView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, ScreenWidth, 64)];
+        _bgView.backgroundColor=[UIColor whiteColor];
+    }
+    return _bgView;
+    
+}
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        self.textField=[[ESRefoundTexdField alloc]initWithLeftTitleName:self.item.text];
+       // self.textField.inputAccessoryView=[[UIView alloc]init];
+        [self.contentView addSubview:self.bgView];
+        self.textField.isAddress=YES;
+        self.textField.delegate=self;
+        self.textField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        self.contentView.backgroundColor=RGB(240, 240, 240);
+        [self.contentView addSubview:self.textField];
+        
+        
+        UIButton *button        = [[UIButton alloc] init];
+        [button addTarget:self action:@selector(buttonAction) forControlEvents:UIControlEventTouchUpInside];
+        [self.contentView addSubview:button];
+        button.hidden           = YES;
+        self.button             = button;
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textDidChange:) name:UITextFieldTextDidChangeNotification object:self.textField];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter]  removeObserver:self];
+}
+
+- (void)textDidChange:(NSNotification *)notification
+{
+    UITextField *textField = notification.object;
+    if (textField == self.textField) {
+        self.item.text = textField.text;
+    }
+}
+
+- (void)buttonAction
+{
+    if (self.item.tapBlock) {
+        self.item.tapBlock();
+    }
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    width = self.contentView.width;
+    height = self.contentView.height-20;
+    
+    left = 15;
+    top = 0;
+    //CGFloat fieldW = width - left*2;
+    self.textField.frame = CGRectMake(10, 10, ScreenWidth-20, height);
+    
+    self.button.frame = self.contentView.bounds;
+    self.button.hidden = !self.item.tapBlock;
+}
+
+@end

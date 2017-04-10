@@ -1,0 +1,69 @@
+//
+//  StatusWindows.m
+//  EasyShop
+//
+//  Created by guojian on 16/6/8.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+#import <UIKit/UIKit.h>
+#import "StatusWindows.h"
+
+static UIWindow *statusWindow;
+
+@implementation StatusWindows
+
++ (void)show
+{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        statusWindow = [[UIWindow alloc] init];
+        statusWindow.windowLevel = UIWindowLevelAlert;
+        statusWindow.frame = [UIApplication sharedApplication].statusBarFrame;
+        statusWindow.backgroundColor = [UIColor clearColor];
+        statusWindow.hidden = NO;
+        [statusWindow addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction)]];
+        
+    });
+}
+
++ (void)tapAction
+{
+    UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
+    
+    [self findScrollViewsInView:keyWindow];
+}
+
+/**
+ * 找到参数view中所有的UIScrollView
+ */
++ (void)findScrollViewsInView:(UIView *)view
+{
+    // 窗口也继承UIView
+    // 利用递归查找所有的子控件
+    for (UIView *subview in view.subviews) {
+        [self findScrollViewsInView:subview];
+    }
+    
+    if (![view isKindOfClass:[UIScrollView class]]) return;
+    
+    // 判断是否跟window有重叠
+    if (![self isIntersectWithView:view otherView:[UIApplication sharedApplication].keyWindow])
+        return;
+    
+    // 如果是scrollView
+    UIScrollView *scrollView = (UIScrollView *)view;
+    
+    // 修改offset
+    CGPoint offset = scrollView.contentOffset;
+    offset.y = - scrollView.contentInset.top;
+    [scrollView setContentOffset:offset animated:YES];
+}
+
++ (BOOL)isIntersectWithView:(UIView *)view otherView:(UIView *)otherView
+{
+    CGRect selfRect = [view convertRect:view.bounds toView:nil];
+    CGRect otherRect = [otherView convertRect:otherView.bounds toView:nil];
+    
+    return CGRectIntersectsRect(selfRect, otherRect);
+}
+
+@end

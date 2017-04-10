@@ -1,0 +1,43 @@
+//
+//  ESLocationManager.m
+//  EasyShop
+//
+//  Created by jiushou on 16/8/17.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESLocationManager.h"
+@interface  ESLocationManager ()<CLLocationManagerDelegate>
+@end
+@implementation ESLocationManager
+-(instancetype)init{
+    if (self=[super init]) {
+        self.locationManager=[[CLLocationManager alloc]init];
+        self.locationManager.distanceFilter=1.0f;
+        self.locationManager.desiredAccuracy=kCLLocationAccuracyBest;
+        if ([[[UIDevice currentDevice]systemVersion]floatValue]>=8.0) {
+            [self.locationManager requestWhenInUseAuthorization];
+            
+        }
+        
+        self.locationManager.delegate=self;
+        [self.locationManager startUpdatingLocation];
+    }
+    return self;
+}
+-(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations{
+    CLLocation *location=[locations lastObject];
+    CLLocationCoordinate2D coordinate =location.coordinate;
+    //获取经度
+    CLLocationDegrees longitut=coordinate.longitude;
+    CLLocationDegrees latitute=coordinate.latitude;
+    NSLog(@"%f",longitut);
+    NSLog(@"%f",latitute);
+
+
+}
+//
+-(void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error{
+    
+}
+@end

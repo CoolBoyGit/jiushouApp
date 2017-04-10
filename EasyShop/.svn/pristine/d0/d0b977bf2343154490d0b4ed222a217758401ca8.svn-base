@@ -1,0 +1,49 @@
+//
+//  CommonRequest.m
+//  EasyShopService
+//
+//  Created by guojian on 16/5/2.
+//  Copyright © 2016年 naijoug. All rights reserved.
+//
+
+#import "CommonRequest.h"
+
+@implementation GetVerifyRequest
+
+@end
+
+@implementation GetSmsVerifyRequest
+
+@end
+
+@implementation GetDistrictRequest
+
++ (NSDictionary *)mj_replacedKeyFromPropertyName
+{
+    return @{@"did":@"id"};
+}
+
+@end
+
+@implementation GetAnnouncementRequest
+
+@end
+
+@implementation GetShopInfoRequest
+
+@end
+
+@implementation FileUploadRequest
+
+- (NSDictionary *)params
+{
+    return nil;
+}
+
+@end
+
+
+@implementation GetOrderTracesRequest
+
+@end
+

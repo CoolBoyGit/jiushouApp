@@ -1,0 +1,50 @@
+//
+//  NSString+Extension.h
+//  ScanHouse
+//
+//  Created by guojian on 16/2/16.
+//  Copyright © 2016年 Boole. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface NSString (Extension)
+
+/**
+ *  字符串是否为空(nil|@"")
+ */
++ (BOOL)isEmptyString:(NSString *)string;
+
++ (BOOL)isNullString:(NSString *)string;
+
+/** string为nil，返回@"" */
++ (instancetype)handleString:(NSString *)string;
+
+/** string为0，返回"" */
++ (instancetype)handleZeroString:(NSString *)string;
+
+/** string为nil，使用placeholder */
++ (instancetype)handleString:(NSString *)string placeholder:(NSString *)placeholder;
+
++ (instancetype)handleString:(NSString *)string unit:(NSString *)unit;
+
+/** string为nil，返回@"" */
++ (instancetype)handleNullString:(NSString *)string;
+/** string为空(nil|@""|@"null"),使用placeholder */
++ (instancetype)handleNullString:(NSString *)string placeholder:(NSString *)placeholder;
+
+/** number为nil 返回@"" */
++ (instancetype)handleNumber:(NSNumber *)number;
+
+- (BOOL)isContainsEmoji;
+
+- (CGFloat)widthOfFont:(UIFont *)font;
+
+-(CGFloat)heightOfFont:(UIFont*)font andWidth:(CGFloat)width;
+
+/** 获取有行距的字符串的高度 */
+-(CGSize)strParaStyleheightOfLineSpacing:(CGFloat)lineSpacing andFont:(UIFont*)font andHeight:(CGFloat)height andwidth:(CGFloat)width;
+/** 改变默认的行间距 */
+-(NSAttributedString*)ParaStyleheightOfLineSpacing:(CGFloat)lineSpacing andFont:(UIFont*)font;
+- (UIColor *)colorWithHexlpha:(CGFloat)alpha;
+@end

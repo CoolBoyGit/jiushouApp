@@ -1,0 +1,338 @@
+//
+//  ESSingleTableViewCell.m
+//  EasyShop
+//
+//  Created by wcz on 16/3/25.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESSingleTableViewCell.h"
+
+@interface ESSingleTableViewCell ()
+
+@property (nonatomic, strong) UIImageView *photoImageView;//图片
+@property (nonatomic, strong) UIImageView *specialImageView;//特价标记
+@property (nonatomic, strong) UILabel *contentLabel;//文字描述
+@property (nonatomic, strong) UILabel *productTitleLabel;//标题
+@property (nonatomic, strong) UILabel *productAreaLabel;//副标题
+@property (nonatomic, strong) UIImageView *countryImageView;//国家图像
+@property (nonatomic, strong) UILabel *judgeLabel;//评价
+@property (nonatomic, strong) UIView *priceView;//价格的集合
+@property (nonatomic, strong) UILabel *newPriceLabel;//原价
+@property (nonatomic, strong) UILabel *originalPriceLabel;//旧价
+@property (nonatomic, strong) UILabel *originalPriceLine;//旧价上面的横线
+@property (nonatomic, strong) UIButton *praiseBtn;//点赞
+@property (nonatomic, strong) UIButton *shareBtn;//分享
+
+@property (nonatomic, strong) UIView *lineView;//底线
+
+@end
+
+@implementation ESSingleTableViewCell
+
+- (void)setGoodsInfo:(GoodsInfo *)goodsInfo
+{
+    _goodsInfo = goodsInfo;
+    [self setModel:nil];
+
+    [self.photoImageView sd_setImageWithURL:[NSURL URLWithString:_goodsInfo.image]
+                           placeholderImage:[UIImage imageNamed:@""]];
+    
+    self.productTitleLabel.text = _goodsInfo.name;
+    self.newPriceLabel.text     = [NSString stringWithFormat:@"¥%@",_goodsInfo.price.stringValue]
+    ;
+    self.originalPriceLabel.text = [NSString stringWithFormat:@"¥%@", _goodsInfo.market_price.stringValue];
+
+}
+
+-(id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        [self setUpViews];
+    }
+    return self;
+}
+
+-(UIImageView *)photoImageView
+{
+    if (!_photoImageView)
+    {
+        _photoImageView = [[UIImageView alloc] init];
+        _photoImageView.contentMode = UIViewContentModeScaleAspectFit;
+    }
+    return _photoImageView;
+}
+-(UIImageView *)specialImageView
+{
+    if (!_specialImageView) {
+        _specialImageView = [[UIImageView alloc] init];
+        _specialImageView.layer.cornerRadius = 20;
+        _specialImageView.layer.masksToBounds = YES;
+    }
+    return _specialImageView;
+}
+
+-(UILabel *)productTitleLabel
+{
+    if (!_productTitleLabel) {
+        _productTitleLabel = [[UILabel alloc] init];
+        _productTitleLabel.numberOfLines = 2;
+        _productTitleLabel.font = [UIFont systemFontOfSize:13];
+        _productTitleLabel.textAlignment = NSTextAlignmentLeft;
+    }
+    return _productTitleLabel;
+}
+-(UILabel *)contentLabel
+{
+    if (!_contentLabel) {
+        _contentLabel = [[UILabel alloc] init];
+        _contentLabel.numberOfLines = 4;
+        _contentLabel.font = [UIFont systemFontOfSize:10];
+        _contentLabel.textAlignment = NSTextAlignmentLeft;
+    }
+    return _contentLabel;
+}
+-(UIImageView *)countryImageView
+{
+    if (!_countryImageView) {
+        _countryImageView = [[UIImageView alloc] init];
+//        [_countryImageView adean_setImageWithURL:[NSURL URLWithString:@"http://static.oschina.net/uploads/code/201211/02142956_wmb7.png"] placeholderImage:nil];
+        _countryImageView.layer.cornerRadius = 10;
+        _countryImageView.layer.masksToBounds = YES;
+        _countryImageView.image = [UIImage imageNamed:@"home_country"];
+    }
+    return _countryImageView;
+}
+-(UILabel *)productAreaLabel
+{
+    if (!_productAreaLabel) {
+        _productAreaLabel = [[UILabel alloc] init];
+        _productAreaLabel.font = [UIFont systemFontOfSize:10];
+        _productAreaLabel.textAlignment = NSTextAlignmentLeft;
+    }
+    return _productAreaLabel;
+}
+-(UILabel *)judgeLabel
+{
+    if (!_judgeLabel) {
+        _judgeLabel = [[UILabel alloc] init];
+        _judgeLabel.font = [UIFont systemFontOfSize:10];
+        _judgeLabel.textAlignment = NSTextAlignmentRight;
+    }
+    return _judgeLabel;
+}
+-(UIButton *)shareBtn
+{
+    if (!_shareBtn) {
+        _shareBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+//        [_shareBtn setTitle:@"分享" forState:UIControlStateNormal];
+        [_shareBtn setImage:[UIImage imageNamed:@"home_praise"] forState:UIControlStateNormal];
+        [_shareBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        _shareBtn.titleLabel.font = [UIFont systemFontOfSize:9];
+        _shareBtn.layer.cornerRadius = 4;
+        _shareBtn.layer.masksToBounds = YES;
+        _shareBtn.layer.borderColor = RGB(183, 184, 185).CGColor;
+        _shareBtn.layer.borderWidth = 1.0;
+        //        [_shareBtn addTarget:self action:@selector(btnClick) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _shareBtn;
+}
+-(UIButton *)praiseBtn
+{
+    if (!_praiseBtn) {
+        _praiseBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+//        [_praiseBtn setTitle:@"点赞" forState:UIControlStateNormal];
+        [_praiseBtn setImage:[UIImage imageNamed:@"home_share"] forState:UIControlStateNormal];
+        [_praiseBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        _praiseBtn.titleLabel.font = [UIFont systemFontOfSize:11];
+        _praiseBtn.layer.cornerRadius = 4;
+        _praiseBtn.layer.masksToBounds = YES;
+        _praiseBtn.layer.borderColor = RGB(183, 184, 185).CGColor;
+        _praiseBtn.layer.borderWidth = 1.0;
+        //        [_praiseBtn addTarget:self action:@selector(btnClick) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _praiseBtn;
+}
+
+-(UIView *)priceView
+{
+    if (!_priceView) {
+        _priceView = [[UIView alloc] init];
+        _priceView.layer.cornerRadius = 3;
+        _priceView.layer.masksToBounds = YES;
+        _priceView.layer.borderColor = [UIColor redColor].CGColor;
+        _priceView.layer.borderWidth = 1.0;
+            }
+    return _priceView;
+}
+
+-(UILabel *)newPriceLabel
+{
+    if (!_newPriceLabel) {
+        _newPriceLabel = [[UILabel alloc] init];
+        _newPriceLabel.font = [UIFont systemFontOfSize:14];
+        _newPriceLabel.textColor = [UIColor redColor];
+        _newPriceLabel.textAlignment = NSTextAlignmentRight;
+            }
+    return _newPriceLabel;
+}
+-(UILabel *)originalPriceLabel
+{
+    if (!_originalPriceLabel) {
+        _originalPriceLabel = [[UILabel alloc] init];
+        _originalPriceLabel.font = [UIFont systemFontOfSize:11];
+        _originalPriceLabel.textColor = [UIColor redColor];
+        _originalPriceLabel.textAlignment = NSTextAlignmentLeft;
+    }
+    return _originalPriceLabel;
+}
+-(UILabel *)originalPriceLine
+{
+    if (!_originalPriceLine) {
+        _originalPriceLine = [[UILabel alloc] init];
+        _originalPriceLine.backgroundColor = [UIColor redColor];
+    }
+    return _originalPriceLine;
+}
+- (UIView *)lineView {
+    if (!_lineView) {
+        _lineView = [[UIView alloc] init];
+        _lineView.backgroundColor = ADeanHEXCOLOR(0xeeeeee);
+           }
+    return _lineView;
+}
+
+-(void)setUpViews
+{
+    
+    [self.contentView addSubview:self.photoImageView];
+    [self.photoImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.equalTo(@330);
+        make.left.right.equalTo(@0);
+    }];
+    
+    
+    [self.photoImageView addSubview:self.specialImageView];
+    [self.specialImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.width.equalTo(@40);
+        make.left.equalTo(@10);
+        make.bottom.equalTo(@(-10));
+    }];
+    
+    [self.contentView addSubview:self.productTitleLabel];
+    [self.productTitleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@10);
+        make.right.equalTo(@(-10));
+        make.top.equalTo(self.photoImageView.mas_bottom).offset(5);
+    }];
+    
+    
+    [self.contentView addSubview:self.contentLabel];
+    [self.contentLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.equalTo(@50);
+        make.top.equalTo(self.productTitleLabel.mas_bottom).offset(10);
+        make.left.equalTo(@10);
+        make.right.equalTo(@(-10));
+    }];
+    [self.contentView addSubview:self.countryImageView];
+    [self.countryImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.equalTo(@20);
+        make.width.equalTo(@20);
+        make.left.equalTo(@(10));
+        make.top.equalTo(self.contentLabel.mas_bottom).offset(5);
+    }];
+    
+    [self.contentView addSubview:self.productAreaLabel];
+    [self.productAreaLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.countryImageView.mas_right).offset(5);
+        make.centerY.equalTo(self.countryImageView);
+    }];
+    [self.contentView addSubview:self.judgeLabel];
+    [self.judgeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(@(-10));
+        make.centerY.equalTo(self.productAreaLabel);
+    }];
+    
+    [self.contentView addSubview:self.shareBtn];
+    [self.shareBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.equalTo(@32);
+        make.top.equalTo(self.judgeLabel.mas_bottom).offset(20);
+        make.width.equalTo(@45);
+        make.left.equalTo(@(6));
+
+    }];
+
+    
+    
+    [self.contentView addSubview:self.praiseBtn];
+    [self.praiseBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.equalTo(@32);
+        make.top.equalTo(self.judgeLabel.mas_bottom).offset(20);
+        make.width.equalTo(@45);
+        make.left.equalTo(self.shareBtn.mas_right).offset(10);
+
+    }];
+    
+    
+    [self.contentView addSubview:self.priceView];
+    [self.priceView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.equalTo(@32);
+        make.top.equalTo(self.judgeLabel.mas_bottom).offset(20);
+        make.width.equalTo(@100);
+        make.right.equalTo(@-6);
+    }];
+    
+    [self.priceView addSubview:self.newPriceLabel];
+    [self.newPriceLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(self.priceView.mas_centerX).offset(5);
+        make.left.mas_greaterThanOrEqualTo(@2);
+        make.centerY.equalTo(@0);
+    }];
+    
+    
+    [self.priceView addSubview:self.originalPriceLabel];
+    [self.originalPriceLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.priceView.mas_centerX).offset(7);
+        make.right.lessThanOrEqualTo(@-2);
+        make.centerY.equalTo(@0);
+        
+    }];
+    
+    [self.originalPriceLabel addSubview:self.originalPriceLine];
+    [self.originalPriceLine mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(@0);
+        make.centerY.equalTo(@0);
+        make.height.equalTo(@1);
+    }];
+    
+    [self.contentView addSubview:self.lineView];
+    [self.lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@5);
+        make.right.equalTo(@-5);
+        make.height.equalTo(@1);
+        make.bottom.equalTo(@-1);
+    }];
+}
+
+- (void)setModel:(id)model
+{
+
+           [self.photoImageView sd_setImageWithURL:[NSURL URLWithString:@"http://preview.quanjing.com/east002/east-ep-a71-2891717.jpg"] placeholderImage:nil];
+    //    self.special.alpha = 1.0f;
+        self.productTitleLabel.text = @"科颜氏 小黄瓜 爽肤水 500毫升";
+        self.contentLabel.text = @"Kiehl's （科颜氏） 1851年创立于纽约曼哈顿，早期Kiehl's （科颜氏） 以典型的19世纪药剂师的身份，提供纽约客药水及自然成分提炼的药膏。Kiehl's （科颜氏） 老店坐落在纽约第13街及第3大道的交叉口，以贩卖草药、精油、处方药、茶及蜂蜜为主。";
+    //    self.country.alpha = 1.0f;
+        self.productAreaLabel.text = @"中国直销";
+        self.judgeLabel.text = @"1136人评价";
+    //    self.shareBtn.alpha = 1.0f;
+    //    self.praiseBtn.alpha = 1.0f;
+    //    self.priceView.alpha = 1.0f;
+        self.newPriceLabel.text = @"¥239";
+       self.originalPriceLabel.text = @"¥100";
+    ////    self.oldPriceW = [ADeanWordsSize adean_getStringWidth:self.oldPriceLab.text height:35 font:ADean_FONT11].width;
+    //    self.oldPriceLine.alpha = 1.0f;
+    //    self.lineLabel.alpha = 1.0f;
+
+}
+
+@end

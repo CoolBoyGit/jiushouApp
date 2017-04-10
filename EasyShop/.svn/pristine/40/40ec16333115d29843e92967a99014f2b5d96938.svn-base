@@ -1,0 +1,108 @@
+//
+//  ESOrderAddressCell.m
+//  EasyShop
+//
+//  Created by 脉融LCJ on 16/5/11.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESOrderAddressCell.h"
+
+@interface ESOrderAddressCell()
+
+@property (nonatomic, strong) UIImageView *locationImg;
+@property (nonatomic, strong) UILabel *userNameLab;
+@property (nonatomic, strong) UILabel *userAddressLab;
+@property (nonatomic, strong) UILabel *userMobileLab;
+
+@end
+
+@implementation ESOrderAddressCell
+
+- (void)setOrderInfo:(OrderDetailInfo *)orderInfo
+{
+    _orderInfo = orderInfo;
+    
+    self.userNameLab.text = _orderInfo.receiver_name;
+    self.userAddressLab.text = [NSString stringWithFormat:@"%@%@",orderInfo.receiver_area,orderInfo.receiver_address];
+    self.userMobileLab.text = [_orderInfo.receiver_mobile stringByReplacingCharactersInRange:NSMakeRange(4, 3) withString:@"***"];}
+
+-(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if ([super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        [self setUpViews];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    return self;
+}
+
+-(void)setUpViews
+{
+    [self.contentView addSubview:self.locationImg];
+    [self.locationImg mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.height.equalTo(@15);
+        make.left.top.equalTo(@15);
+    }];
+    
+    [self.contentView addSubview:self.userNameLab];
+    [self.userNameLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.equalTo(@100);
+        make.top.height.equalTo(@12);
+        make.left.equalTo(self.locationImg.mas_right).with.offset(15);
+    }];
+    
+    [self.contentView addSubview:self.userAddressLab];
+    [self.userAddressLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.equalTo(@200);
+        make.height.equalTo(@12);
+        make.top.equalTo(@36);
+        make.left.equalTo(self.locationImg.mas_right).with.offset(15);
+    }];
+    
+    [self.contentView addSubview:self.userMobileLab];
+    
+    [self.userMobileLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.equalTo(@100);
+        make.top.height.equalTo(@12);
+        make.right.equalTo(@-15);
+    }];
+}
+
+-(UIImageView *)locationImg
+{
+    if (!_locationImg) {
+        _locationImg = [[UIImageView alloc] init];
+        _locationImg.image = [UIImage imageNamed:@"share_location"];
+    }
+    return _locationImg;
+}
+-(UILabel *)userNameLab
+{
+    if (!_userNameLab) {
+        _userNameLab = [[UILabel alloc] init];
+        _userNameLab.text = @"何更颖";
+        _userNameLab.font = [UIFont systemFontOfSize:12];
+    }
+    return _userNameLab;
+}
+-(UILabel *)userMobileLab
+{
+    if (!_userMobileLab) {
+        _userMobileLab = [[UILabel alloc] init];
+        _userMobileLab.text = @"13270720072";
+        _userMobileLab.textAlignment = NSTextAlignmentRight;
+        _userMobileLab.font = [UIFont systemFontOfSize:12];
+    }
+    return _userMobileLab;
+}
+-(UILabel *)userAddressLab
+{
+    if (!_userAddressLab) {
+        _userAddressLab = [[UILabel alloc] init];
+        _userAddressLab.text = @"江苏省南京市蓬莱区胜利路23号";
+        _userAddressLab.font = [UIFont systemFontOfSize:12];
+    }
+    return _userAddressLab;
+}
+
+@end

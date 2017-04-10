@@ -1,0 +1,15 @@
+//
+//  ESShopDetailHeaderTitleView.h
+//  EasyShop
+//
+//  Created by wcz on 16/3/31.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESShopDetailHeaderTitleView : UIView
+
+@property (nonatomic, strong) id model;
+
+@end

@@ -1,0 +1,30 @@
+//
+//  NormalWebViewController.h
+//  MFBank
+//
+//  Created by 脉融iOS开发 on 15/11/24.
+//  Copyright (c) 2015年 MFBank. All rights reserved.
+//
+
+#import "NormalWebViewController.h"
+
+@interface NormalWebViewController ()<UIWebViewDelegate>
+
+@end
+
+@implementation NormalWebViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    TitleCenter;
+    ShowNavbar;
+   self.navigationItem.title= self.title;
+//     self.navigationController.navigationBar.backItem.title =@" ";
+    UIWebView *web = [[UIWebView alloc] initWithFrame:CGRectMake(0, 0, ScreenWidth, ScreenHeight)];
+    web.scalesPageToFit = YES;
+    [web loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.url]]];
+    web.delegate = self;
+    [self.view addSubview:web];
+}
+
+@end

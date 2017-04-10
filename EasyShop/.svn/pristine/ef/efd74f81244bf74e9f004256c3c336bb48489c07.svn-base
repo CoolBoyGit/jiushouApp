@@ -1,0 +1,300 @@
+//
+//  OrderResponse.h
+//  EasyShopService
+//
+//  Created by guojian on 16/5/2.
+//  Copyright © 2016年 naijoug. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+typedef NS_ENUM(NSUInteger, OrderStatus) {
+    OrderStatus_Cancel,     //已取消
+    OrderStatus_WaitPay,    //待支付
+    OrderStatus_WaitSend,   //待发货
+    OrderStatus_WaitReply,  //待评价
+    OrderStatus_WaitSure,   //待收货
+};
+
+/**
+ *  订单信息
+ */
+@interface OrderInfo : NSObject
+
+/** id */
+@property (nonatomic,copy) NSString *oid;
+/** 订单id */
+@property (nonatomic,copy) NSString *order_id;
+/** 商店id */
+@property (nonatomic,copy) NSString *shop_id;
+/** 商店名 */
+@property (nonatomic,copy) NSString *shop_name;
+/** 订单生成时间 */
+@property (nonatomic,strong) NSNumber *create_time;
+
+/** 优惠券码 */
+@property (nonatomic,copy) NSString *coupon_code;
+/** 优惠金额 */
+@property (nonatomic,strong) NSNumber *coupon_fee;
+/** 订单总金额 */
+@property (nonatomic,strong) NSNumber *total_fee;
+/** 实支付金额 */
+@property (nonatomic,strong) NSNumber *real_amount;
+/** 税费 */
+@property (nonatomic,strong) NSNumber *tax_fee;
+/** 退款状态 **/
+@property (nonatomic,strong) NSNumber *refund_status;
+/** 退货状态 **/
+@property (nonatomic,strong) NSNumber *return_status;
+/** 理由 **/
+@property (nonatomic,copy)   NSString* cancel_reason;
+/** 订单件数 */
+@property (nonatomic,strong) NSNumber *total_goods_num;
+/** 订单总重 */
+@property (nonatomic,strong) NSNumber *total_weight;
+/** 订单状态 **/
+@property (nonatomic,copy)   NSString   *order_status;
+/**申请退款的时间**/
+@property (nonatomic,strong) NSNumber   *apply_return_time;
+/** 订单商品（item： OrderGoodsInfo ） */
+@property (nonatomic,strong) NSArray *order_goods;
+
+@end
+@interface OrderInfo (Extension)
+
+/** 订单状态 */
+@property (nonatomic,assign,readonly) OrderStatus orderStatus;
+/** 订单状态文字 */
+@property (nonatomic,copy,readonly) NSString *orderDisplay;
+/**退款状态文字**/
+@property (nonatomic,assign,readonly) NSString* refund_stau;
+//扩展属性：用于我的订单页面，设置不同类型订单，footer的高度
+/** 订单footer高度 */
+@property (nonatomic,assign,readonly) CGFloat footerHeight;
+
+@end
+
+/**
+ *  订单详情信息
+ */
+@interface OrderDetailInfo : OrderInfo
+
+/** 收货人名 */
+@property (nonatomic,copy) NSString *receiver_name;
+/** 省事区 */
+@property (nonatomic,copy) NSString *receiver_area;
+/** 街道地址 */
+@property (nonatomic,copy) NSString *receiver_address;
+/** 省份id */
+@property (nonatomic,copy) NSString *receiver_zip;
+/** 收货人手机号 */
+@property (nonatomic,copy) NSString *receiver_mobile;
+/** 支付方式 */
+@property (nonatomic,copy) NSString *payment_name;
+/** 支付流水号 */
+@property (nonatomic,copy) NSString *trade_no;
+/** 支付时间 */
+@property (nonatomic,strong) NSNumber *payment_time;
+/** 商家名 */
+@property (nonatomic,copy) NSString *seller_name;
+/** 商家所在国家 */
+@property (nonatomic,copy) NSString *seller_contury;
+/** 商家 省市区 */
+@property (nonatomic,copy) NSString *seller_area;
+/** 商家 具体地址 */
+@property (nonatomic,copy) NSString *seller_address;
+/** 商家 邮编 */
+@property (nonatomic,copy) NSString *seller_zip;
+/** 商家 联系方式 */
+@property (nonatomic,copy) NSString *seller_contact;
+/** 快递公司 */
+@property (nonatomic,copy) NSString *shipping_name;
+/** 发货时间 */
+@property (nonatomic,strong) NSNumber *shipping_time;
+/** 快递单号 */
+@property (nonatomic,copy) NSString *shipping_code;
+
+/** 买家留言 */
+@property (nonatomic,copy) NSString *shipping_message;
+/** 买家确认收货时间 */
+@property (nonatomic,strong) NSNumber *confirm_time;
+
+/** 邮费 */
+@property (nonatomic,strong) NSNumber *shipping_fee;
+/** 退款状态
+ *  0是无退款,1是部分退款,2是全部退款
+ */
+@property (nonatomic,strong) NSNumber *refund_status;
+/** 退货状态
+ *  :0是无退货,1是提交退货申请,2是商家审核通过，3是商家拒绝退货，4是商家允许退款，5是退款完成，6是等待退款
+ */
+@property (nonatomic,strong) NSNumber *return_status;
+/** 退款金额 */
+@property (nonatomic,strong) NSNumber *refund_amount;
+/** 退款完成时间 */
+@property (nonatomic,strong) NSNumber *refund_time;
+/** 退货数量 */
+@property (nonatomic,strong) NSNumber *return_num;
+/** 退货原因    */
+@property (nonatomic,copy) NSString *return_reason;
+/** 退货图片 */
+@property (nonatomic,copy) NSString *return_pic;
+/** 退货、退货中时间 */
+@property (nonatomic,strong) NSNumber *apply_return_time;
+/** 退货快递公司 */
+@property (nonatomic,copy) NSString *return_express_id;
+/** 退货快递单号 */
+@property (nonatomic,copy) NSString *return_express_code;
+/** 拒绝退货原因 */
+@property (nonatomic,copy) NSString *refuse_reason;
+
+
+@end
+
+
+/**
+ *  订单商品信息
+ */
+@interface OrderGoodsInfo : NSObject
+
+/** id */
+@property (nonatomic,copy) NSString *oid;
+/** 商品id */
+@property (nonatomic,copy) NSString *goods_id;
+/** 商品名称 */
+@property (nonatomic,copy) NSString *goods_name;
+/** goods_class_id */
+@property (nonatomic,copy) NSString *goods_class_id;
+/** spec_id */
+@property (nonatomic,copy) NSString *spec_id;
+/** spec info */
+@property (nonatomic,copy) NSString *spec_info;
+/** 商品价格 */
+@property (nonatomic,strong) NSNumber *goods_price;
+/** 商品数量 */
+@property (nonatomic,strong) NSNumber *goods_num;
+/** 商品图片 */
+@property (nonatomic,copy) NSString *goods_image;
+/** 商品返回数量 */
+@property (nonatomic,strong) NSNumber *goods_returnnum;
+/** 商品金额 */
+@property (nonatomic,strong) NSNumber *total_fee;
+/** 支付金额 */
+@property (nonatomic,strong) NSNumber *payment_fee;
+/** 折扣金额 */
+@property (nonatomic,strong) NSNumber *discount_fee;
+/** 商店id */
+@property (nonatomic,copy) NSString *shop_id;
+/** 评价状态 */
+@property (nonatomic,strong) NSNumber *evaluation_status;
+
+
+@end
+
+/** 订单包裹信息 */
+@interface OrderConfirmInfo : NSObject
+
+/** 包裹商店信息 (item : OrderConfirmShopInfo ) */
+@property (nonatomic,strong) NSArray *shops;
+
+/** 总价 */
+@property (nonatomic,assign,readonly) double cost;
+
+
+
+@end
+
+@class OrderConfirmGoodsInfo;
+@class OrderConfrimDiscriptionInfo;
+/**
+ *  订单包裹商店
+ */
+@interface OrderConfirmShopInfo : NSObject
+
+/** 订单包裹商品信息 (item : OrderConfirmGoodsInfo ) */
+@property (nonatomic,strong) NSArray *goods;
+/** 订单描述信息 */
+@property (nonatomic,strong) OrderConfrimDiscriptionInfo *ddescription;
+
+@end
+
+/**
+ *  订单包裹商品信息
+ */
+@interface OrderConfirmGoodsInfo : NSObject
+
+/** id */
+@property (nonatomic,copy) NSString *oid;
+/** 商店id */
+@property (nonatomic,copy) NSString *shop_id;
+/** 商店名 */
+@property (nonatomic,copy) NSString *shop_name;
+/** 商品id */
+@property (nonatomic,copy) NSString *goods_id;
+/** 商品数量 */
+@property (nonatomic,strong) NSNumber *goods_num;
+/** 商品名称 */
+@property (nonatomic,copy) NSString *goods_name;
+/** 商品图片 */
+@property (nonatomic,copy) NSString *goods_image;
+/** 商品 */
+@property (nonatomic,strong) NSNumber *goods_stock;
+/** cubage */
+@property (nonatomic,strong) NSNumber *goods_cubage;
+/** 商品价格 */
+@property (nonatomic,strong) NSNumber *goods_price;
+/** tax */
+@property (nonatomic,strong) NSNumber *goods_tax;
+/** clearance */
+@property (nonatomic,copy) NSString *goods_clearance;
+/** border */
+@property (nonatomic,strong) NSNumber *goods_border;
+/** 是否免运费 */
+@property (nonatomic,copy) NSString *is_free_shipping;
+/** class id */
+@property (nonatomic,copy) NSString *class_id;
+/** 仓库 代码 */
+@property (nonatomic,copy) NSString *warehouse_code;
+/** 用户id */
+@property (nonatomic,copy) NSString *uid;
+/** tax cost */
+@property (nonatomic,copy) NSString *goods_tax_cost;
+
+@end
+
+/**
+ *  包裹信息描述
+ */
+@interface OrderConfrimDiscriptionInfo : NSObject
+
+/** 商店id */
+@property (nonatomic,copy) NSString *shop_id;
+/** 商店名 */
+@property (nonatomic,copy) NSString *shop_name;
+/** 仓库 代码 */
+@property (nonatomic,copy) NSString *warehouse_code;
+/** clearance */
+@property (nonatomic,copy) NSString *goods_clearance;
+/** cost */
+@property (nonatomic,strong) NSNumber *cost;
+/** 重量 */
+@property (nonatomic,strong) NSNumber *weight;
+/** freight */
+@property (nonatomic,strong) NSNumber *freight;
+/** 总数 */
+@property (nonatomic,strong) NSNumber *total_num;
+/** tax */
+@property (nonatomic,strong) NSNumber *tax;
+
+@end
+/**用来判断是否需要填写身份证**/
+@interface ShopInfoStatusNeedPesonid : NSObject
+@property (nonatomic,copy) NSString* address_id;
+@property (nonatomic,strong) NSNumber *status;
+@end
+
+
+
+
+
+

@@ -1,0 +1,25 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "9455617e-f296-4e26-9371-729c2d261bf8",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+    "9455617e-f296-4e26-9371-729c2d261bf8" : {
+
+    }
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "9455617e-f296-4e26-9371-729c2d261bf8" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "61B6ED73-BB02-4332-B2E0-2A3B978EEAB8",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "9455617e-f296-4e26-9371-729c2d261bf8" : "EasyShop%E6%8B%BC%E5%A4%9A%E5%A4%9A%202\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "EasyShop",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "EasyShop.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "svn:\/\/120.26.55.45\/jiushou_shop\/ios\/EasyShop",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Subversion",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "9455617e-f296-4e26-9371-729c2d261bf8"
+    }
+  ]
+}

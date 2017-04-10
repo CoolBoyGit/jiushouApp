@@ -1,0 +1,238 @@
+
+
+
+
+
+
+//
+//  ESPageController.m
+//  EasyShop
+//
+//  Created by wcz on 16/3/26.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESPageController.h"
+#import "ESHomeController.h"
+#import "ESKIDSController.h"
+#import "ESHomeSearchView.h"
+#import "ESEmptyViewController.h"
+#import "ESCountryController.h"
+#import "ESShopCommentController.h"
+#import "UIHomeSelectView.h"
+#import "ICAlert.h"
+#import "ESMyOrderPageController.h"
+#import "RichScanViewController.h"
+//#import "HomeTitleView.h"
+
+
+
+@interface ESPageController ()
+
+@property (nonatomic, strong) UITextField *searchTextField;
+
+/** 是否导航信息为空 */
+@property (nonatomic,assign) BOOL isEmpty;
+/** empty */
+@property (nonatomic,weak) ESEmptyViewController *emptyController;
+/** 导航信息（item ： NavInfo ） */
+@property (nonatomic,strong) NSArray *navItems;
+/** 分类信息( item : GoodsCategoryInfo ) */
+//@property (nonatomic,strong) NSArray *categoryItems;
+
+/** Indicator */
+@property (nonatomic,strong) ESIndicator *indicator;
+
+@end
+
+@implementation ESPageController
+
+- (ESIndicator *)indicator
+{
+    if (!_indicator) {
+        _indicator = [ESIndicator indicatorToView:self.view];
+    }
+    return _indicator;
+}
+
+- (BOOL)isEmpty
+{
+    return !(self.navItems && self.navItems.count>0);
+}
+
+
+
+-(instancetype)init
+{
+    if ([super init]) {
+        self.menuViewStyle = WMMenuViewStyleLine;
+        self.progressColor = [UIColor blackColor];
+        self.menuBGColor = [UIColor whiteColor];
+        self.progressHeight = 1;
+    }
+    return self;
+}
+
+#pragma mark - LifeCycle
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+//    self.view.backgroundColor = [UIColor whiteColor];
+    self.titleSizeSelected = 15;
+    self.titleSizeNormal = 15;
+    self.menuHeight = 40;
+    self.menuItemWidth = 65;
+    self.itemMargin = 25;
+//    self.navigationItem.titleView = ;
+    self.postNotification = YES;
+    self.menuViewStyle = WMMenuViewStyleLine;
+    self.bounces = NO;
+    self.titleColorNormal = RGB(138, 138, 138);
+    self.titleColorSelected = [UIColor blackColor];
+    self.navigationController.navigationBar.translucent = NO;
+    UIButton *leftButton = [[UIButton alloc]initWithFrame:CGRectMake(0,0,25,25)];
+    [leftButton setImage:[UIImage imageNamed:@"notification"]forState:UIControlStateNormal];
+    [leftButton addTarget:self action:@selector(leftBtnAction)forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem*leftItem = [[UIBarButtonItem alloc]initWithCustomView:leftButton];
+    self.navigationItem.leftBarButtonItem= leftItem;
+    UIButton *rightButton = [[UIButton alloc]initWithFrame:CGRectMake(0,0,25,25)];
+    [rightButton setImage:[UIImage imageNamed:@"sweep"]forState:UIControlStateNormal];
+    [rightButton addTarget:self action:@selector(rightBtnAction)forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem*rightItem = [[UIBarButtonItem alloc]initWithCustomView:rightButton];
+    self.navigationItem.rightBarButtonItem= rightItem;
+    self.navigationItem.title = @"首页";
+    ESHomeSearchView *titleView = [[ESHomeSearchView alloc] initWithFrame:CGRectMake(0, 30, 250, 30)];
+    titleView.isAllowToPush = YES;
+    self.navigationItem.titleView = titleView;
+//    HomeTitleView *titleView = [[HomeTitleView alloc] initWithTile:self.navigationItem.title?self.navigationItem.title:@"首页" withBackRuturn:NO];
+//    titleView.titleView = ;
+//    titleView.leftView = leftButton;
+//    titleView.rightView = rightButton;
+//    [self.view addSubview:titleView];
+    [self fetchNavList];
+}
+-(void)leftBtnAction
+{
+    [[ICAlert alert]selectTypeInfoCallBack:^(NSInteger index) {
+        ESMyOrderPageController *controller = [[ESMyOrderPageController alloc]init];
+        controller.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:controller animated:YES];
+    }];
+}
+-(void)rightBtnAction
+{
+    RichScanViewController*scanConVc=[[RichScanViewController alloc]init];
+    [self.navigationController pushViewController:scanConVc animated:YES];
+
+}
+
+#pragma mark - WMPageControllerDataSource
+
+- (NSInteger)numbersOfChildControllersInPageController:(WMPageController *)pageController
+{
+    if (self.isEmpty) {
+        return 1;
+    }
+    return self.navItems.count;
+}
+
+- (NSString *)pageController:(WMPageController *)pageController titleAtIndex:(NSInteger)index
+{
+    if (self.isEmpty) {
+        return @"";
+    }
+    NavInfo *info = [self.navItems objectAtIndex:index];
+    return info.name;
+}
+
+- (__kindof UIViewController *)pageController:(WMPageController *)pageController viewControllerAtIndex:(NSInteger)index
+{
+    if (self.isEmpty) {
+        ESEmptyViewController *empty = [[ESEmptyViewController alloc] init];
+        @weakify(self);
+        empty.RefreshBlock = ^{
+            @strongify(self);
+            [self fetchNavList];
+        };
+        self.emptyController = empty;
+        return empty;
+    }
+    NavInfo *info = [self.navItems objectAtIndex:index];
+    //全球购
+    if ([info.nid isEqualToString:@"2"]) {
+        ESHomeController *home = [[ESHomeController alloc] init];
+        home.navInfo            = info;
+        return home;
+        //国家馆
+    }else if ([info.nid isEqualToString:@"6"]){
+        ESCountryController *controller    = [[ESCountryController alloc] init];
+        controller.navInfo              = info;
+        return controller;
+    }else{//其他页面
+        ESKIDSController *controller    = [[ESKIDSController alloc] init];
+        controller.navInfo              = info;
+        return controller;
+    }
+}
+
+
+#pragma mark - Networking
+
+//- (void)fetchGoodsCategory
+//{
+//    GetGoodsCategoryRequest *request = [GetGoodsCategoryRequest request];
+//    
+//    @weakify(self);
+//    [ESService getGoodsCategoryRequest:request success:^(NSArray *response) {
+//        @strongify(self);
+//        
+//        self.categoryItems = response;
+//        
+//    } failure:^(NSError *error) {
+//        
+//    }];
+//}
+
+/**
+ *  获取导航信息
+ */
+- (void)fetchNavList
+{
+    GetNavListRequest *request = [GetNavListRequest request];
+    
+    @weakify(self);
+    [self beginNetworking];
+    [ESService getNavListRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        self.navItems = response;
+        [self reloadData];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+#pragma mark GSNetworking
+- (void)beginNetworking
+{
+    self.emptyController.isNetworking = YES;
+    [self.indicator startAnimation];
+}
+
+- (void)endGSNetworking
+{
+    self.emptyController.isNetworking = NO;
+    [self.indicator stopAnimation];
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+//    self.navigationController.navigationBar.hidden = YES;
+}
+
+@end

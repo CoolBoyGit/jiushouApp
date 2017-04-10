@@ -1,0 +1,101 @@
+//
+//  ESHomePopView.m
+//  EasyShop
+//
+//  Created by guojian on 16/7/6.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESHomePopView.h"
+
+static NSString *const kESHomePopCellID = @"kESHomePopCellID";
+static const CGFloat   kESHomePopHeight = 40;
+
+@interface ESHomePopView()<UITableViewDelegate,UITableViewDataSource>
+
+/** table */
+@property (nonatomic,weak) UITableView *tableView;
+/** Control */
+@property (nonatomic,weak) UIControl *control;
+/** 数据 */
+@property (nonatomic,strong) NSArray *popItems;
+
+@end
+
+@implementation ESHomePopView
+
+- (NSArray *)popItems
+{
+    return @[@"我的订单",@"现金券",@"消息"];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        
+        self.frame              = kKeyWindow.bounds;
+        self.backgroundColor    = [UIColor colorWithRed:100 green:100 blue:100 alpha:0.5f];
+        self.hidden             = YES;
+        
+        UIControl *control = [[UIControl alloc] initWithFrame:self.bounds];
+        [control addTarget:self action:@selector(hidePopView) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:control];
+        
+        UITableView *tableView = [[UITableView alloc]initWithFrame:CGRectZero style:UITableViewStylePlain];
+        [tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:kESHomePopCellID];
+        tableView.layer.cornerRadius=8;
+        tableView.layer.masksToBounds=YES;
+        tableView.dataSource = self;
+        tableView.delegate = self;
+        tableView.tableFooterView = [[UIView alloc]init];
+        tableView.frame = CGRectMake(15, 64, 100, self.popItems.count * kESHomePopHeight);
+        [self addSubview:tableView];
+        self.tableView = tableView;
+    }
+    return self;
+}
+
+- (void)showPopView
+{
+    self.hidden = NO;
+    [kKeyWindow addSubview:self];
+}
+
+- (void)hidePopView
+{
+    self.hidden = YES;
+    [self removeFromSuperview];
+}
+
+#pragma mark - UITableViewDataSource
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.popItems.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kESHomePopCellID forIndexPath:indexPath];
+    cell.contentView. backgroundColor = RGB(253, 253, 253);
+    cell.textLabel.textAlignment=NSTextAlignmentCenter;
+    cell.textLabel.font = [UIFont systemFontOfSize:15.5];
+    cell.textLabel.text = [self.popItems objectAtIndex:indexPath.row];
+    return cell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return kESHomePopHeight;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
+    if (self.selectedBlock) {
+        self.selectedBlock(indexPath.row);
+    }
+    [self hidePopView];
+}
+
+@end

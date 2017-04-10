@@ -1,0 +1,114 @@
+
+//
+//  ESRemindLIstCell.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/20.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESRemindLIstCell.h"
+
+@interface ESRemindLIstCell()
+
+@property (nonatomic, strong) UIImageView     *shopImg;//商品图像
+@property (nonatomic, strong) UILabel         *shopNameLab;//商品名字
+@property (nonatomic, strong) UILabel         *isRemindLab;//是否提醒
+@property (nonatomic, strong) UIButton        *remindButton;//提醒按钮
+
+@end
+
+@implementation ESRemindLIstCell
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        [self setupViews];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    return self;
+}
+
+- (void)setupViews
+{
+    self.shopImg.image = [UIImage imageNamed:@"page2"];
+    [self.contentView addSubview:self.shopImg];
+    [self.shopImg mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@20);
+        make.centerY.equalTo(@0);
+        make.height.width.equalTo(@80);
+    }];
+    
+    self.isRemindLab.text = @"未提醒";
+    [self.contentView addSubview:self.isRemindLab];
+    [self.isRemindLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@5);
+        make.right.equalTo(@(-12));
+        make.width.equalTo(@50);
+        make.height.equalTo(@44);
+    }];
+    
+    self.shopNameLab.text = @"伊丽莎白美白霜 2016 版";
+    [self.contentView addSubview:self.shopNameLab];
+    [self.shopNameLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@(50));
+        make.left.equalTo(self.shopImg.mas_right).with.offset(15);
+    }];
+
+    [self.contentView addSubview:self.remindButton];
+    [self.remindButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(@(-12));
+        make.right.equalTo(@(-10));
+        make.height.equalTo(@30);
+        make.width.equalTo(@90);
+    }];
+}
+
+- (UIImageView *)shopImg
+{
+    if (!_shopImg) {
+        _shopImg =[[UIImageView alloc] init];
+        _shopImg.contentMode = UIViewContentModeScaleToFill;
+    }
+    return _shopImg;
+}
+- (UILabel *)shopNameLab
+{
+    if (!_shopNameLab) {
+        _shopNameLab = [[UILabel alloc] init];
+        _shopNameLab.textAlignment = NSTextAlignmentLeft;
+        _shopNameLab.backgroundColor = [UIColor clearColor];
+        _shopNameLab.font = ADeanFONT15;
+        _shopNameLab.textColor = [UIColor blackColor];
+    }
+    return _shopNameLab;
+}
+- (UILabel *)isRemindLab
+{
+    if (!_isRemindLab) {
+        _isRemindLab = [[UILabel alloc] init];
+        _isRemindLab.textAlignment = NSTextAlignmentCenter;
+        _isRemindLab.backgroundColor = [UIColor clearColor];
+        _isRemindLab.font = ADeanFONT15;
+        _isRemindLab.textColor = [UIColor grayColor];
+    }
+    return _isRemindLab;
+}
+- (UIButton *)remindButton
+{
+    if (!_remindButton) {
+        _remindButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _remindButton.layer.borderWidth = 1;
+        _remindButton.layer.borderColor = [UIColor grayColor].CGColor;
+        _remindButton.titleLabel.font = [UIFont systemFontOfSize:15];
+        [_remindButton setTitle:@"取消提醒" forState:UIControlStateNormal];
+        [_remindButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [_remindButton setBackgroundColor:RGB(233, 40, 46)];
+        //        [_remindButton addTarget:self action:@selector(loginButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _remindButton;
+}
+
+
+@end

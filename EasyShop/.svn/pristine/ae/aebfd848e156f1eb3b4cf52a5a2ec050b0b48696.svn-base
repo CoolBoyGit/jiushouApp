@@ -1,0 +1,179 @@
+//
+//  ShopCartCell.m
+//  MFBank
+//
+//  Created by YANQI on 15/11/4.
+//  Copyright © 2015年 MFBank. All rights reserved.
+//
+
+#import "ESSureShopCell.h"
+
+
+@interface ESSureShopCell()
+
+@property (nonatomic, strong) UIButton                  *selectBtn;//打勾
+@property (nonatomic, strong) UIImageView               *productImg;//商品的图像
+@property (nonatomic, strong) UILabel                   *productName;//商品的名称
+@property (nonatomic, strong) UILabel                   *productPrice;//商品的价格
+@property (nonatomic, strong) UILabel                   *productFreight;//商品的运费
+@property (nonatomic, strong) UILabel                   *productNum;//商品的数量
+
+@end
+
+@implementation ESSureShopCell
+
+- (void)setGoodsInfo:(OrderConfirmGoodsInfo *)goodsInfo
+{
+    _goodsInfo = goodsInfo;
+    
+    [self.productImg sd_setImageWithURL:[NSURL URLWithString:_goodsInfo.goods_image] placeholderImage:[UIImage imageNamed:@"page3"]];
+    self.productName.text = _goodsInfo.goods_name;
+    self.productPrice.text = [NSString stringWithFormat:@"¥%@",_goodsInfo.goods_price];
+    self.productNum.text = [NSString stringWithFormat:@"[%@]",_goodsInfo.goods_num];
+//    self.productFreight.text = _goodsInfo.
+    
+}
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        
+        [self setupViews];
+    }
+    return self;
+}
+
+- (void)setupViews
+{
+    self.selectBtn.alpha = 1.0f;
+    self.productImg.image = [UIImage imageNamed:@"page3"];
+    self.productImg.backgroundColor = [UIColor redColor];
+    //    [self.productImg sd_setImageWithURL:[NSURL URLWithString:@""] placeholderImage:[UIImage imageNamed:@"default"]];
+    self.productPrice.alpha = 1.0f;
+    self.productName.alpha = 1.0f;
+ 
+    self.productFreight.alpha = 1.0f;
+    self.productNum.alpha = 1.0f;
+}
+
+#pragma mark view init
+- (UIImageView *)productImg
+{
+    if (!_productImg) {
+        _productImg =[[UIImageView alloc] init];
+        _productImg.layer.masksToBounds = YES;
+        _productImg.contentMode = UIViewContentModeCenter;
+        [self.contentView addSubview:_productImg];
+        [_productImg mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.equalTo(@0);
+            make.left.equalTo(self.selectBtn.mas_right).with.offset(10);
+            make.height.equalTo(@80);
+            make.width.equalTo(@80);
+        }];
+    }
+    return _productImg;
+}
+
+- (UILabel *)productName
+{
+    if (!_productName) {
+        _productName = [[UILabel alloc] init];
+        _productName.backgroundColor = [UIColor clearColor];
+        _productName.font = ADeanFONT11;
+        _productName.numberOfLines = 2;
+        _productName.text = @"小黄瓜爽肤水  200M 999元";
+        [self.contentView addSubview:_productName];
+        [_productName mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.productImg.mas_top).with.offset(0);
+            make.left.equalTo(self.productImg.mas_right).with.offset(5);
+            make.height.equalTo(@20);
+            make.right.equalTo(@-20);
+        }];
+    }
+    return _productName;
+}
+- (UILabel *)productFreight
+{
+    if (!_productFreight) {
+        _productFreight = [[UILabel alloc] init];
+        _productFreight.backgroundColor = [UIColor clearColor];
+        _productFreight.font = ADeanFONT11;
+        _productFreight.text = @"邮费：0";
+        _productFreight.textAlignment = NSTextAlignmentRight;
+        [self.contentView addSubview:_productFreight];
+        [_productFreight mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.productImg.mas_top).with.offset(20);
+            make.left.equalTo(self.productImg.mas_right).with.offset(5);
+            make.height.equalTo(@20);
+            make.right.equalTo(@-20);
+        }];
+    }
+    return _productFreight;
+}
+- (UILabel *)productNum
+{
+    if (!_productNum) {
+        _productNum = [[UILabel alloc] init];
+        _productNum.backgroundColor = [UIColor clearColor];
+        _productNum.font = ADeanFONT9;
+        _productNum.text = @"X1";
+        _productNum.textColor = [UIColor grayColor];
+        _productNum.textAlignment = NSTextAlignmentRight;
+        [self.contentView addSubview:_productNum];
+        [_productNum mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.productImg.mas_top).with.offset(40);
+            make.left.equalTo(self.productImg.mas_right).with.offset(5);
+            make.height.equalTo(@20);
+            make.right.equalTo(@-20);
+        }];
+    }
+    return _productNum;
+}
+- (UILabel *)productPrice
+{
+    if (!_productPrice) {
+        _productPrice = [[UILabel alloc] init];
+        _productPrice.backgroundColor = [UIColor clearColor];
+        _productPrice.font = ADeanFONT15;
+        _productPrice.text = @"¥999.00";
+        _productPrice.textColor = [UIColor redColor];
+        _productPrice.textAlignment = NSTextAlignmentRight;
+        [self.contentView addSubview:_productPrice];
+        [_productPrice mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.productImg.mas_top).with.offset(60);
+            make.left.equalTo(self.productImg.mas_right).with.offset(5);
+            make.height.equalTo(@20);
+            make.right.equalTo(@-20);
+        }];
+    }
+    return _productPrice;
+}
+- (UIButton *)selectBtn
+{
+    if (!_selectBtn) {
+        _selectBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_selectBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [_selectBtn setBackgroundColor:[UIColor clearColor]];
+        [_selectBtn setImage:[UIImage imageNamed:@"shopcart_selected_icon"] forState:UIControlStateNormal];
+        [_selectBtn setImage:[UIImage imageNamed:@"shopcart_selected_icon"] forState:UIControlStateSelected];
+//        [_selectBtn addTarget:self action:@selector(selectBtnAction) forControlEvents:UIControlEventTouchUpInside];
+        [self.contentView addSubview:_selectBtn];
+        [_selectBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.equalTo(@0);
+            make.left.equalTo(@10);
+            make.height.equalTo(@30);
+            make.width.equalTo(@30);
+        }];
+    }
+    return _selectBtn;
+}
+//- (void)selectBtnAction
+//{
+//    NSLog(@"123");
+//    _selectBtn.selected = !_selectBtn.selected;
+//}
+
+@end
+

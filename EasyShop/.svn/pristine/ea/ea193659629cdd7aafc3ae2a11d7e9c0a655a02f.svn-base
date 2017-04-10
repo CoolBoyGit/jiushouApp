@@ -1,0 +1,80 @@
+//
+//  ESGoodsStockCell.m
+//  
+//
+//  Created by jiushou on 16/7/21.
+//
+//
+
+#import "ESGoodsStockCell.h"
+@interface ESGoodsStockCell()
+/** 图片 */
+@property (nonatomic,strong) UIImageView *goodImageView;
+/** 商品名字 */
+@property (nonatomic,strong) UILabel *nameLabel;
+/** 库存数量 */
+@property (nonatomic,strong) UILabel *stockLabel;
+@end
+@implementation ESGoodsStockCell
+
+
+-(void)setInfo:(GoodsStockMessageInfo *)info{
+    GoodsStockInfo*goodsInfo=info.goods;
+    [self.imageView sd_setImageWithURL:[NSURL URLWithString:goodsInfo.goods_image] placeholderImage:[UIImage imageNamed:@"bg"]];
+    self.nameLabel.text = goodsInfo.goods_name;
+    self.stockLabel.text = [NSString stringWithFormat:@"库存： %@",goodsInfo.goods_stock];
+    
+}
+-(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    if (self=[super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        
+        [self.contentView addSubview:self.imageView];
+        
+        [self.imageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@15);
+            make.top.equalTo(@15);
+            make.width.height.equalTo(@60);
+        }];
+        [self.contentView addSubview:self.nameLabel];
+        [self.nameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.imageView.mas_top);
+            make.left.equalTo(self.imageView.mas_right).offset(15);
+            make.right.equalTo(@15);
+            make.height.equalTo(@30);
+        }];
+        [self.contentView addSubview:self.stockLabel];
+        [self.stockLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.nameLabel.mas_bottom);
+            make.left.equalTo(self.imageView.mas_right).offset(15);
+            make.right.equalTo(@15);
+            make.height.equalTo(@30);
+        }];
+
+    }
+    return self;
+}
+
+- (UIImageView *)goodImageView
+{
+    if (!_goodImageView) {
+        _goodImageView = [[UIImageView alloc] init];
+    }
+    return _goodImageView;
+}
+- (UILabel *)nameLabel
+{
+    if (!_nameLabel) {
+        _nameLabel = [[UILabel alloc] init];
+    }
+    return _nameLabel;
+}
+- (UILabel *)stockLabel
+{
+    if (!_stockLabel) {
+        _stockLabel = [[UILabel alloc] init];
+    }
+    return _stockLabel;
+}
+
+@end

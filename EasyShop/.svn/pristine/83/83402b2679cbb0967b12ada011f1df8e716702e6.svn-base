@@ -1,0 +1,29 @@
+//
+//  ESLogisticHeardView.m
+//  EasyShop
+//
+//  Created by jiushou on 16/7/1.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESLogisticHeardView.h"
+
+@implementation ESLogisticHeardView
+- (instancetype)initWithReuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self=[super initWithReuseIdentifier:reuseIdentifier]) {
+        self.backgroundColor=[UIColor yellowColor];
+    }
+    return self;
+    
+}
+
+/*
+// Only override drawRect: if you perform custom drawing.
+// An empty implementation adversely affects performance during animation.
+- (void)drawRect:(CGRect)rect {
+    // Drawing code
+}
+*/
+
+@end

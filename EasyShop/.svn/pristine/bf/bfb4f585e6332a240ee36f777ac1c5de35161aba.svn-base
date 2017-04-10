@@ -1,0 +1,153 @@
+//
+//  ESShopInfoCell.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/3/27.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESShopInfoCell.h"
+
+@interface ESShopInfoCell()
+
+@property (nonatomic, strong) UILabel *shopTitle;//商品标题
+@property (nonatomic, strong) UILabel *shopExplanation;//商品说明
+@property (nonatomic, strong) UILabel *lineLabel;//中间线
+@property (nonatomic, strong) UILabel *explanation;//说明
+@property (nonatomic,strong) UILabel*tipsLabel;//
+
+
+@end
+
+
+@implementation ESShopInfoCell
+
+- (void)setGoodsInfo:(GoodsDetailInfo *)goodsInfo
+{
+    _goodsInfo = goodsInfo;
+    
+    self.shopTitle.text = _goodsInfo.name;
+    
+    self.shopExplanation.text = _goodsInfo.sevice;
+    self.explanation.text = _goodsInfo.prompt;
+}
+-(UILabel *)tipsLabel{
+    if (_tipsLabel==nil) {
+        _tipsLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, 0, 0)];
+        _tipsLabel.font=[UIFont systemFontOfSize:12];
+        _tipsLabel.textColor=ADeanHEXCOLOR(0x333333);
+    }
+    return _tipsLabel;
+}
+- (UILabel *)shopTitle {
+    if (!_shopTitle) {
+        _shopTitle = [[UILabel alloc] init];
+        _shopTitle.font = ADeanFONT14;
+        _shopTitle.numberOfLines=0;
+        _shopTitle.textAlignment = NSTextAlignmentLeft;
+        _shopTitle.textColor = ADeanHEXCOLOR(0x333333);
+    }
+    return _shopTitle;
+}
+- (UILabel *)shopExplanation {
+    if (!_shopExplanation) {
+        _shopExplanation = [[UILabel alloc] init];
+        _shopExplanation.font = ADeanFONT11;
+        _shopExplanation.numberOfLines = 10;
+        _shopExplanation.textAlignment = NSTextAlignmentLeft;
+        _shopExplanation.textColor = ADeanHEXCOLOR(0x999999);
+    }
+    return _shopExplanation;
+}
+- (UILabel *)explanation {
+    if (!_explanation) {
+        _explanation = [[UILabel alloc] init];
+        _explanation.font = ADeanFONT11;
+        _explanation.text = @"说明：";
+        _explanation.textColor = ADeanHEXCOLOR(0x999999);
+    }
+    return _explanation;
+}
+- (UILabel *)lineLabel {
+    if (!_lineLabel) {
+        _lineLabel = [[UILabel alloc] init];
+        _lineLabel.backgroundColor = ADeanHEXCOLOR(0xeeeeee);
+        }
+    return _lineLabel;
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        [self intalizedView];
+    }
+    return self;
+}
+
+
+-(void)intalizedView
+{
+    [self.contentView addSubview:self.shopTitle];
+
+    [self.shopTitle mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@(15));
+        make.right.equalTo(@(-15));
+        make.top.equalTo(@(5));
+    }];
+
+    [self.contentView addSubview:self.shopExplanation];
+    [self.shopExplanation mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@(15));
+        make.top.equalTo(self.shopTitle.mas_bottom).offset(5);
+        make.right.equalTo(@(-15));
+    }];
+
+  
+    
+    [self.contentView addSubview:self.lineLabel];
+    [self.lineLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@(15));
+        make.right.equalTo(@(-20));
+        make.top.equalTo(self.shopExplanation.mas_bottom).with.offset(5);
+        make.height.equalTo(@0.5);
+    }];
+    
+    [self.contentView addSubview:self.explanation];
+    [self.explanation mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@(15));
+        make.top.equalTo(self.lineLabel).offset(5);
+    }];
+}
+
+- (void)setModel:(id)model
+{
+    self.lineLabel.alpha = 1.0f;
+    self.shopTitle.text = @"佐藤日本消炎水";
+    self.shopExplanation.text = @"现在的天气十分干燥。现在的天气十分干燥。现在的天气十分干燥。现在的天气十分干燥。";
+    self.explanation.alpha = 1.0f;
+    NSArray *arr = @[@"满245包邮",@"香港发货",@"支持优惠卷"];
+    CGFloat X = 45;
+    for (int i = 0; i < arr.count; i ++) {
+        CGSize detailSize = [arr[i] sizeWithFont:[UIFont systemFontOfSize:11] constrainedToSize:CGSizeMake(MAXFLOAT, 15) lineBreakMode:UILineBreakModeWordWrap];
+        UILabel *lab = [[UILabel alloc] init];
+        [self.contentView addSubview:lab];
+        lab.font = ADeanFONT11;
+        lab.text = arr[i];
+        lab.textAlignment = NSTextAlignmentCenter;
+        lab.backgroundColor = ADeanHEXCOLOR(0x333333);
+        lab.textColor = [UIColor whiteColor];
+        
+        [lab mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.mas_left).with.offset(X);
+            make.centerY.equalTo(self.explanation.mas_centerY).with.offset(0);
+            make.width.equalTo(@(detailSize.width+10));
+            make.height.equalTo(@12);
+        }];
+        
+        X =  X + detailSize.width +20;
+    }
+
+}
+
+
+@end

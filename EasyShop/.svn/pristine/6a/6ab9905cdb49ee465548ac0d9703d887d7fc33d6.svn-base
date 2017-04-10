@@ -1,0 +1,148 @@
+//
+//  ESSureOrderAddressView.m
+//  EasyShop
+//
+//  Created by guojian on 16/5/22.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESSureOrderAddressView.h"
+#import "ESAddressListController.h"
+
+@interface ESSureOrderAddressView()
+
+/** title */
+@property (nonatomic,strong) UILabel *titleLabel;
+@property (nonatomic, strong) UILabel *userNameLab;
+@property (nonatomic, strong) UILabel *userAddressLab;
+@property (nonatomic, strong) UILabel *userMobileLab;
+
+@end
+
+@implementation ESSureOrderAddressView
+
+- (void)setAddressInfo:(AddressInfo *)addressInfo
+{
+    _addressInfo = addressInfo;
+    
+    self.userNameLab.text = [NSString handleString:_addressInfo.name];
+    self.userAddressLab.text = [NSString stringWithFormat:@"%@%@",[NSString handleString:_addressInfo.area],[NSString handleString:_addressInfo.address]];
+    self.userMobileLab.text = [NSString handleString:_addressInfo.mobile];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        self.backgroundColor = [UIColor whiteColor];
+        
+        [self addTarget:self action:@selector(changeAction) forControlEvents:UIControlEventTouchUpInside];
+        
+        
+        [self addSubview:self.titleLabel];
+        [self addSubview:self.userNameLab];
+        [self addSubview:self.userAddressLab];
+        [self addSubview:self.userMobileLab];
+        
+        
+        UIView *lineview= [[UIView alloc] init];
+        lineview.backgroundColor = [UIColor lightGrayColor];
+        [self addSubview:lineview];
+        [lineview mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.bottom.equalTo(@(-2));
+            make.right.left.equalTo(@0);
+            make.height.equalTo(@1);
+        }];
+        
+    }
+    return self;
+}
+
+- (void)changeAction
+{
+    ESAddressListController *adddrss = [[ESAddressListController alloc] init];
+    adddrss.isOrder = YES;
+    @weakify(self);
+    adddrss.addressBlock = ^(AddressInfo *info){
+        @strongify(self);
+        self.addressInfo = info;
+    };
+    [[AppDelegate shared] pushViewController:adddrss animated:YES];
+
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.equalTo(@100);
+        make.top.height.equalTo(@10);
+        make.left.height.equalTo(@20);
+    }];
+    
+    [self.userNameLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@20);
+        make.height.equalTo(@15);
+        make.width.equalTo(@60);
+        make.top.equalTo(self.titleLabel.mas_bottom).with.offset(10);
+    }];
+    
+    [self.userAddressLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@20);
+        make.height.equalTo(@20);
+        make.width.equalTo(@200);
+        make.top.equalTo(self.userNameLab.mas_bottom).with.offset(10);
+    }];
+    
+    [self.userMobileLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.userNameLab.mas_right).with.offset(10);
+        make.height.equalTo(@15);
+        make.width.equalTo(@100);
+        make.top.equalTo(self.userNameLab.mas_top).with.offset(0);
+    }];
+    
+
+}
+
+- (UILabel *)titleLabel
+{
+    if (!_titleLabel) {
+        _titleLabel = [[UILabel  alloc] init];
+        _titleLabel.font = ADeanFONT13;
+        _titleLabel.text = @"更改收货地址";
+        _titleLabel.textColor = [UIColor blackColor];
+    }
+    return _titleLabel;
+}
+
+-(UILabel *)userNameLab
+{
+    if (!_userNameLab) {
+        _userNameLab = [[UILabel alloc] init];
+        _userNameLab.text = @"何更颖";
+        _userNameLab.font = [UIFont systemFontOfSize:12];
+    }
+    return _userNameLab;
+}
+-(UILabel *)userMobileLab
+{
+    if (!_userMobileLab) {
+        _userMobileLab = [[UILabel alloc] init];
+        _userMobileLab.text = @"13270720072";
+        _userMobileLab.textAlignment = NSTextAlignmentRight;
+        _userMobileLab.font = [UIFont systemFontOfSize:12];
+    }
+    return _userMobileLab;
+}
+-(UILabel *)userAddressLab
+{
+    if (!_userAddressLab) {
+        _userAddressLab = [[UILabel alloc] init];
+        _userAddressLab.text = @"江苏省 南京市 蓬莱区胜利路23号";
+        _userAddressLab.font = [UIFont systemFontOfSize:12];
+    }
+    return _userAddressLab;
+}
+
+
+@end

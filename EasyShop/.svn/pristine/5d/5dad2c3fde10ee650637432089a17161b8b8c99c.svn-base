@@ -1,0 +1,15 @@
+//
+//  LoginViewController.h
+//  艾特测试
+//
+//  Created by 文聪科技 on 15/5/25.
+//  Copyright (c) 2015年 wencongkeji. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESLoginViewController : UIViewController
+
+@property (nonatomic, assign) BOOL  isNeedLoginEaseMob;
+
+@end

@@ -1,0 +1,43 @@
+
+
+
+
+
+
+
+
+
+
+//
+//  ESButton.m
+//  EasyShop
+//
+//  Created by wcz on 16/5/24.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESButton.h"
+
+@implementation ESButton
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        self.titleLabel.font = [UIFont systemFontOfSize:10];
+        self.titleLabel.textAlignment= NSTextAlignmentCenter;
+        self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    }
+    return self;
+}
+
+- (CGRect)titleRectForContentRect:(CGRect)contentRect
+{
+    return CGRectMake(0, contentRect.size.height - 20, contentRect.size.width, 15);
+}
+
+- (CGRect)imageRectForContentRect:(CGRect)contentRect
+{
+    return CGRectMake(0, 8, contentRect.size.width, contentRect.size.height - 28 );
+}
+
+@end

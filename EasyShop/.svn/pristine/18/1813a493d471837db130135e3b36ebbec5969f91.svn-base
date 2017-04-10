@@ -1,0 +1,26 @@
+//
+//  ESChatViewController.m
+//  EasyShop
+//
+//  Created by wcz on 16/4/23.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESChatViewController.h"
+
+@implementation ESChatViewController
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+}
+
+- (void)didPressSendButton:(UIButton *)button withMessageText:(NSString *)text senderId:(NSString *)senderId senderDisplayName:(NSString *)senderDisplayName date:(NSDate *)date
+{
+    
+}
+
+
+
+
+@end

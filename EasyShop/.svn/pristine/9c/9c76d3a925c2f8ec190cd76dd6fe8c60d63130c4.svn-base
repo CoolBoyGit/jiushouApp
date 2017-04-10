@@ -1,0 +1,48 @@
+//
+//  ESPayTool.m
+//  EasyShop
+//
+//  Created by guojian on 16/5/28.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESPayTool.h"
+
+#import "WXApi.h"
+#import <AlipaySDK/AlipaySDK.h>
+
+@implementation ESPayTool
+
++ (instancetype)payTool
+{
+    static ESPayTool *tool;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        tool = [[self alloc] init];
+    });
+    return tool;
+}
+
+- (void)handleWexinPayWithInfo:(WeixinPayInfo *)info
+{
+    PayReq* req             = [[PayReq alloc] init];
+    req.partnerId           = info.partnerid;
+    req.prepayId            = info.prepayid;
+    req.nonceStr            = info.noncestr;
+    req.timeStamp           = info.timestamp.intValue;
+    req.package             = info.package;
+    req.sign                = info.sign;
+    [WXApi sendReq:req];
+}
+//支付宝快捷支付
+- (void)handleAliPayWithOrder:(NSString *)order
+{
+    [[AlipaySDK defaultService] payOrder:order fromScheme:kAliPay_Scheme callback:^(NSDictionary *resultDic) {
+        NSLog(@"reslut = %@",resultDic);
+        
+        [UIAlertView bk_alertViewWithTitle:@"提示信息" message:resultDic.description];
+        
+    }];
+}
+
+@end

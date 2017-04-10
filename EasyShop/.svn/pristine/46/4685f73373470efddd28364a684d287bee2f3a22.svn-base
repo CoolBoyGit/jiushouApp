@@ -1,0 +1,462 @@
+//
+//  ESRegisterController.m
+//  EasyShop
+//
+//  Created by wcz on 16/4/4.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESRegisterController.h"
+#import "ESInputTextField.h"
+#import "ESThreeLoginView.h"
+#import "ESBlindViewController.h"
+#import "ESService.h"
+#import "WXApi.h"
+#import "ESSmsButton.h"
+#import <TencentOpenAPI/TencentApiInterface.h>
+#import <TencentOpenAPI/TencentOAuth.h>
+#import <TencentOpenAPI/QQApiInterface.h>
+#import "WarningControlView.h"
+#import "ESLoginViewController.h"
+@interface ESRegisterController ()<UITextFieldDelegate,ESThreeLoginDelegate,TencentSessionDelegate,ESInputTextFieldDelete>{
+    
+    TencentOAuth *_tencentOAuth;//腾讯授权
+}
+
+@property (nonatomic, strong) ESInputTextField *mobileNumTextField;
+@property (nonatomic, strong) ESInputTextField *passWordTextField;
+@property (nonatomic, strong) ESInputTextField *codeTextField;
+@property (nonatomic, strong) ESInputTextField *passWordNextTextField;
+
+/** indicator */
+@property (nonatomic,strong) ESIndicator *indcator;
+@property (nonatomic,strong) ESSmsButton *msButton;
+@property (nonatomic,strong) UIButton *registerButton;
+@end
+
+@implementation ESRegisterController
+
+- (ESIndicator *)indcator
+{
+    if (!_indcator) {
+        _indcator = [ESIndicator indicatorToView:self.view];
+    }
+    return _indcator;
+}
+
+- (ESInputTextField *)mobileNumTextField
+{
+    if (_mobileNumTextField ==nil) {
+        _mobileNumTextField = [[ESInputTextField alloc] initWithImage:nil needChange:NO andIsLogin:NO];
+        _mobileNumTextField.delegate=self;
+        _mobileNumTextField.TextDelete=self;
+        _mobileNumTextField.keyboardType = UIKeyboardTypeNumberPad;
+        _mobileNumTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _mobileNumTextField.placeholder = @"手机号";
+    }
+    return _mobileNumTextField;
+}
+
+- (ESInputTextField *)passWordTextField
+{
+    if (_passWordTextField ==nil) {
+        _passWordTextField = [[ESInputTextField alloc] initWithImage:nil needChange:NO andIsLogin:NO];
+        _passWordTextField.keyboardType = UIKeyboardTypeDefault;
+        _passWordTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _passWordTextField.secureTextEntry = YES;
+        _passWordTextField.TextDelete=self;
+        _passWordTextField.placeholder = @"6-16位登录密码";
+    }
+    return _passWordTextField;
+}
+
+- (ESInputTextField *)passWordNextTextField
+{
+    if (_passWordNextTextField ==nil) {
+        _passWordNextTextField = [[ESInputTextField alloc] initWithImage:nil needChange:NO andIsLogin:NO];
+        _passWordNextTextField.keyboardType = UIKeyboardTypeDefault;
+        _passWordNextTextField.TextDelete=self;
+        _passWordNextTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _passWordNextTextField.secureTextEntry=YES;
+        _passWordNextTextField.placeholder = @"请再次输入密码";
+    }
+    return _passWordNextTextField;
+}
+
+
+- (ESInputTextField *)codeTextField
+{
+    if (_codeTextField ==nil) {
+        _codeTextField = [[ESInputTextField alloc] initWithImage:nil needChange:NO andIsLogin:NO];
+        _codeTextField.keyboardType = UIKeyboardTypeNumberPad;
+        _codeTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _codeTextField.TextDelete=self;
+        _codeTextField.placeholder = @"请输入收到的注册码";
+    }
+    return _codeTextField;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    UIButton*rightButton=[UIButton buttonWithType:UIButtonTypeCustom];
+    rightButton.frame=CGRectMake(0, 0, 40, 25);
+    [rightButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [rightButton setTitle:@"登录" forState:UIControlStateNormal];
+    [rightButton addTarget:self action:@selector(goToLogin) forControlEvents:UIControlEventTouchUpInside];
+    
+    UIBarButtonItem*rightBarButton=[[UIBarButtonItem alloc]initWithCustomView:rightButton];
+    self.navigationItem.rightBarButtonItem=rightBarButton;
+    
+    
+    self.navigationItem.title=@"注册";
+    //self.navigationController.navigationBar.hidden=YES;
+    [self initalizedView];
+    [self addNotification];
+}
+- (void)initalizedView
+{
+    UIScrollView *sv = [[UIScrollView alloc] init];
+    sv.backgroundColor=[UIColor whiteColor];
+    sv.userInteractionEnabled = YES;
+    [self.view addSubview:sv];
+    [sv mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(@0);
+    }];
+    UIView *backgroundView = [[UIView alloc] init];
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(exitKeyboard)];
+    [backgroundView addGestureRecognizer:tap];
+    backgroundView.backgroundColor=[UIColor whiteColor];
+    
+    [sv addSubview:backgroundView];
+    [backgroundView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(sv);
+        make.width.equalTo(sv);
+    }];
+    
+    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [backButton setImage:[UIImage imageNamed:@"leftButton"] forState:UIControlStateNormal];
+    [backButton addTarget:self action:@selector(backButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    [backgroundView addSubview:backButton];
+    [backButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.view.mas_left).with.offset(15);
+        make.top.equalTo(self.view.mas_top).with.offset(30);
+        make.width.mas_equalTo(@20);
+        make.height.mas_equalTo(@20);
+    }];
+    
+    UILabel *nameLabel = [[UILabel alloc] init];
+    nameLabel.font = ADeanFONT15;
+    nameLabel.text = @"注册平台帐号";
+    nameLabel.textAlignment = NSTextAlignmentCenter;
+    nameLabel.textColor = LoginComColor;
+    [backgroundView addSubview:nameLabel];
+    [nameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(@(0));
+        //make.top.equalTo(@(ScreenHeight/6));
+        make.top.equalTo(@60);
+    }];
+    
+    [backgroundView addSubview:self.mobileNumTextField];
+    [self.mobileNumTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@40);
+        make.right.equalTo(@(-120));
+        make.height.equalTo(@39);
+        make.top.equalTo(nameLabel.mas_bottom).offset(40);
+    }];
+    self.msButton = [ESSmsButton buttonWithType:UIButtonTypeCustom];
+    //getVerifyCodeButton.backgroundColor = RGBA(255, 255, 255, .6);
+    [self.msButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    self.msButton. layer.borderColor=RGBA(233, 40, 46, 0.7).CGColor;
+    self.msButton.layer.borderWidth=1;
+    self.msButton.layer.cornerRadius = 18;
+    self.msButton.layer.masksToBounds = YES;
+    [self.msButton setTitleColor:RGBA(233, 40, 46, 0.7) forState:UIControlStateNormal];
+    [self.msButton setTitle:@"验证" forState:UIControlStateNormal];
+    self.msButton.enabled=NO;
+    //    [getVerifyCodeButton addTarget:self action:@selector(getVerifyCodeAction) forControlEvents:UIControlEventTouchUpInside];
+    self.msButton.titleLabel.font = ADeanFONT12;
+    
+    
+    [backgroundView addSubview:self.msButton];
+    [self.msButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(@(-40));
+        make.width.equalTo(@(70));
+        make.height.equalTo(@39);
+        make.centerY.equalTo(self.mobileNumTextField.mas_centerY).offset(0);
+    }];
+    
+    [backgroundView addSubview:self.codeTextField];
+    [self.codeTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@40);
+        make.right.equalTo(@(-40));
+        make.height.equalTo(@39);
+        make.top.equalTo(self.mobileNumTextField.mas_bottom).offset(15);
+    }];
+    
+    [backgroundView addSubview:self.passWordTextField];
+    [self.passWordTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@40);
+        make.width.equalTo(@(ScreenWidth - 80));
+        make.height.equalTo(@39);
+        make.top.equalTo(self.codeTextField.mas_bottom).offset(15);
+    }];
+    
+    [backgroundView addSubview:self.passWordNextTextField];
+    [self.passWordNextTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@40);
+        make.width.equalTo(@(ScreenWidth - 80));
+        make.height.equalTo(@39);
+        make.top.equalTo(self.passWordTextField.mas_bottom).offset(15);
+    }];
+    
+    self.registerButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.registerButton.backgroundColor = RGBA(233, 40, 46, 0.8);
+    self.registerButton.layer.cornerRadius = 18;
+    self.registerButton.layer.masksToBounds = YES;
+    [self.registerButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [self.registerButton setTitle:@"注册" forState:UIControlStateNormal];
+    //    registerButton.backgroundColor = [UIColor whiteColor];
+    self.registerButton.titleLabel.font = ADeanFONT15;
+    [self.registerButton addTarget:self action:@selector(registerAction) forControlEvents:UIControlEventTouchUpInside];
+    self.registerButton.enabled=NO;
+    [backgroundView addSubview:self.registerButton];
+    [self.registerButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@(40));
+        make.right.equalTo(@(-40));
+        make.top.equalTo(self.passWordNextTextField.mas_bottom).offset(20);
+        make.height.equalTo(@39);
+    }];
+    
+    
+    ESThreeLoginView *loginView = [[ESThreeLoginView alloc] initWithFrame:CGRectZero];
+    //    loginView.backgroundColor = [UIColor whiteColor];
+    loginView.delegate = self;
+    [backgroundView addSubview:loginView];
+    [loginView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.registerButton.mas_bottom).offset(0);
+        make.left.equalTo(@0);
+        make.width.equalTo(@(ScreenWidth));
+        make.height.equalTo(@(100));
+    }];
+    
+    
+    [backgroundView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(loginView.mas_bottom);
+    }];
+    
+}
+-(void)dealloc{
+    [self removeNotification];
+}
+-(void)threeLoginAboutAction:(LoginType)type
+{
+    if (type == LoginType_WeChat) {//微信
+       
+            
+            SendAuthReq *req    = [[SendAuthReq alloc] init];
+            req.scope           = @"snsapi_userinfo";
+            req.state           = @"123";
+            [WXApi sendReq:req];
+        
+    
+        
+    } else {//QQ
+        // 检测是否安装了QQ
+                    _tencentOAuth       = [[TencentOAuth alloc] initWithAppId:kQQ_AppId andDelegate:self];
+            NSArray *permission = @[kOPEN_PERMISSION_GET_INFO,
+                                    kOPEN_PERMISSION_GET_USER_INFO,
+                                    kOPEN_PERMISSION_GET_SIMPLE_USER_INFO];
+            [_tencentOAuth authorize:permission];
+            
+            
+        
+        }
+
+    
+}
+
+
+
+#pragma mark
+#pragma mark  Other Action
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [self.view endEditing:YES];
+    [[[UIApplication sharedApplication] keyWindow] endEditing:YES];
+}
+#pragma mark 代理协议自定义方法
+-(void)inputTextFieldDidChange:(NSString *)InputTextFieldText{
+    if (self.mobileNumTextField.text.length==0||self.passWordTextField.text.length==0||self.codeTextField.text.length==0||self.passWordNextTextField.text.length==0) {
+        self.registerButton.backgroundColor = RGBA(233, 40, 46, 0.8);
+        self.registerButton.enabled=NO;
+    }else if([self isMobileNumberClassification:self.mobileNumTextField.text]&&self.codeTextField.text.length==4){
+        self.registerButton.backgroundColor = RGBA(233, 40, 46, 1);
+        self.registerButton.enabled=YES;
+    }
+    if ([self isMobileNumberClassification:InputTextFieldText]) {
+        
+        self.msButton.layer.borderColor=RGBA(233, 40, 46, 1).CGColor;
+         [self.msButton setTitleColor:RGBA(233, 40, 46, 1) forState:UIControlStateNormal];
+        self.msButton.enabled=YES;
+    }else{
+        self.msButton.layer.borderColor=RGBA(233, 40, 46, 0.7).CGColor;
+        [self.msButton setTitleColor:RGBA(233, 40, 46, 0.7) forState:UIControlStateNormal];
+        self.msButton.enabled=NO;
+    }
+    
+    
+}
+-(void)goToLogin{
+//
+    if (self.isComfromLogin==YES) {
+        [self.navigationController popViewControllerAnimated:YES];
+    }else{
+        ESLoginViewController*login=[[ESLoginViewController alloc]init];
+        login.isComFromRegiste=YES;
+        [self.navigationController pushViewController:login animated:YES];
+    }
+    
+}
+
+-(void)exitKeyboard{
+    [self.view endEditing:YES];
+}
+#pragma mark 正则表达式
+/**判断是不是手机号码**/
+-(BOOL)isMobileNumberClassification:(NSString*)mobile{
+    
+    NSString * MOBIL = @"^\\d{11}$";//11位数字正则
+    NSPredicate *regextestmobil = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", MOBIL];
+    return [regextestmobil evaluateWithObject:mobile];
+    
+}
+/**
+ *  判断是不是纯数字 yes 是纯数字 no不是
+ */
+-(BOOL)isIntThePassWord:(NSString*)passWord{
+    NSString *regex =@"[0-9]*";
+    NSPredicate *pred = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",regex];
+    if (![pred evaluateWithObject:passWord]) {
+        return YES;
+    }
+    return NO;
+}
+- (void)backButtonAction
+{
+    self.navigationController.navigationBar.hidden = NO;
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+/**
+ *  获取验证码
+ */
+-(void)getVerifyCodeAction
+{
+    [self getVerifyCode];
+}
+
+/**
+ *  注册
+ */
+- (void)registerAction
+{
+    [self doUserAdd];
+}
+
+#pragma mark - Networking
+- (void)getVerifyCode
+{
+    GetSmsVerifyRequest *request = [GetSmsVerifyRequest request];
+    request.mobile = self.mobileNumTextField.text;
+    
+    @weakify(self);
+    //[self.indcator startAnimationWithMessage:@"正在获取验证码"];
+    [ESService getSmsVerifyRequest:request success:^{
+        @strongify(self);
+        [self endNetworking];
+        [ESToast showSuccess:@"验证码获取成功！"];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endNetworking];
+    }];
+}
+- (void)addNotification
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textDidChange:) name:UITextFieldTextDidChangeNotification object:self.mobileNumTextField];
+}
+- (void)removeNotification
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)textDidChange:(NSNotification *)notification
+{
+    UITextField *textField = notification.object;
+    if (textField == self.mobileNumTextField) {
+        self.msButton.phone = textField.text;
+    }
+}
+- (void)doUserAdd
+{
+
+    if ([self isIntThePassWord:self.passWordTextField.text]) {
+        
+    }else{
+        //这里写提示动画
+        TipViewAnimation*tipView=[[TipViewAnimation alloc]initWithFrame:self.view.bounds andTip:@"密码不能是纯数字"];
+        [tipView show];
+        return;
+    }if (6<self.passWordTextField.text.length&&self.passWordTextField.text.length<17) {
+        
+    }else{
+        return;
+        //这里写提示动画
+    }if ([self.passWordTextField.text isEqualToString:self.passWordNextTextField.text]) {
+        
+    }else{
+        //这里写提示
+        return;
+    }
+    UserAddRequest *request = [UserAddRequest request];
+    request.username    = self.mobileNumTextField.text;
+    request.password    = self.passWordTextField.text;
+    request.verify      = self.codeTextField.text;
+    
+    @weakify(self);
+    [self.indcator startAnimationWithMessage:@"正在注册..."];
+    [ESService userAddRequest:request success:^(NSString *response) {
+        @strongify(self);
+        [self endNetworking];
+        
+        [ESToast showSuccess:@"注册成功！"];
+        
+        if (self.registerBlock) {
+            self.registerBlock(request.username,request.password);
+        }
+        
+        [self.navigationController popViewControllerAnimated:YES];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endNetworking];
+    }];
+}
+-(void)tencentDidLogin{
+    
+}
+-(void)tencentDidNotNetWork{
+    
+}
+-(void)tencentDidNotLogin:(BOOL)cancelled{
+    
+}
+#pragma mark endNetworking
+- (void)endNetworking
+{
+    [self.indcator stopAnimation];
+}
+
+
+@end

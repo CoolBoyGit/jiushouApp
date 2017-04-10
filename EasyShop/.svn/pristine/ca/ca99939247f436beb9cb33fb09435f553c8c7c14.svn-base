@@ -1,0 +1,52 @@
+//
+//  ICPickerView.m
+//  iCarePregnant
+//
+//  Created by wcz on 15/12/16.
+//  Copyright © 2015年 oenius. All rights reserved.
+//
+
+#import "ICPickerView.h"
+#import "ICKeyBoardTopView.h"
+
+@interface ICPickerView () < ICKeyBoardTopViewDelegete >
+
+@end
+
+@implementation ICPickerView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame])
+    {
+        ICKeyBoardTopView *ickeyBoardView = [[ICKeyBoardTopView alloc] initWithFrame:CGRectZero];
+        [self addSubview:ickeyBoardView];
+        [ickeyBoardView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.top.equalTo(@0);
+            make.height.equalTo(@44);
+        }];
+        ickeyBoardView.delegate = self;
+    }
+    return self;
+}
+//ICKeyBoardTopView的代理方法
+-(void)ICkeyBoardTopViewButtonBeClick:(ButtonType)type
+{
+    if (type == ButtonTypeSure)
+    {
+        if(self.delegate && [self.delegate respondsToSelector:@selector(ICPickerViewDidPickerInfoBeSure:)])
+        {
+            [self.delegate ICPickerViewDidPickerInfoBeSure:self.pickInfo];
+        }
+        return;
+    }
+    if (type == ButtonTypeCancel)
+    {
+        if(self.delegate && [self.delegate respondsToSelector:@selector(ICPickerViewDidPickerInfoBeCancel:)])
+        {
+            [self.delegate ICPickerViewDidPickerInfoBeCancel:self.pickInfo];
+        }
+        return;
+    }
+}
+@end

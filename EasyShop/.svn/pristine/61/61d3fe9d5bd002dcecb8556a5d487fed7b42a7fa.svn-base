@@ -1,0 +1,14 @@
+//
+//  ESESRefoundController.h
+//  EasyShop
+//
+//  Created by wcz on 16/6/23.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESESRefoundController : UIViewController
+@property (nonatomic,assign) BOOL isRefound;
+@property (nonatomic,copy) NSString*order_id;
+@end

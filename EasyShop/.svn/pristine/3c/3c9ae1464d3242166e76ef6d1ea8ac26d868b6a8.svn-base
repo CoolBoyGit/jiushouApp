@@ -1,0 +1,98 @@
+//
+//  ESCartShopHeaderView.m
+//  EasyShop
+//
+//  Created by guojian on 16/5/15.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESCartShopHeaderView.h"
+#import "CartResponse.h"
+
+@interface ESCartShopHeaderView()
+
+@property (nonatomic, strong) UILabel                   *shopName;
+@property (nonatomic, strong) UIButton                  *editBtn;
+
+@end
+
+@implementation ESCartShopHeaderView
+
+- (void)setShopInfo:(CartShopInfo *)shopInfo
+{
+    _shopInfo = shopInfo;
+    
+    CartGoodsInfo *info     = _shopInfo.goodsItems.firstObject;
+    _shopName.text          = info ? info.shop_name : @"";
+    
+    self.editBtn.selected   = _shopInfo.isSelected;
+}
+
+- (instancetype)initWithReuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self  =[super initWithReuseIdentifier:reuseIdentifier]) {
+        
+        self.contentView.backgroundColor = [UIColor whiteColor];
+        [self setupViews];
+        
+    }
+    return self;
+}
+
+- (void)setupViews
+{
+    
+    self.editBtn.alpha = 1.0f;
+    self.shopName.alpha = 1.0f;
+}
+#pragma mark view init
+- (UILabel *)shopName
+{
+    if (!_shopName) {
+        _shopName = [[UILabel alloc] init];
+        _shopName.backgroundColor = [UIColor clearColor];
+        _shopName.text = @"";
+        
+        _shopName.font = [UIFont systemFontOfSize:15.f];
+        [self.contentView addSubview:_shopName];
+        [_shopName mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.equalTo(@0);
+            make.left.equalTo(self.editBtn.mas_right).with.offset(5);
+            make.height.equalTo(@30);
+            make.width.equalTo(@200);
+        }];
+
+    }
+    return _shopName;
+}
+
+- (UIButton *)editBtn
+{
+    if (!_editBtn) {
+        _editBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_editBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [_editBtn setBackgroundColor:[UIColor clearColor]];
+        [_editBtn setImage:[UIImage imageNamed:@"shopcart_unselect_icon"] forState:UIControlStateNormal];
+        [_editBtn setImage:[UIImage imageNamed:@"shopcart_selected_icon"] forState:UIControlStateSelected];
+        [_editBtn addTarget:self action:@selector(editBtnAction) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_editBtn];
+        [_editBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.equalTo(@0);
+            make.left.equalTo(@10);
+            make.height.equalTo(@30);
+            make.width.equalTo(@30);
+        }];
+
+        
+    }
+    return _editBtn;
+}
+
+- (void)editBtnAction
+{
+    if (self.selectedBlock) {
+        self.selectedBlock(!self.shopInfo.isSelected);
+    }
+}
+
+@end

@@ -1,0 +1,23 @@
+//
+//  PayResponse.m
+//  EasyShop
+//
+//  Created by guojian on 16/5/15.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "PayResponse.h"
+
+@implementation WeixinPayInfo
+
+- (NSString *)package
+{
+    return @"Sign=WXPay";
+}
+
+@end
+@implementation WeixinPayAllInfo
+
+
+
+@end

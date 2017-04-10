@@ -1,0 +1,17 @@
+//
+//  ESNewAddressController.h
+//  EasyShop
+//
+//  Created by 脉融LCJ on 16/5/11.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESNewAddressController : UIViewController
+
+/** 成功block */
+@property (nonatomic,copy)  void (^successBlock)();
+@property (nonatomic,strong) AddressInfo *info;
+@property (nonatomic,assign) BOOL isChangeAddress;
+@end

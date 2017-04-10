@@ -1,0 +1,296 @@
+//
+//  GoodsResponse.h
+//  EasyShopService
+//
+//  Created by guojian on 16/5/2.
+//  Copyright © 2016年 naijoug. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+/**
+ *  商品导航信息
+ */
+@interface NavInfo : NSObject
+
+/** 导航id */
+@property (nonatomic,copy) NSString *nid;
+/** 分类名称 */
+@property (nonatomic,copy) NSString *name;
+/** banner信息 [item : Banner ]*/
+@property (nonatomic,strong) NSArray *m_banner;
+
+@end
+
+/** 导航信息 */
+@interface BannerInfo : NSObject
+
+/** 导航图url */
+@property (nonatomic,copy) NSString *banner;
+/** id */
+@property (nonatomic,copy) NSString *bid;
+
+@end
+
+/**
+ *  活动专场信息
+ */
+@interface ActivityInfo : NSObject
+
+/** 专场id */
+@property (nonatomic,copy) NSString *aid;
+/** 专场名称 */
+@property (nonatomic,copy) NSString *name;
+/** 图片url */
+@property (nonatomic,copy) NSString *cover;
+/** 商品列表 (item: GoodsInfo )*/
+@property (nonatomic,strong) NSArray *goods_list;
+/**描述文字**/
+@property (nonatomic,copy) NSString* descriptions;
+
+@property (nonatomic,copy) NSString* start_time;
+
+@property (nonatomic,copy)  NSString *end_time;
+@end
+@interface ActivityInfo(Extentsion)
+
+/** 是否包含商品（goods_list > 1） */
+@property (nonatomic,assign,readonly)BOOL haveGoods;
+@property (nonatomic,assign,readonly) BOOL hasGoods;
+/** 专场cell高度 */
+@property (nonatomic,assign,readonly) CGFloat cellHeight;
+
+
+@end
+
+
+typedef NS_ENUM(NSInteger,GoodsInfoType) {
+    GoodsInfoType_Sell = 0,     //可售
+    GoodsInfoType_Remind,   //到货提醒
+    GoodsInfoType_Wish,     //心愿单
+};
+/**
+ *  商品列表信息
+ */
+@interface GoodsInfo : NSObject
+
+/** 商品id */
+@property (nonatomic,copy) NSString *gid;
+/** common id */
+@property (nonatomic,copy) NSString *common_id;
+/** 商品名字 */
+@property (nonatomic,copy) NSString *name;
+/** 商店id */
+@property (nonatomic,copy) NSString *shop_id;
+/** 商店名称 */
+@property (nonatomic,copy) NSString *shop_name;
+/** 价格 */
+@property (nonatomic,copy) NSString *price;
+/** 市价 */
+@property (nonatomic,strong) NSNumber *market_price;
+/** 是否包邮（Y ： 是 N ：否） */
+@property (nonatomic,copy) NSString *is_free_shipping;
+/** 销量 */
+@property (nonatomic,strong) NSNumber *salenum;
+/** 库存 */
+@property (nonatomic,strong) NSNumber *stock;
+/** 已订阅到货提醒数 */
+@property (nonatomic,strong) NSNumber *arrival;
+/** 图片 */
+@property (nonatomic,copy) NSString *image;
+/** item pcs */
+@property (nonatomic,strong) NSNumber *item_pcs;
+/** 销售（上架）时间（long） */
+@property (nonatomic,strong) NSNumber *sell_time;
+/** 促销信息 */
+@property (nonatomic,copy) NSString *tips;
+/** 所属分类 */
+@property (nonatomic,copy) NSString *cat_id;
+/** 加入心愿单数 */
+@property (nonatomic,strong) NSNumber *wish;
+/** 运费 */
+@property (nonatomic,strong) NSNumber *free_freight;
+/** 当前用户是否已加入收藏（Y ： 是 N：否） */
+@property (nonatomic,copy) NSString *subscribe_collect;
+/** 当前用户是否已加入心愿单（Y N） */
+@property (nonatomic,copy) NSString *subscribe_wish;
+/** 当前用户是否已加入到货提醒（Y N） */
+@property (nonatomic,copy) NSString *subscribe_arrival;
+/** 0不支持 1支持拼团 */
+@property (nonatomic,copy) NSString*cluster;
+/** 拼团价格 */
+@property (nonatomic,copy) NSString*cluster_price;
+/** 拼团人数 */
+@property (nonatomic,copy) NSString*cluster_member;
+
+@end
+@interface GoodsInfo (Extension)
+
+/** 商品信息类型 */
+@property (nonatomic,assign,readonly) GoodsInfoType goodsInfoType;
+
+/** 是否是收藏 */
+@property (nonatomic,assign,readonly) BOOL isCollect;
+/** 是心愿单 */
+@property (nonatomic,assign,readonly) BOOL isWish;
+/** 是到货提醒 */
+@property (nonatomic,assign,readonly) BOOL isArrival;
+
+@end
+
+
+@class GoodsCartInfo;
+/**
+ *  商品详情信息
+ */
+@interface GoodsDetailInfo : GoodsInfo
+
+/** 收藏数 */
+@property (nonatomic,strong) NSNumber *collect;
+/** sepc  */
+@property (nonatomic,copy) NSString *spec;
+/** 商品图片（item: 图片url ） */
+@property (nonatomic,copy) NSString *body;
+/** 属性 */
+@property (nonatomic,copy) NSString *property;
+/** 品牌id */
+@property (nonatomic,copy) NSString *brand_id;
+/** 所属品牌 */
+@property (nonatomic,copy) NSString *brand_name;
+/** psec参数名 */
+@property (nonatomic,copy) NSString *spec_name;
+/** spec value */
+@property (nonatomic,copy) NSString *spec_value;
+/** 属性分类 */
+@property (nonatomic,copy) NSString *type_id;
+/** 商品图片( item : ESImageInfo ) */
+@property (nonatomic,strong) NSArray *images;
+
+/** 0 是没有拼团 1是有拼团 */
+@property (nonatomic,copy) NSString*cluster;
+/** 是团购价格价格 */
+@property (nonatomic,strong) NSNumber*cluster_price;
+/** 是团购需要的人数 */
+@property (nonatomic,strong) NSNumber*cluster_member;
+
+@property (nonatomic,copy) NSString *sevice;
+/** prompt */
+@property (nonatomic,copy) NSString *prompt;
+/** 商品购物车 */
+@property (nonatomic,strong) GoodsCartInfo *cart_info;
+
+@end
+
+/** 图片信息 */
+@interface ESImageInfo : NSObject
+
+/** 图片 */
+@property (nonatomic,copy) NSString *image;
+
+@end
+
+@interface GoodsCartInfo : NSObject
+
+/** 商品数量 */
+@property (nonatomic,assign) NSInteger goods_sum;
+/** 商品价格 */
+@property (nonatomic,strong) NSNumber *price_sum;
+
+
+@end
+
+
+/**
+ *  商品分类信息
+ */
+@interface GoodsCategoryInfo : NSObject
+
+/** 分类名称 */
+@property (nonatomic,copy) NSString *name;
+/** pic */
+@property (nonatomic,copy) NSString *pic;
+/** 分类id */
+@property (nonatomic,copy) NSString *cid;
+
+@end
+
+/**
+ *  商品评论信息
+ */
+@interface GoodsEvaluationInfo : NSObject
+
+/** 评论id */
+@property (nonatomic,copy) NSString *eid;
+/** 用户id */
+@property (nonatomic,copy) NSString *member_id;
+/** 用户名 */
+@property (nonatomic,copy) NSString *member_name;
+/** common id */
+@property (nonatomic,copy) NSString *common_id;
+/** 商品id */
+@property (nonatomic,copy) NSString *goods_id;
+/** 商品名称 */
+@property (nonatomic,copy) NSString *goods_name;
+/** 用户评分（1 - 5 分） */
+@property (nonatomic,strong) NSNumber *scores;
+/** 评价（good ：好评 | neutral ：一般 | bad ：差） */
+@property (nonatomic,copy) NSString *result;
+/** 内容 */
+@property (nonatomic,copy) NSString *content;
+/** 用户晒图 */
+@property (nonatomic,strong) NSArray *image;
+/** 是否匿名评价（0：否 1：是） */
+@property (nonatomic,copy) NSString *isanonymous;
+/** 创建时间（long） */
+@property (nonatomic,strong) NSNumber *create_time;
+/** 状态（0：禁止显示 1：显示 2：置顶） */
+@property (nonatomic,strong) NSNumber *status;
+/** 商家解释 */
+@property (nonatomic,copy) NSString *explain;
+/** 上传时间 */
+@property (nonatomic,strong) NSNumber *update_time;
+/** 来自（1：手机端 2：电脑） */
+@property (nonatomic,strong) NSNumber *evaluate_from;
+
+@end
+
+/**
+ *  商品评论信息统计
+ */
+@interface EvaluationInfo : NSObject
+
+/** 评论总数 */
+@property (nonatomic,strong) NSNumber *count;
+/** 好评数 */
+@property (nonatomic,strong) NSNumber *good_count;
+/** 带图评论 */
+@property (nonatomic,strong) NSNumber *img_count;
+/** 评论平均分 */
+@property (nonatomic,strong) NSNumber *score;
+/** delivery_scores */
+@property (nonatomic,strong) NSNumber *delivery_scores;
+/** logistics_scores */
+@property (nonatomic,strong) NSNumber *logistics_scores;
+
+@property (nonatomic,strong) NSNumber*bad_count;
+@property (nonatomic,strong) NSNumber*normal_count;
+@end
+
+/** 抢购信息 */
+@interface PanicInfo : NSObject
+
+/** id */
+@property (nonatomic,copy) NSString *pid;
+/** 名称 */
+@property (nonatomic,copy) NSString *name;
+/** banner ( item : BannerInfo ) */
+@property (nonatomic,strong) NSArray *m_banner;
+/** 专场信息 （item : ActivityInfo ） */
+@property (nonatomic,strong) NSArray *activeList;
+
+@end
+
+
+
+
+

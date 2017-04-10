@@ -1,0 +1,243 @@
+//
+//  ICCouponController.m
+//  iCarePregnant
+//
+//  Created by wcz on 16/6/22.
+//  Copyright © 2016年 oenius. All rights reserved.
+//
+
+#import "ICCouponController.h"
+#import "ESCouponViewCell.h"
+#import "ESCouponFooterReusableView.h"
+#import "ESCouponNoneCell.h"
+@interface ICCouponController ()<UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout>
+
+@property (nonatomic, strong) UICollectionView *collectionview;
+
+/** from */
+@property (nonatomic,assign) NSInteger page;
+/** 卡券 */
+@property (nonatomic,strong) NSMutableArray *couponItems;
+
+@end
+
+@implementation ICCouponController
+
+- (NSMutableArray *)couponItems
+{
+    if (!_couponItems) {
+        _couponItems = [NSMutableArray array];
+    }
+    return _couponItems;
+}
+
+- (UICollectionView *)collectionview
+{
+    if (_collectionview == nil) {
+        
+        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc]init];
+        _collectionview = [[UICollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:flowLayout];
+        _collectionview.dataSource = self;
+        _collectionview.delegate = self;
+        _collectionview.backgroundColor = [UIColor whiteColor];
+        [_collectionview registerClass:[ESCouponViewCell class] forCellWithReuseIdentifier:@"ESCouponViewCell"];
+        [_collectionview registerClass:[ESCouponNoneCell class] forCellWithReuseIdentifier:@"ESCouponNoneCell"];
+        [_collectionview registerClass:[ESCouponFooterReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"ESCouponFooterReusableView"];
+    }
+    return _collectionview;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    //self.view.backgroundColor=RGB(245, 245, 245);
+    if (self.isComfromPayList==YES) {
+        self.title=@"使用优惠卷";
+    }else{
+        self.title=@"";
+    }
+    [self.view addSubview:self.collectionview];
+    [self.collectionview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(@0);
+    }];
+    
+    @weakify(self);
+    self.collectionview.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        @strongify(self);
+        [self refreshList];
+    }];
+    self.collectionview.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+        @strongify(self);
+        [self moreList];
+    }];
+    
+    
+    [self refreshList];
+}
+-(CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section{
+    if (self.isComfromPayList==YES) {
+        return CGSizeMake(ScreenWidth-20, ScreenHeight-100*(self.couponItems.count)-64);
+
+    }
+     return CGSizeMake(0, 0);
+   }
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath{
+    if (self.isComfromPayList==YES) {
+        if (kind==UICollectionElementKindSectionFooter) {
+            ESCouponFooterReusableView*view=[collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"ESCouponFooterReusableView" forIndexPath:indexPath];
+            return view;
+        }
+
+    }else{
+        if (kind==UICollectionElementKindSectionFooter) {
+            ESCouponFooterReusableView*view=[collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"ESCouponFooterReusableView" forIndexPath:indexPath];
+            //view.backgroundColor=[UIColor whiteColor];
+            return view;
+        }
+
+    }
+    
+    return nil;
+}
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    if (self.isComfromPayList==YES) {
+        if (self.couponItems.count==0) {
+            return 1;
+        }
+        else{
+            return self.couponItems.count;
+        }
+    }
+    else{
+        return self.couponItems.count;
+    }
+    
+}
+
+-(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+{
+    return UIEdgeInsetsMake(10, 0, 0, 0);
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (self.couponItems.count==0) {
+        return CGSizeMake(ScreenWidth-20, 200);
+    }else{
+         return CGSizeMake(ScreenWidth - 20, 90);
+    }
+   
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+
+{
+    if (self.isComfromPayList==YES) {
+        if (self.couponItems.count==0) {
+            ESCouponNoneCell *cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"ESCouponNoneCell" forIndexPath:indexPath];
+            return cell;
+        }else{
+            ESCouponViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ESCouponViewCell" forIndexPath:indexPath];
+            //    cell.contentView.layer.cornerRadius=10;
+            //    cell.contentView.layer.masksToBounds=YES;
+            //    cell.model = nil;
+            cell.couponInfo = [self.couponItems objectAtIndex:indexPath.item];
+            
+            return cell;
+        }
+
+    }else{
+        ESCouponViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ESCouponViewCell" forIndexPath:indexPath];
+        //    cell.contentView.layer.cornerRadius=10;
+        //    cell.contentView.layer.masksToBounds=YES;
+        //    cell.model = nil;
+        cell.couponInfo = [self.couponItems objectAtIndex:indexPath.item];
+        
+        return cell;
+
+    }
+    
+    
+}
+
+#pragma mark - Networking
+- (void)refreshList
+{
+    if (self.isComfromPayList==YES) {
+        [self fetchCoupon];
+    }else{
+        self.page = 1;
+        [self fetchCoupon];
+    }
+    
+}
+- (void)moreList
+{
+    if (self.isComfromPayList==YES) {
+        [self fetchCoupon];
+    }else{
+        self.page ++;
+        [self fetchCoupon];
+    }
+
+}
+
+
+- (void)fetchCoupon
+{
+    
+    if (self.isComfromPayList==YES) {
+        SelectCouponRequest *request=[SelectCouponRequest request];
+        request.order_id=self.order_id;
+        @weakify(self);
+        [ESService selectCouponRequest:request success:^(NSArray *response) {
+            @strongify(self);
+            [self endGSNetworking];
+            [self.couponItems removeAllObjects];
+            [self.couponItems addObjectsFromArray:response];
+            [self.collectionview reloadData];
+            
+            
+        } failure:^(NSError *error) {
+            @strongify(self);
+            [self endGSNetworking];
+
+        }];
+        
+    }else{
+        CouponRequest *request = [CouponRequest request];
+        request.type = self.type;
+        request.page = [NSNumber numberWithInteger:self.page];
+        request.n = @20;
+        
+        @weakify(self);
+        [ESService couponRequest:request success:^(NSArray *response) {
+            @strongify(self);
+            [self endGSNetworking];
+            
+            if (self.page == 1) {
+                [self.couponItems removeAllObjects];
+            }
+            self.collectionview.mj_footer.hidden = response.count < 20;
+            
+            [self.couponItems addObjectsFromArray:response];
+            [self.collectionview reloadData];
+            
+        } failure:^(NSError *error) {
+            @strongify(self);
+            [self endGSNetworking];
+        }];
+    }
+    
+}
+
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.collectionview.mj_header endRefreshing];
+    [self.collectionview.mj_footer endRefreshing];
+}
+
+@end

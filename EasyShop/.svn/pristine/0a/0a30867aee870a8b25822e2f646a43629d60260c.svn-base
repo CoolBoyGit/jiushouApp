@@ -1,0 +1,407 @@
+//
+//  ESOrderDetailController.m
+//  EasyShop
+//
+//  Created by 脉融LCJ on 16/5/11.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESOrderDetailController.h"
+#import "ESOrderStateView.h"
+#import "ESOrderAddressCell.h"
+#import "ESOrderShopCell.h"
+#import "ESOrderPriceCell.h"
+#import "ESLogisticsCell.h"
+#import "ESOrderTimeCell.h"
+#import "ESOrderBottonCell.h"
+#import "ESHomeShopDetailController.h"
+#import "OrderDetailBottomView.h"
+#import "OrderFooterView.h"
+#import "ESESRefoundController.h"
+#import "ESHomeShopDetailController.h"
+#import "ESPayListController.h"
+#import "ESFootViewGray.h"
+#import "ESLogisticsController.h"
+#import "ESRefundResultCon.h"
+#import "PostCommentViewController.h"
+#import "ESPayListController.h"
+
+@interface ESOrderDetailController()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) ESOrderStateView *headerView;
+/** footer */
+@property (nonatomic,strong) OrderFooterView *footerView;
+/** BottomView */
+@property (nonatomic,strong) ESFootViewGray *footView;
+@property (nonatomic,strong) OrderDetailBottomView *bottomView;
+
+/** 订单详情信息 */
+@property (nonatomic,strong) OrderDetailInfo *detailInfo;
+/** indicator */
+@property (nonatomic,strong) ESIndicator *indicator;
+
+@end
+
+@implementation ESOrderDetailController
+
+- (ESIndicator *)indicator
+{
+    if (!_indicator) {
+        _indicator = [ESIndicator indicatorToView:self.view];
+    }
+    return _indicator;
+}
+
+- (OrderDetailBottomView *)bottomView
+{
+    if (!_bottomView) {
+        _bottomView = [[OrderDetailBottomView alloc] init];
+        @weakify(self);
+        _bottomView.RefoundBlock=^{//申请退货 
+            @strongify(self);
+            ESESRefoundController *esRefound=[[ESESRefoundController alloc]init];
+            esRefound.orderInfo=self.detailInfo;
+            esRefound.isRefound=NO;
+            [self.navigationController pushViewController:esRefound animated:YES];
+        };
+        _bottomView.leftBlock = ^{//
+            @strongify(self);
+            switch (self.detailInfo.orderStatus) {
+                case OrderStatus_WaitSend://退款
+                {
+                    @strongify(self);
+                    ESESRefoundController *esRefound=[[ESESRefoundController alloc]init];
+                    esRefound.orderInfo=self.detailInfo;
+                    esRefound.isRefound=YES;
+                    [self.navigationController pushViewController:esRefound animated:YES];
+                }
+                    break;
+                case OrderStatus_WaitSure://查看物流
+                {
+                    
+                }
+                    break;
+                    case OrderStatus_WaitReply://等待评价->查看物流
+                {
+                    ESLogisticsController*esLogitic=[[ESLogisticsController alloc]init];
+                    esLogitic.orderId=self.detailInfo.order_id;
+                    NSLog(@"%@",self.detailInfo.order_id);
+                    [self.navigationController pushViewController:esLogitic animated:YES];
+                    
+                }
+                    break;
+                default: break;
+            }
+        };
+        _bottomView.rightBlock = ^{
+            @strongify(self);
+            switch (self.detailInfo.orderStatus) {
+                case OrderStatus_WaitPay://去支付
+                {
+                    ESPayListController *pay = [[ESPayListController alloc] init];
+                    pay.order_id = self.order_id;
+                    pay.total_fee = self.detailInfo.total_fee;
+                    [self.navigationController pushViewController:pay animated:YES];
+                }
+                    break;
+                case OrderStatus_WaitSend://申请退款
+                {
+                    if (self.detailInfo.refund_status.intValue==0) {
+                        ESESRefoundController *esRefound=[[ESESRefoundController alloc]init];
+                        esRefound.orderInfo=self.detailInfo;
+                        esRefound.isRefound=YES;
+                        [self.navigationController pushViewController:esRefound animated:YES];
+                    }else{
+                        ESRefundResultCon *vc=[[ESRefundResultCon alloc]init];
+                        vc.isFromDetailOrder=YES;
+                        vc.orderInfo=self.detailInfo;
+                        [self.navigationController pushViewController:vc animated:YES];
+                    }
+                }
+                    break;
+                case OrderStatus_WaitReply://评价
+                {
+                    PostCommentViewController *vc=[[PostCommentViewController alloc]init];
+                    vc.orderInfo = self.detailInfo;
+                    [self.navigationController pushViewController:vc animated:YES];
+                }
+                    break;
+                case OrderStatus_WaitSure://确认收货
+                {
+                    UIAlertView *alertView = [UIAlertView bk_alertViewWithTitle:@"确认收货" message:@"您确认收货吗？"];
+                    [alertView bk_addButtonWithTitle:@"取消" handler:nil];
+                    // @weakify(self);
+                    [alertView bk_addButtonWithTitle:@"确认收货" handler:^{//进入评论页面
+                        // @strongify(self);
+                        //            [self handleAtSection:section];
+                        
+                    }];
+                    [alertView show];
+                    
+                }
+                    break;
+                default: break;
+            }
+        };
+    }
+    return _bottomView;
+}
+
+#pragma mark - LifeCycle
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    
+    [self handleNavigation];
+    
+    self.view.backgroundColor = [UIColor whiteColor];
+    self.title = @"订单详情";
+//    [self initalizedCumstomNav];
+    [self.view addSubview:self.tableView];
+    self.tableView.tableHeaderView = ({
+        ESOrderStateView *headerView = [[ESOrderStateView alloc] init];
+        headerView.frame    = CGRectMake(0, 0, ScreenWidth, 60);
+        self.headerView     = headerView;
+        
+        headerView;
+    });
+    self.tableView.tableFooterView = ({
+        OrderFooterView *footerView = [[OrderFooterView alloc] init];
+        footerView.backgroundColor=[UIColor whiteColor];
+        footerView.frame = CGRectMake(0, 0, ScreenWidth, 55);
+        footerView.pasteButtonBlock=^(){
+            UIPasteboard*paste=[UIPasteboard generalPasteboard];
+            paste.string=self.detailInfo.order_id;
+            [ESToast showSuccess:@"成功复制"];
+        };
+        self.footerView = footerView;
+        footerView;
+    });
+//    self.tableView.contentInset = UIEdgeInsetsMake(0, 0, kHeightOrderFooter, 0);
+    
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(@0);
+        make.top.equalTo(@0);
+        make.bottom.equalTo(@(-49));
+    }];
+    [self.view addSubview:self.bottomView];
+    //CGFloat top = self.view.height - kHeightOrderDetailBottom;
+    [self.bottomView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(@0);
+       // make.top.equalTo([NSNumber numberWithFloat:top]);
+        make.height.equalTo(@49);
+    }];
+    
+    [self fetchOrderDetail];
+}
+
+- (void)handleNavigation
+{
+    //1. 如果是支付页面进入，从堆栈删除
+    NSMutableArray *mArr = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+    [mArr enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj isKindOfClass:[ESPayListController class]]) {
+            [mArr removeObject:obj];
+        }
+    }];
+    self.navigationController.viewControllers = [mArr copy];
+}
+
+#pragma mark
+#pragma mark - tableview代理方法;
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    if (self.detailInfo) {
+        if (self.detailInfo.orderStatus == OrderStatus_WaitReply || self.detailInfo.orderStatus == OrderStatus_WaitSure) {//待评价 || 待收货  -> 有物流信息
+            return 3;
+        }else{
+            return 3;
+        }
+    }
+    return 0;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    if (section == 0) {//地址
+        return 1;
+    }else if (section == 1) {//订单商品
+        return self.detailInfo.order_goods.count;
+    }else if (section == 2) {//价格相关
+        return 5;
+   }
+//    else if (section == 3) {//物流信息
+//        return 1;
+//    }
+    return 0;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section == 0) {//地址
+        return 60;
+    }else if (indexPath.section == 1) {//订单商品
+        return 90;
+    }else if (indexPath.section == 2) {//价格相关
+        return 40;
+    }
+//    else if (indexPath.section == 3) {//物流信息
+//        return 20;
+//    }
+    return 0;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
+{
+    return 5;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 0.01;
+}
+-(UIView*)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
+    ESFootViewGray *view=[tableView dequeueReusableHeaderFooterViewWithIdentifier:@"ESFootViewGray"];
+    //self.footerView.backgroundColor=[UIColor blackColor];
+    return view;
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section == 0) {//地址信息
+        ESOrderAddressCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESOrderAddressCell"];
+        cell.orderInfo = self.detailInfo;
+        return cell;
+    }else if (indexPath.section == 1) {//商品信息
+        ESOrderShopCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESOrderShopCell"];
+        cell.goodsInfo = [self.detailInfo.order_goods objectAtIndex:indexPath.row];
+        return cell;
+    }else if (indexPath.section == 2) {//价格信息
+        ESOrderPriceCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESOrderPriceCell"];
+        switch (indexPath.row) {
+            case 0:
+                cell.titleLab.text = @"应付总额";
+                cell.titleLab.textColor = [UIColor blackColor];
+                cell.priceNumLab.text = [NSString stringWithFormat:@"¥%@",self.detailInfo.real_amount];
+                cell.priceNumLab.textColor = RGB(233, 40, 46);
+                break;
+            case 1:
+                cell.titleLab.text = @"商品总价";
+                cell.priceNumLab.text = [NSString stringWithFormat:@"¥%@",self.detailInfo.total_fee];
+                break;
+            case 2:
+                cell.titleLab.text = @"首单优惠";
+                cell.priceNumLab.text = [NSString stringWithFormat:@"¥%@",self.detailInfo.coupon_fee];
+                break;
+            case 3:
+                cell.titleLab.text = @"运费";
+                cell.priceNumLab.text = [NSString stringWithFormat:@"¥%@",self.detailInfo.shipping_fee];
+                break;
+            default:
+                cell.titleLab.text = @"税费";
+                cell.priceNumLab.text = [NSString stringWithFormat:@"¥%@",self.detailInfo.tax_fee];
+                break;
+        }
+        return cell;
+    }
+//    else if (indexPath.section == 3) {//物流信息
+//        ESLogisticsCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESLogisticsCell"];
+//        cell.orderInfo = self.detailInfo;
+//        return cell;
+//    }
+    return nil;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
+    if (indexPath.section == 1) {//商品信息
+        
+        OrderGoodsInfo *info = [self.detailInfo.order_goods objectAtIndex:indexPath.row];
+        
+        ESHomeShopDetailController *detail = [[ESHomeShopDetailController alloc] init];
+        detail.goods_id = info.goods_id;
+        [self.navigationController pushViewController:detail animated:YES];
+    }
+}
+
+#pragma mark
+#pragma mark lazy init
+- (UITableView *)tableView
+{
+    if (_tableView == nil) {
+        _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+        _tableView.delegate = self;
+        //_tableView.tableFooterView = [[UIView alloc] init];
+        [_tableView registerClass:[ESFootViewGray class] forHeaderFooterViewReuseIdentifier:@"ESFootViewGray"];
+        [_tableView registerClass:[ESOrderAddressCell class] forCellReuseIdentifier:@"ESOrderAddressCell"];
+        [_tableView registerClass:[ESOrderShopCell class] forCellReuseIdentifier:@"ESOrderShopCell"];
+        [_tableView registerClass:[ESOrderPriceCell class] forCellReuseIdentifier:@"ESOrderPriceCell"];
+        [_tableView registerClass:[ESLogisticsCell class] forCellReuseIdentifier:@"ESLogisticsCell"];
+        [_tableView registerClass:[ESOrderTimeCell class] forCellReuseIdentifier:@"ESOrderTimeCell"];
+        [_tableView registerClass:[ESOrderBottonCell class] forCellReuseIdentifier:@"ESOrderBottonCell"];
+        @weakify(self);
+        _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+           @strongify(self);
+            [self fetchOrderDetail];
+        }];
+    }
+    return _tableView;
+}
+
+#pragma mark - Networking
+
+#pragma mark - 确认收货
+- (void)comfrimOrder
+{
+    ComfirmOrderRequest *request = [ComfirmOrderRequest request];
+    request.order_id = self.order_id;
+    
+    @weakify(self);
+    [self.indicator startAnimation];
+    [ESService comfirmOrderRequest:request success:^{
+        @strongify(self);
+        [self endGSNetworking];
+        
+        [ESToast showSuccess:@"确认收货成功!"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kReloadOrderListNotification object:nil];
+        [self.navigationController popViewControllerAnimated:YES];
+        
+    } failure:^(NSError *error) {
+       @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+#pragma mark 请求订单详情
+- (void)fetchOrderDetail
+{
+    GetOrderDetailRequest *request = [[GetOrderDetailRequest alloc] init];
+    request.order_id = self.order_id;
+    
+    @weakify(self);
+    [self.indicator startAnimation];
+    [ESService getOrderDetailRequest:request success:^(OrderDetailInfo *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        self.detailInfo = response;
+        [self.tableView reloadData];
+        
+        self.headerView.orderInfo = response;
+        self.footerView.orderInfo = response;
+        self.bottomView.orderInfo = response;
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.indicator stopAnimation];
+    [self.tableView.mj_header endRefreshing];
+}
+
+@end

@@ -1,0 +1,72 @@
+//
+//  ESSharePageController.m
+//  EasyShop
+//
+//  Created by wcz on 16/5/26.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESSharePageController.h"
+#import "ESShareCategoryController.h"
+
+@interface ESSharePageController ()
+
+@property (nonatomic, strong) NSArray *array;
+
+@end
+
+@implementation ESSharePageController
+
+- (NSArray *)array
+{
+    if (_array == nil) {
+        _array = @[@"默认",@"热评",@"关注"];
+    }
+    return _array;
+}
+- (instancetype)init
+{
+    if (self = [super init]) {
+        self.menuHeight = 44;
+        self.progressColor = [UIColor blackColor];
+        self.progressHeight = 1;
+        self.menuViewStyle = WMMenuViewStyleLine;
+        self.menuItemWidth = 50 ;
+        self.postNotification = YES;
+        self.titleSizeSelected = 15;
+        self.itemMargin = 20;
+        self.titleSizeNormal = 15;
+        self.titleColorSelected = [UIColor blackColor];
+        self.titleColorNormal = RGB(138, 138, 138);
+        self.menuBGColor = [UIColor whiteColor];
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.title = @"11111";
+//    [self initalizedCumstomNav];
+}
+
+- (NSInteger)numbersOfChildControllersInPageController:(WMPageController *)pageController
+{
+    return self.array.count;
+}
+
+- (NSString *)pageController:(WMPageController *)pageController titleAtIndex:(NSInteger)index
+{
+    return self.array[index];
+}
+
+
+
+- (__kindof UIViewController *)pageController:(WMPageController *)pageController viewControllerAtIndex:(NSInteger)index
+{
+    ESShareCategoryController *controller = [[ESShareCategoryController alloc] init];
+    return controller;
+}
+
+
+@end

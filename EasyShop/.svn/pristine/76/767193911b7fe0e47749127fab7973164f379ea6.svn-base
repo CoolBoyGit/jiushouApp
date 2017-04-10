@@ -1,0 +1,93 @@
+//
+//  ESShopCommentReusableView.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/5.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESShopCommentReusableView.h"
+
+@interface ESShopCommentReusableView ()
+
+@property (nonatomic, strong) UILabel *rateLabel;
+@property (nonatomic, strong) UIView *backView;
+
+@end
+
+@implementation ESShopCommentReusableView
+
+- (UILabel *)rateLabel
+{
+    if (_rateLabel == nil) {
+        _rateLabel = [[UILabel alloc]init];
+        _rateLabel.textColor = [UIColor blackColor];
+        _rateLabel.font = [UIFont systemFontOfSize:14];
+    }
+    return _rateLabel;
+}
+
+- (UIView *)backView
+{
+    if (_backView == nil) {
+        _backView = [[UIView alloc]init];
+    }
+    return _backView;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame])
+    {
+        [self initalizedView];
+    }
+    return self;
+}
+
+- (void)initalizedView
+{
+    [self addSubview:self.rateLabel];
+    [self.rateLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@12);
+        make.top.equalTo(@12);
+    }];
+    [self addSubview:self.backView ];
+    [self.backView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(@0);
+        make.top.equalTo(self.rateLabel.mas_bottom).offset(5);
+    }];
+}
+
+- (void)setEvluationInfo:(EvaluationInfo *)evluationInfo
+{
+    _evluationInfo = evluationInfo;
+    
+    for (UIView *view in self.backView.subviews) {
+        [view removeFromSuperview];
+    }
+    int count = _evluationInfo.count.intValue;
+    int good  = _evluationInfo.good_count.intValue;
+    int img   = _evluationInfo.img_count.intValue;
+    int rate  = count > 0 ? (good / count)*100 : 0;
+    self.rateLabel.text = [NSString stringWithFormat:@"%d%% 的好评",rate];
+    
+    NSArray *array = @[[NSString stringWithFormat:@"全部(%d)",count],
+                       [NSString stringWithFormat:@"好评(%d)",good],
+                       [NSString stringWithFormat:@"图片(%d)",img],
+                       ];
+    for (int i = 0; i < array.count; i++)
+    {
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.frame = CGRectMake(10 + ((70)*(i%3)), 30 * (i / 3), 60, 20);
+        button.layer.borderWidth = .5;
+        button.titleLabel.font = [UIFont systemFontOfSize:10];
+        button.layer.borderColor = [UIColor redColor].CGColor;
+        [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [button setTitle:array[i] forState:UIControlStateNormal];
+        [self.backView addSubview:button];
+        
+    }
+}
+
+
+@end

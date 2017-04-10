@@ -1,0 +1,16 @@
+//
+//  ESRegisterController.h
+//  EasyShop
+//
+//  Created by wcz on 16/4/4.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESRegisterController : UIViewController
+
+/** 注册成功block */
+@property (nonatomic,copy) void (^registerBlock)(NSString *username,NSString *password);
+
+@end

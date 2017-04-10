@@ -1,0 +1,82 @@
+//
+//  OrderFooterView.m
+//  EasyShop
+//
+//  Created by guojian on 16/5/31.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "OrderFooterView.h"
+#import "GSTimeTool.h"
+
+@interface OrderFooterView()
+
+/** 订单编号 */
+@property (nonatomic,strong) UILabel *numberLabel;
+/** 下单时间 */
+@property (nonatomic,strong) UILabel  *timeLabel;
+
+
+@end
+
+@implementation OrderFooterView
+
+- (void)setOrderInfo:(OrderDetailInfo *)orderInfo
+{
+    _orderInfo = orderInfo;
+    
+    self.numberLabel.text = [NSString stringWithFormat:@"订单编号：%@",orderInfo.order_id];
+    self.timeLabel.text = [NSString stringWithFormat:@"下单时间：%@",[GSTimeTool formatterNumber:orderInfo.create_time toType:GSTimeType_YYYYMMddHHmm]];
+}
+
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        
+        [self addSubview:self.numberLabel];
+        [self addSubview:self.timeLabel];
+        
+    }
+    return self;
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    [self.numberLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(@15);
+        make.top.equalTo(@0);
+        make.bottom.equalTo(self.mas_centerY);
+    }];
+    [self.timeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.mas_centerY);
+        make.left.right.equalTo(@15);
+        make.bottom.equalTo(@0);
+    }];
+}
+
+- (UILabel *)numberLabel
+{
+    if (!_numberLabel) {
+        _numberLabel = [[UILabel alloc] init];
+        _numberLabel.font = [UIFont systemFontOfSize:11];
+        _numberLabel.text = @"";
+    }
+    return _numberLabel;
+}
+
+- (UILabel *)timeLabel
+{
+    if (!_timeLabel) {
+        _timeLabel = [[UILabel alloc] init];
+        _timeLabel.font = [UIFont systemFontOfSize:11];
+        _timeLabel.text = @"";
+    }
+    return _timeLabel;
+}
+
+
+
+@end

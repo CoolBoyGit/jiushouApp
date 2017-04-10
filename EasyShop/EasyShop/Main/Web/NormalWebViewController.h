@@ -1,0 +1,14 @@
+//
+//  NormalWebViewController.h
+//  MFBank
+//
+//  Created by 脉融iOS开发 on 15/11/24.
+//  Copyright (c) 2015年 MFBank. All rights reserved.
+//
+
+@interface NormalWebViewController : ESMyViewController
+
+@property (nonatomic, copy) NSString *url;//网页地址
+@property (nonatomic, copy) NSString *title;//标题
+
+@end

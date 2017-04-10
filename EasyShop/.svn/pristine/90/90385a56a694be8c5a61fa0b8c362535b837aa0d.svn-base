@@ -1,0 +1,50 @@
+//
+//  ESComBottonView.m
+//  EasyShop
+//
+//  Created by 脉融LCJ on 16/5/12.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESCommentBottonView.h"
+
+@implementation ESCommentBottonView
+
+-(instancetype)initWithFrame:(CGRect)frame
+{
+    if ([super initWithFrame:frame]) {
+        [self setUpviews];
+    }
+    return self;
+}
+
+-(void)setUpviews
+{
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = CGRectMake(ScreenWidth-100, 0, 100, 44);
+    [button setTitle:@"发表评价" forState:UIControlStateNormal];
+    [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    button.backgroundColor = [UIColor blackColor];
+    [button addTarget:self action:@selector(btnClick) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:button];
+    
+    UIButton *button1 = [UIButton buttonWithType:UIButtonTypeCustom];
+    button1.frame = CGRectMake(0, 0, 100, 44);
+//    button1.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+    button1.titleLabel.font = [UIFont systemFontOfSize:13];
+    [button1 setTitle:@"匿名评价" forState:UIControlStateNormal];
+    [button1 setImage:[UIImage imageNamed:@"photo_check_default"] forState:UIControlStateNormal];
+    [button1 setImage:[UIImage imageNamed:@"photo_check_selected"] forState:UIControlStateSelected];
+    [button1 setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [button1 addTarget:self action:@selector(btnClick1:) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:button1];
+}
+-(void)btnClick
+{
+    [[AppDelegate shared] popToRootViewControllerAnimated:YES];
+}
+-(void)btnClick1:(UIButton *)btn
+{
+    btn.selected = !btn.selected;
+}
+@end

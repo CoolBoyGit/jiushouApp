@@ -1,0 +1,233 @@
+//
+//  ESBlindViewController.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/2.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESBlindViewController.h"
+#import "ESThirdRegisterView.h"
+#import "ESThirdBlindView.h"
+
+@interface ESBlindViewController ()<UIScrollViewDelegate>
+
+@property (nonatomic, strong) UIView *lineView;
+@property (nonatomic, weak) UILabel *registerLabel;
+@property (nonatomic, weak) UILabel *blindLabel;
+
+/** Indicator */
+@property (nonatomic,strong) ESIndicator *indicator;
+
+@end
+
+@implementation ESBlindViewController
+
+- (ESIndicator *)indicator
+{
+    if (!_indicator) {
+        _indicator = [ESIndicator indicatorToView:self.view];
+    }
+    return _indicator;
+}
+
+- (UIView *)lineView
+{
+    if (_lineView == nil) {
+        _lineView = [[UIView alloc]initWithFrame:CGRectZero];
+    }
+    return _lineView;
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+}
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.view.backgroundColor = [UIColor redColor];
+    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [backButton setImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
+    [backButton addTarget:self action:@selector(backButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:backButton];
+    [backButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.view.mas_left).with.offset(15);
+        make.top.equalTo(self.view.mas_top).with.offset(25);
+        make.width.mas_equalTo(@15);
+        make.height.mas_equalTo(@15);
+    }];
+
+    UIScrollView *scrollview = [[UIScrollView alloc] init];
+    scrollview.pagingEnabled = YES;
+    scrollview.contentSize = CGSizeMake(ScreenWidth *2, 0);
+    scrollview.delegate = self;
+    [self.view addSubview:scrollview];
+    [scrollview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@0);
+        make.width.equalTo(@(ScreenWidth));
+        make.top.equalTo(@(ScreenHeight/6));
+        make.bottom.equalTo(@0);
+    }];
+    
+    ESThirdRegisterView *registerView= [[ESThirdRegisterView alloc] init];
+    registerView.backgroundColor = [UIColor redColor];
+    [scrollview addSubview:registerView];
+    [registerView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.top.equalTo(@0);
+        make.width.equalTo(@(ScreenWidth));
+        make.height.equalTo(@(ScreenHeight/6 * 5));
+    }];
+    @weakify(self);
+    registerView.bindBlock = ^(NSString *moblie,NSString *smsCode){
+        @strongify(self);
+        [self userBindingMoblie:moblie code:smsCode pwd:nil];
+    };
+    
+    ESThirdBlindView *blindView= [[ESThirdBlindView alloc] init];
+    blindView.backgroundColor = [UIColor redColor];
+    [scrollview addSubview:blindView];
+    [blindView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@0);
+        make.left.equalTo(@(ScreenWidth));
+        make.width.equalTo(@(ScreenWidth));
+        make.height.equalTo(@(ScreenHeight/6 * 5));
+    }];
+    blindView.bindBlock = ^(NSString *moblie,NSString *smsCode,NSString *pwd){
+        @strongify(self);
+        [self userBindingMoblie:moblie code:smsCode pwd:pwd];
+    };
+
+    UILabel *registLabel = [[UILabel alloc] init];
+    registLabel.text = @"您已有就手账号";
+    registLabel.font = [UIFont systemFontOfSize:15];
+    registLabel.textColor = [UIColor whiteColor];
+    registLabel.textAlignment  = NSTextAlignmentCenter;
+    self.registerLabel = registLabel;
+    [self.view addSubview:registLabel];
+    [registLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@40);
+        make.right.equalTo(self.view.mas_centerX);
+        make.height.equalTo(@35);
+        make.bottom.equalTo(scrollview.mas_top);
+    }];
+    UILabel *blindLabel = [[UILabel alloc] init];
+    blindLabel.text = @"您没有就手账号";
+    self.blindLabel = blindLabel;
+    blindLabel.textColor = [UIColor whiteColor];
+    blindLabel.font = [UIFont systemFontOfSize:15];
+    blindLabel.textAlignment  = NSTextAlignmentCenter;
+    [self.view addSubview:blindLabel];
+    [blindLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(@(-40));
+        make.left.equalTo(self.view.mas_centerX);
+        make.height.equalTo(@35);
+        make.bottom.equalTo(scrollview.mas_top);
+    }];
+    
+    UIView *lineView= [[UIView alloc] init];
+    [self.view addSubview:lineView];
+    lineView.backgroundColor = [UIColor whiteColor];
+    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@40);
+        make.right.equalTo(@(-40));
+        make.height.equalTo(@.5);
+        make.bottom.equalTo(blindLabel);
+    }];
+    [self.view addSubview:self.lineView];
+    self.lineView.backgroundColor = [UIColor whiteColor];
+    [self.lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.registerLabel);
+        make.width.equalTo(@(110));
+        make.height.equalTo(@2);
+        make.bottom.equalTo(lineView);
+    }];
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    if (scrollView.contentOffset.x /ScreenWidth != 1) {
+        [self.lineView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.equalTo(self.registerLabel);
+            make.width.equalTo(@(110));
+            make.height.equalTo(@2);
+            make.bottom.equalTo(scrollView.mas_top);
+        }];
+    } else
+    {
+        [self.lineView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.equalTo(self.blindLabel);
+            make.width.equalTo(@(110));
+            make.height.equalTo(@2);
+            make.bottom.equalTo(scrollView.mas_top);
+        }];
+    }
+}
+
+- (void)backButtonAction
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - Networking
+- (void)userBindingMoblie:(NSString *)moblie code:(NSString *)code pwd:(NSString *)pwd
+{
+    UserBindingRequest *request = [UserBindingRequest request];
+    request.mobile = moblie;
+    request.verify = code;
+    request.password = pwd;
+    request.open_id = self.open_id;
+    switch (self.bindType) {
+        case ESBindType_Wechat://微信
+        {
+            request.type = @1;
+        }
+            break;
+        case ESBindType_QQ://QQ
+        {
+            request.type = @2;
+        }
+            break;
+        default:
+            break;
+    }
+    
+    
+    @weakify(self);
+    [self.indicator startAnimation];
+    [ESService userBindingRequest:request success:^{
+        @strongify(self);
+        [self endGSNetworking];
+        
+        [ESToast showSuccess:@"绑定成功！"];
+        
+        NSDictionary *dict = @{@"type":request.type,@"open_id":request.open_id};
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:kDidBindSuccessNotification object:nil userInfo:dict];
+        
+        [self.navigationController popViewControllerAnimated:YES];
+        
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.indicator stopAnimation];
+}
+
+@end

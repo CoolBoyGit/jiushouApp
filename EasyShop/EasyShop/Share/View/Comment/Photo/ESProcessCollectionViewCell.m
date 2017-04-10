@@ -1,0 +1,46 @@
+//
+//  ESProcessCollectionViewCell.m
+//  EasyShop
+//
+//  Created by wcz on 16/5/15.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESProcessCollectionViewCell.h"
+
+@interface ESProcessCollectionViewCell ()
+
+@property (nonatomic, strong) UIImageView *imageView;
+
+
+@end
+
+@implementation ESProcessCollectionViewCell
+
+- (UIImageView *)imageView
+{
+    if (_imageView == nil) {
+        _imageView = [[UIImageView alloc] init];
+        _imageView.contentMode = UIViewContentModeScaleAspectFit;
+    }
+    return _imageView;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        [self.contentView addSubview:self.imageView];
+        [self.imageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.equalTo(@0);
+        }];
+    }
+    return self;
+}
+
+- (void)setAsset:(ALAsset *)asset
+{
+    self.imageView.image = [UIImage imageWithCGImage:[asset aspectRatioThumbnail]];
+
+}
+
+@end

@@ -1,0 +1,19 @@
+//
+//  ESESRefoundController.h
+//  EasyShop
+//
+//  Created by wcz on 16/6/23.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESESRefoundController : ESMyViewController
+
+/** 是否是退款 : YES: 退款  ； NO: 退货 */
+@property (nonatomic,assign) BOOL isRefound;
+//@property (nonatomic,copy) NSString*order_id;
+/** 订单信息 */
+@property (nonatomic,strong) OrderInfo *orderInfo;
+
+@end

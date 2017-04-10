@@ -1,0 +1,75 @@
+
+
+//
+//  ICDrawbackController.m
+//  EasyShop
+//
+//  Created by wcz on 16/4/23.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ICDrawbackController.h"
+#import "ESDrawbackCell.h"
+
+@interface ICDrawbackController ()<UICollectionViewDataSource, UICollectionViewDelegate,UICollectionViewDelegateFlowLayout>
+
+@property (nonatomic, strong) UICollectionView *collectionview;
+
+@end
+@implementation ICDrawbackController
+
+
+- (UICollectionView *)collectionview
+{
+    if (_collectionview == nil) {
+        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+        flowLayout.minimumInteritemSpacing = 20;
+        flowLayout.minimumLineSpacing = 20;
+        //        flowLayout.itemSize = CGSizeMake(ScreenWidth, 125);
+        _collectionview = [[UICollectionView alloc]initWithFrame:CGRectZero collectionViewLayout:flowLayout];
+        _collectionview.dataSource = self;
+        _collectionview.showsVerticalScrollIndicator = NO;
+        _collectionview.showsHorizontalScrollIndicator = NO;
+        _collectionview.delegate = self;
+        [_collectionview registerClass:[ESDrawbackCell class] forCellWithReuseIdentifier:@"ESDrawbackCell"];
+        _collectionview.backgroundColor = [UIColor whiteColor];
+    }
+    return _collectionview;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    [self.view addSubview:self.collectionview];
+    self.title = @"退货/退款";
+//    [self initalizedCumstomNav];
+    [self.collectionview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(@0);
+        make.top.equalTo(@0);
+    }];
+}
+
+#pragma mark - collectionview 代理方法
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    return 8;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    return CGSizeMake(ScreenWidth, 110);
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESDrawbackCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ESDrawbackCell" forIndexPath:indexPath];
+        cell.model =nil;
+    return cell;
+}
+
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+{
+    return UIEdgeInsetsMake(20, 0, 0, 0);
+}
+@end

@@ -1,0 +1,63 @@
+//
+//  ESCouponPageController.m
+//  iCarePregnant
+//
+//  Created by wcz on 16/6/22.
+//  Copyright © 2016年 oenius. All rights reserved.
+//
+
+#import "ESCouponPageController.h"
+#import "ICCouponController.h"
+
+@implementation ESCouponPageController
+
+-(instancetype)init
+{
+    if ([super init]) {
+        self.menuViewStyle = WMMenuViewStyleLine;
+        self.progressColor = [UIColor blackColor];
+        self.menuBGColor = [UIColor whiteColor];
+        self.progressHeight = 1;
+        self.titleSizeSelected = 15;
+        self.titleSizeNormal = 15;
+        self.menuHeight = 40;
+        self.menuItemWidth = 80;
+        self.itemMargin = 25;
+        self.titleColorNormal = RGB(138, 138, 138);
+        self.titleColorSelected = [UIColor blackColor];
+    }
+    return self;
+}
+
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    TitleCenter;
+    self.navigationItem.title = @"优惠券";
+    
+}
+
+- (NSInteger)numbersOfChildControllersInPageController:(WMPageController *)pageController
+{
+    return 2;
+}
+
+- (NSString *)pageController:(WMPageController *)pageController titleAtIndex:(NSInteger)index
+{
+    if(index == 0)
+    {
+        return @"未使用";
+    } else
+    {
+        return @"已使用";
+
+    }
+}
+
+- (UIViewController *)pageController:(WMPageController *)pageController viewControllerAtIndex:(NSInteger)index
+{
+    ICCouponController *controller = [[ICCouponController alloc] init];
+    return controller;
+}
+@end

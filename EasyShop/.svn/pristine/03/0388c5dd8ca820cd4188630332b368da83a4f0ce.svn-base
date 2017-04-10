@@ -1,0 +1,73 @@
+
+//
+//  UINavigationController+Extra.m
+//  1111
+//
+//  Created by wcz on 16/6/16.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "UINavigationController+Extra.h"
+#import <objc/runtime.h>
+#import "HomeTitleView.h"
+
+@interface UINavigationController ()<HomeTitleViewDelegate>
+
+
+@end
+
+@implementation UINavigationController (Extra)
+
+//
+//+ (void)load
+//{
+//    IMP orgIMP = class_getMethodImplementation([self class], @selector(pushViewController:animated:));
+//    IMP newIMP = class_getMethodImplementation([self class], @selector(wc_pushViewController:animated:));
+//    
+//    Method orginMe = class_getInstanceMethod([self class], @selector(pushViewController:animated:));
+//    Method newMe = class_getInstanceMethod([self class], @selector(wc_pushViewController:animated:));
+//    
+//    method_setImplementation(newMe, orgIMP);
+//    method_setImplementation(orginMe, newIMP);
+//    
+////    IMP orgIMP1 = class_getMethodImplementation([self class], @selector(popViewControllerAnimated:));
+////    IMP newIMP1 = class_getMethodImplementation([self class], @selector(wc_popViewControllerAnimated:));
+////    
+////    Method orginMe1 = class_getInstanceMethod([self class], @selector(popViewControllerAnimated:));
+////    Method newMe1 = class_getInstanceMethod([self class], @selector(wc_popViewControllerAnimated:));
+////    
+////    method_setImplementation(newMe1, orgIMP1);
+////    method_setImplementation(orginMe1, newIMP1);
+//}
+//
+//
+//- (void)wc_pushViewController:(UIViewController *)viewController animated:(BOOL)animated
+//{
+// 
+////    viewController.navigationItem.backBarButtonItem=[[UIBarButtonItem alloc]initWithImage:[UIImage imageNamed:@"left_back"] style:UIBarButtonItemStylePlain target:self action:@selector(leftBtnPressed)];
+//    [self wc_pushViewController:viewController animated:YES];
+//
+//
+//}
+//
+//- (void)leftBtnPressed
+//{
+//    [self popViewControllerAnimated:YES];
+//}
+////- ( nullable UIViewController *)wc_popViewControllerAnimated:(BOOL)animated
+////{
+////    UIViewController *viewController = [self wc_popViewControllerAnimated:animated];
+////   UIViewController *nextController = [self.viewControllers lastObject];
+//////    if (nextController.isNavHidden)
+//////    {
+//////        nextController.navigationController.navigationBar.hidden = YES;
+//////    } else
+//////    {
+//////        nextController.navigationController.navigationBar.hidden = NO;
+//////    }
+////    return viewController;
+////}
+////
+
+
+@end

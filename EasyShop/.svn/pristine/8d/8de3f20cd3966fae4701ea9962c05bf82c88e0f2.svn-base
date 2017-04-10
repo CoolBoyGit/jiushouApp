@@ -1,0 +1,195 @@
+
+
+
+
+
+
+//
+//  ESThirdBlindView.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/3.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESThirdBlindView.h"
+#import "ESInputTextField.h"
+#import "ESSmsButton.h"
+
+@interface ESThirdBlindView ()<UITextFieldDelegate>
+
+@property (nonatomic, strong) ESInputTextField *mobileNumTextField;
+@property (nonatomic, strong) ESInputTextField *passWordTextField;
+@property (nonatomic, strong) ESInputTextField *codeTextField;
+@property (nonatomic, strong) ESInputTextField *passWordNextTextField;
+/** smsButtom */
+@property (nonatomic,weak) ESSmsButton *smsButton;
+
+/** indicator */
+@property (nonatomic,strong) ESIndicator *indcator;
+
+@end
+
+@implementation ESThirdBlindView
+
+
+
+- (ESInputTextField *)mobileNumTextField
+{
+    if (_mobileNumTextField ==nil) {
+        _mobileNumTextField = [[ESInputTextField alloc] initWithImage:nil needChange:YES];
+        _mobileNumTextField.keyboardType = UIKeyboardTypeNumberPad;
+        _mobileNumTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _mobileNumTextField.placeholder = @"手机号/账号";
+    }
+    return _mobileNumTextField;
+}
+
+- (ESInputTextField *)passWordTextField
+{
+    if (_passWordTextField ==nil) {
+        _passWordTextField = [[ESInputTextField alloc] initWithImage:nil];
+        _passWordTextField.keyboardType = UIKeyboardTypeDefault;
+        _passWordTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _passWordTextField.secureTextEntry = YES;
+        _passWordTextField.placeholder = @"新密码";
+    }
+    return _passWordTextField;
+}
+
+- (ESInputTextField *)passWordNextTextField
+{
+    if (_passWordNextTextField ==nil) {
+        _passWordNextTextField = [[ESInputTextField alloc] initWithImage:nil];
+        _passWordNextTextField.keyboardType = UIKeyboardTypeDefault;
+        _passWordNextTextField.secureTextEntry=YES;
+        _passWordNextTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _passWordNextTextField.placeholder = @"请再次输入密码";
+    }
+    return _passWordNextTextField;
+}
+
+
+- (ESInputTextField *)codeTextField
+{
+    if (_codeTextField ==nil) {
+        _codeTextField = [[ESInputTextField alloc] initWithImage:nil];
+        _codeTextField.keyboardType = UIKeyboardTypeNumberPad;
+        _codeTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        _codeTextField.placeholder = @"注册码";
+    }
+    return _codeTextField;
+}
+
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame])
+    {
+        [self addNotification];
+        
+        [self addSubview:self.mobileNumTextField];
+        [self.mobileNumTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@40);
+            make.right.equalTo(@(-40));
+            make.height.equalTo(@44);
+            make.top.equalTo(@0);
+        }];
+        [self.mobileNumTextField clearButtonRectForBounds:CGRectMake(0, 0, 10, 10)];
+        ESSmsButton *getVerifyCodeButton = [ESSmsButton buttonWithType:UIButtonTypeCustom];
+        //getVerifyCodeButton.backgroundColor = RGBA(255, 255, 255, .6);
+        getVerifyCodeButton.backgroundColor=RGB(233, 40, 46);
+        getVerifyCodeButton.layer.cornerRadius = 2;
+        getVerifyCodeButton.layer.masksToBounds = YES;
+        [getVerifyCodeButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [getVerifyCodeButton setTitle:@"获取验证码" forState:UIControlStateNormal];
+        getVerifyCodeButton.titleLabel.font = ADeanFONT13;
+        [self addSubview:getVerifyCodeButton];
+        self.smsButton = getVerifyCodeButton;
+        
+        [getVerifyCodeButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.equalTo(@-40);
+            make.width.equalTo(@(80));
+            make.height.equalTo(@20);
+            make.centerY.equalTo(self.mobileNumTextField.mas_centerY).offset(0);
+        }];
+        
+        [self addSubview:self.codeTextField];
+        [self.codeTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@40);
+            make.right.equalTo(@(-40));
+            make.height.equalTo(@44);
+            make.top.equalTo(self.mobileNumTextField.mas_bottom).offset(15);
+        }];
+        
+        [self addSubview:self.passWordTextField];
+        [self.passWordTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@40);
+            make.width.equalTo(@(ScreenWidth - 80));
+            make.height.equalTo(@44);
+            make.top.equalTo(self.codeTextField.mas_bottom).offset(15);
+        }];
+        
+        [self addSubview:self.passWordNextTextField];
+        [self.passWordNextTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@40);
+            make.width.equalTo(@(ScreenWidth - 80));
+            make.height.equalTo(@44);
+            make.top.equalTo(self.passWordTextField.mas_bottom).offset(15);
+        }];
+        
+        UIButton *registerButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        registerButton.backgroundColor = RGB(233, 40, 46);
+        registerButton.layer.cornerRadius = 4;
+        registerButton.layer.masksToBounds = YES;
+        [registerButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [registerButton setTitle:@"立即注册并绑定" forState:UIControlStateNormal];
+        //    registerButton.backgroundColor = [UIColor whiteColor];
+        registerButton.titleLabel.font = ADeanFONT15;
+        [registerButton addTarget:self action:@selector(registerAction) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:registerButton];
+        [registerButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@(40));
+            make.right.equalTo(@(-40));
+            make.top.equalTo(self.passWordNextTextField.mas_bottom).offset(20);
+            make.height.equalTo(@44);
+        }];
+
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [self removeNotification];
+}
+
+- (void)addNotification
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textDidChange:) name:UITextFieldTextDidChangeNotification object:self.mobileNumTextField];
+}
+- (void)removeNotification
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)textDidChange:(NSNotification *)notification
+{
+    UITextField *textField = notification.object;
+    if (textField == self.mobileNumTextField) {
+        self.smsButton.phone = textField.text;
+    }
+}
+
+- (void)registerAction
+{
+    NSString *moblie = self.mobileNumTextField.text;
+    NSString *smsCode = self.codeTextField.text;
+    NSString *pwd = self.passWordTextField.text;
+    
+    if (self.bindBlock) {
+        self.bindBlock(moblie,smsCode,pwd);
+    }
+}
+
+@end

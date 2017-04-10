@@ -1,0 +1,140 @@
+//
+//  ImageViewScrollView.m
+//  MFBank
+//
+//  Created by lyywhg on 15/12/5.
+//  Copyright (c) 2015年 MFBank. All rights reserved.
+//
+
+#import "ImageViewScrollView.h"
+#import <AssetsLibrary/AssetsLibrary.h>
+#define IMAGEWIDTH 50
+
+@implementation ImageViewScrollView
+
+- (void)updateViewInfoWithInfo:(NSArray *)imageList type:(NSInteger)type {
+    
+    self.userInteractionEnabled = YES;
+    self.showsVerticalScrollIndicator = NO;
+    self.showsHorizontalScrollIndicator = NO;
+    
+    if (type == 1) { // 上传样式
+        
+        if (imageList != nil && imageList.count > 0) {
+            
+            for (UIView *tview in self.subviews) {
+//                if ([tview isKindOfClass:[UIButton class]]) {
+                    [tview removeFromSuperview];
+//                }
+            }
+            
+            NSInteger iCount = imageList.count;
+            
+            for (int i = 0; i < iCount; i++) {
+                
+                UIImage *asset = imageList[i];
+                UIImageView *tbtn = [[UIImageView alloc] init];
+                tbtn.image = asset;
+
+                [self addSubview:tbtn];
+                [tbtn mas_makeConstraints:^(MASConstraintMaker *make) {
+                    make.left.equalTo(self.mas_left).with.offset(i*IMAGEWIDTH);
+                    make.top.equalTo(self.mas_top).with.offset(5);
+                    make.size.mas_equalTo(CGSizeMake(IMAGEWIDTH-5, IMAGEWIDTH-5));
+                }];
+                
+                
+ }
+            
+            NSInteger width = ScreenWidth;
+            if (iCount * IMAGEWIDTH > ScreenWidth) {
+                width = iCount * IMAGEWIDTH;
+            }
+            self.contentSize = CGSizeMake(width, self.frame.size.height);
+            
+            if (iCount < 5) {
+                UIButton *addBtn = [[UIButton alloc] init];
+                [addBtn setImage:[UIImage imageNamed:@"add"] forState:UIControlStateNormal];
+                [self addSubview:addBtn];
+                [addBtn addTarget:self action:@selector(btnAddImageAction) forControlEvents:UIControlEventTouchUpInside];
+                [addBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+                    make.left.equalTo(self.mas_left).with.offset(iCount*IMAGEWIDTH);
+                    make.top.equalTo(self.mas_top).with.offset(5);
+                    make.size.mas_equalTo(CGSizeMake(IMAGEWIDTH-5, IMAGEWIDTH-5));
+                }];
+                
+                NSInteger width = ScreenWidth;
+                if (iCount * IMAGEWIDTH > ScreenWidth) {
+                    width = iCount * IMAGEWIDTH;
+                }
+                self.contentSize = CGSizeMake(width, self.frame.size.height);
+
+            }
+        } else {
+            for (UIView *view in self.subviews) {
+                [view removeFromSuperview];
+            }
+            
+            UIButton *addBtn = [[UIButton alloc] init];
+            [addBtn setImage:[UIImage imageNamed:@"add"] forState:UIControlStateNormal];
+            [self addSubview:addBtn];
+            [addBtn addTarget:self action:@selector(btnAddImageAction) forControlEvents:UIControlEventTouchUpInside];
+            [addBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.left.equalTo(self.mas_left).with.offset(0*IMAGEWIDTH);
+                make.top.equalTo(self.mas_top).with.offset(0);
+                make.size.mas_equalTo(CGSizeMake(IMAGEWIDTH-5, IMAGEWIDTH-5));
+            }];
+
+        }
+    } else {
+        
+        if (imageList != nil && imageList.count > 0) {
+            
+            for (UIView *tview in self.subviews) {
+                if ([tview isKindOfClass:[UIButton class]]) {
+                    [tview removeFromSuperview];
+                }
+            }
+            
+            NSInteger iCount = imageList.count;
+            for (int i = 0; i < iCount; i++) {
+                
+//                NSDictionary *dict = imageList[i];
+                ALAsset *asset = imageList[i];
+                UIButton *tbtn = [[UIButton alloc] init];
+                tbtn.imageView.contentMode = UIViewContentModeScaleAspectFill;
+                [tbtn setImage:[UIImage imageWithCGImage:[asset thumbnail]] forState:UIControlStateNormal];
+                tbtn.tag = 1001+i;
+                tbtn.backgroundColor = [UIColor redColor];
+                [tbtn addTarget:self action:@selector(btnImageAction:) forControlEvents:UIControlEventTouchUpInside];
+                [self addSubview:tbtn];
+                [tbtn mas_makeConstraints:^(MASConstraintMaker *make) {
+                    make.left.equalTo(self.mas_left).with.offset(i*IMAGEWIDTH);
+                    make.top.equalTo(self.mas_top).with.offset(5);
+                    make.size.mas_equalTo(CGSizeMake(IMAGEWIDTH-5, IMAGEWIDTH-5));
+                }];
+            }
+            NSInteger width = ScreenWidth;
+            if (iCount * IMAGEWIDTH > ScreenWidth) {
+                width = iCount * IMAGEWIDTH;
+            }
+            self.contentSize = CGSizeMake(width, self.frame.size.height);
+        }
+    }
+}
+
+- (void)btnAddImageAction {
+
+    if (_iDelegate && [_iDelegate respondsToSelector:@selector(addPhotoAction)]) {
+        [_iDelegate addPhotoAction];
+    }
+}
+
+- (void)btnImageAction:(UIButton *)sender {
+    
+    if (_iDelegate && [_iDelegate respondsToSelector:@selector(deleteTouchAction:)]) {
+        [_iDelegate deleteTouchAction:sender.tag];
+    }}
+
+
+@end

@@ -1,0 +1,94 @@
+//
+//  ESShopDetailHeaderTitleView.m
+//  EasyShop
+//
+//  Created by wcz on 16/3/31.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESShopDetailHeaderTitleView.h"
+
+@interface ESShopDetailHeaderTitleView ()
+
+@property (nonatomic, strong) UILabel *titleLabel;
+@property (nonatomic,strong) UIView*linieView;
+@end
+
+@implementation ESShopDetailHeaderTitleView
+
+-(UIView*)linieView{
+    if (_linieView==nil) {
+        _linieView=[[UIView alloc]init];
+        _linieView.backgroundColor=KCommontLineViewBagroudColor;
+    }
+    return _linieView;
+}
+- (UIButton *)button
+{
+    if (_button == nil) {
+        _button = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_button addTarget:self action:@selector(buttonBetouch) forControlEvents:UIControlEventTouchUpInside];
+        [_button setImage:[UIImage imageNamed:@"icon_home_arrow"] forState:UIControlStateNormal];
+    }
+    return _button;
+}
+
+- (UILabel *)titleLabel
+{
+    if (_titleLabel == nil) {
+        _titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+        _titleLabel.font = ADeanFONT15;
+        _titleLabel.text = @"商品详情";
+        _titleLabel.textColor = ADeanHEXCOLOR(0x999999);
+    }
+    return _titleLabel;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        self.backgroundColor = [UIColor whiteColor];
+        [self addSubview:self.titleLabel];
+        UITapGestureRecognizer*tap=[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tapAction)];
+        [self addGestureRecognizer:tap];
+        [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.equalTo(@0);
+            make.left.equalTo(@15);
+        }];
+        
+        [self addSubview:self.button];
+        [self.button mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.equalTo(@0);
+            make.width.equalTo(@30);
+            make.top.bottom.equalTo(@0);
+        }];
+//        UIView *lineView = [[UIView alloc] initWithFrame:CGRectZero];
+//        lineView.backgroundColor = KCommontLineViewBagroudColor;
+//        [self addSubview:lineView];
+//        [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+//            make.left.equalTo(@15);
+//            make.right.equalTo(@(-15));
+//            make.height.equalTo(@0.5);
+//            make.bottom.equalTo(@(0));
+//        }];
+    }
+    return self;
+}
+-(void)tapAction{
+    if (self.tapBlock) {
+        self.tapBlock();
+    }
+}
+- (void)buttonBetouch
+{
+    if (_callBack) {
+        _callBack ();
+    }
+}
+
+- (void)setModel:(id)model
+{
+    self.titleLabel.text = model;
+}
+
+@end

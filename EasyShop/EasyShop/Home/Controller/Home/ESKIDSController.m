@@ -1,0 +1,193 @@
+//
+//  ESKIDSController.m
+//  EasyShop
+//
+//  Created by wcz on 16/4/18.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESKIDSController.h"
+#import "ESHomeSearchView.h"
+#import "ESBannerScrollview.h"
+#import "ESHomeProductCell.h"
+#import "ESSingleTableViewCell.h"
+#import "ESHomeCategaryView.h"
+#import "ESHomeCategoryTitleView.h"
+#import "ESHomeShopDetailController.h"
+#import "GoodsListViewController.h"
+
+@interface ESKIDSController ()<UITableViewDataSource,UITableViewDelegate>
+
+@property (nonatomic, strong) UITableView *tableView;
+
+/** 活动专场列表 （item ：ActivityInfo ） */
+@property (nonatomic,strong) NSArray *activityItems;
+@property (nonatomic,strong) UIButton*suspendButton;
+
+@end
+
+@implementation ESKIDSController
+
+- (UITableView *)tableView
+{
+    if (_tableView == nil) {
+        _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+        _tableView.dataSource = self;
+        _tableView.allowsSelection=NO;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        _tableView.delegate = self;
+        _tableView.tableFooterView = [[UIView alloc] init];
+        [_tableView registerClass:[ESHomeProductCell class] forCellReuseIdentifier:kIDESHomeProductCell];
+    }
+    return _tableView;
+}
+
+-(void)scrollToTop{
+
+    [self.tableView setContentOffset:CGPointMake(0, 0) animated:YES];
+    //[self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:YES];
+    
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
+    
+    //[[UIApplication  sharedApplication].keyWindow addSubview:self.tapButton];
+    
+    //    self.navigationItem.titleView = self.searchTextField;
+    
+    self.tableView.tableHeaderView = ({
+        ESBannerScrollview *bannerView =   [[ESBannerScrollview alloc] initWithFrame:CGRectMake(0, 0, ScreenWidth, ScreenWidth*408/617.0+10)];
+        bannerView.navInfo      = self.navInfo;
+//        self.bannerView = bannerView;
+        
+        bannerView;
+    });
+    [self.view addSubview:self.tableView];
+    
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(@0);
+    }];
+    [self.view addSubview:self.suspendButton];
+    self.suspendButton.hidden=YES;
+    
+    [self.suspendButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.equalTo(@31);
+        make.right.equalTo(@(-30));
+        make.height.equalTo(@31);
+        make.bottom.equalTo(self.view.mas_bottom).offset(-25);
+    }];
+    @weakify(self);
+    self.tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        @strongify(self);
+        [self fetchActivityList];
+    }];
+    
+    [self fetchActivityList];
+}
+-(UIButton *)suspendButton{
+    if (_suspendButton==nil) {
+        _suspendButton=[[UIButton alloc]initWithFrame:CGRectMake(0, 80, 31, 31)];
+        [_suspendButton setBackgroundImage:[UIImage imageNamed:[NSString stringWithFormat:@"%@",@"newTopBtn"]] forState:UIControlStateNormal];
+        
+        [_suspendButton addTarget:self action:@selector(scrollToTop) forControlEvents:UIControlEventTouchUpInside];
+        
+    }
+    return _suspendButton;
+}
+
+#pragma mark - tableview代理方法;
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.activityItems.count;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    return 0;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    UIView *backView = [[UIView alloc] init];
+    backView.backgroundColor = [UIColor whiteColor];
+    return backView;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    ActivityInfo *info =   [self.activityItems objectAtIndex:indexPath.row];
+//    if (info.haveGoods==YES) {
+//        return 0;
+//    }
+    if (info.goods_list.count == 0) {
+        return ScreenWidth*(408/617.0);
+    }
+    return ScreenWidth*(408/617.0)+225.0;
+}
+/*tbaleview的一直调用的代理方法*/
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    CGFloat offy=scrollView.contentOffset.y;
+    if (offy>ScreenHeight*1.3) {
+        self.suspendButton.hidden=NO;
+    }else{
+        self.suspendButton.hidden=YES;
+    }
+    
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+//    ActivityInfo *info = [self.activityItems objectAtIndex:indexPath.row];
+//    
+//    GoodsListViewController *list = [[GoodsListViewController alloc] init];
+//    list.activity_name = info.name;
+//    list.activity_id = info.aid;
+//    [self.navigationController pushViewController:list animated:YES];
+    
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESHomeProductCell *cell=[tableView dequeueReusableCellWithIdentifier:kIDESHomeProductCell];
+//    ESHomeProductCell *cell = [tableView dequeueReusableCellWithIdentifier:kIDESHomeProductCell forIndexPath:indexPath];
+    cell.activityInfo   = [self.activityItems objectAtIndex:indexPath.row];
+    return cell;
+}
+
+#pragma mark - Networking
+/** 获取活动专场 */
+- (void)fetchActivityList
+{
+    GetActivityListRequest *request = [GetActivityListRequest request];
+    request.nav_id = self.navInfo.nid;
+    
+    @weakify(self);
+    [ESService getActivityListRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        self.activityItems = response;
+        [self.tableView reloadData];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.tableView.mj_header endRefreshing];
+}
+
+@end

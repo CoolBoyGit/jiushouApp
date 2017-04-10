@@ -1,0 +1,92 @@
+
+
+
+
+
+
+//
+//  ESTabBarController.m
+//  EasyShop
+//
+//  Created by wcz on 16/3/24.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESTabBarController.h"
+#import "ESPageController.h"
+#import "ESNavigationController.h"
+#import "ESShopCartViewController.h"
+#import "ESUserCenterController.h"
+#import "ESPanicBuyingController.h"
+#import "ESShareController.h"
+#import "ESTabbar.h"
+#import "PostCommentViewController.h"
+
+
+@interface ESTabBarController ()<ESTabbarDelegate>
+
+@end
+
+@implementation ESTabBarController
+
+- (instancetype)init
+{
+    if (self = [super init])
+    {
+      self.viewControllers =   [self childControllers];
+        ESTabbar *tab = [[ESTabbar alloc] initWithFrame:CGRectMake(0, 0, ScreenWidth, 49)];
+        tab.delegate = self;
+        [self.tabBar addSubview:tab];
+    }
+    return self;
+}
+
+- (NSArray *)childControllers
+{
+    [[UINavigationBar appearance] setTintColor:[UIColor blackColor]];
+    [[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(0, -80)
+                                                         forBarMetrics:UIBarMetricsDefault];
+    [[UINavigationBar appearance] setBarTintColor:[UIColor whiteColor]];
+    
+    // 首页
+    ESPageController *homeController = [[ESPageController alloc] init];
+    ESNavigationController *homeNav = [[ESNavigationController alloc] initWithRootViewController:homeController];
+    
+//    homeNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"首页" image:[UIImage imageNamed:@"home_normal"] selectedImage:[UIImage imageNamed:@"home_select"]];
+    
+    ESPanicBuyingController *buyController = [[ESPanicBuyingController alloc] init];
+    ESNavigationController *buyNav = [[ESNavigationController alloc] initWithRootViewController:buyController];
+//    buyNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"抢购" image:[UIImage imageNamed:@"icon_tab_buy"] selectedImage:nil];
+    
+//    ESShareController *shareController = [[ESShareController alloc] init];
+//    ESNavigationController *shareNav = [[ESNavigationController alloc] initWithRootViewController:shareController];
+//    shareNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"分享" image:[UIImage imageNamed:@"community_normal"] selectedImage:[UIImage imageNamed:@"community_select"]];
+    
+    ESShopCartViewController *shoppingController = [[ESShopCartViewController alloc] init];
+    shoppingController.isHome = NO;
+    
+    ESNavigationController *shoppingNav = [[ESNavigationController alloc] initWithRootViewController:shoppingController];
+    //shoppingNav.navigationItem.title=@"购物车";
+//    shoppingNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"购物车" image:[UIImage imageNamed:@"shopcar_normal"] selectedImage:[UIImage imageNamed:@"shopcar_select"]];
+    
+    ESUserCenterController *meController = [[ESUserCenterController alloc] init];
+    ESNavigationController *meNav = [[ESNavigationController alloc] initWithRootViewController:meController];
+//    meNav.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"我的" image:[UIImage imageNamed:@"mycenter_normal"] selectedImage:[UIImage imageNamed:@"mycenter_select"]];
+    
+    return @[homeNav,buyNav,shoppingNav,meNav];
+    
+}
+
+
+- (void)ESTabbarDidSelectIndex:(NSInteger)selectIndex
+{
+    self.selectedIndex = selectIndex;
+    
+//    if (selectIndex == 3) {//我的
+//        ESLoginVerify
+//    }
+    
+    [self.delegate tabBarController:self didSelectViewController:self.viewControllers[selectIndex]];
+}
+
+@end

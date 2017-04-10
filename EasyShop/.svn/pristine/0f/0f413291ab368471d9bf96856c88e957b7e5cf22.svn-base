@@ -1,0 +1,164 @@
+//
+//  ESMyFootListCell.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/20.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESMyFootListCell.h"
+
+@interface ESMyFootListCell()
+
+@property (nonatomic, strong) UIImageView     *shopImg;//商品图像
+@property (nonatomic, strong) UILabel         *shopNameLab;//商品名字
+@property (nonatomic, strong) UILabel         *shopPriceLab;//商品价格
+@property (nonatomic, strong) UIButton        *seeButton;//登陆按钮
+@property (nonatomic, strong) UILabel         *shopPromptLab;//多件多折
+@property (nonatomic, strong) UILabel         *shopPreferentialLab;//商品优惠信息
+
+@end
+
+@implementation ESMyFootListCell
+
+- (void)setFootInfo:(FootprintInfo *)footInfo
+{
+    _footInfo = footInfo;
+    
+    [self.shopImg sd_setImageWithURL:[NSURL URLWithString:_footInfo.goods_image]
+                    placeholderImage:[UIImage imageNamed:@"page2"]];
+    self.shopNameLab.text = _footInfo.goods_name;
+    self.shopPriceLab.text = [NSString stringWithFormat:@"¥%@",_footInfo.goods_price];
+}
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        [self setupViews];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    return self;
+}
+
+- (void)setupViews
+{
+    self.shopImg.image = [UIImage imageNamed:@"page2"];
+    self.shopImg.backgroundColor = [UIColor redColor];
+    [self.contentView addSubview:self.shopImg];
+    [self.shopImg mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@20);
+        make.top.equalTo(@12);
+        make.height.width.equalTo(@80);
+    }];
+    
+    self.shopNameLab.text = @"伊丽莎白美白霜";
+    [self.contentView addSubview:self.shopNameLab];
+    [self.shopNameLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@12);
+        make.left.equalTo(self.shopImg.mas_right).with.offset(15);
+    }];
+    
+    self.shopPriceLab.text = @"¥199";
+    [self.contentView addSubview:self.shopPriceLab];
+    [self.shopPriceLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(self.shopImg.mas_bottom).with.offset(-5);
+        make.left.equalTo(self.shopImg.mas_right).with.offset(15);
+    }];
+    
+    self.shopPromptLab.text = @"多件多折";
+    [self.contentView addSubview:self.shopPromptLab];
+    [self.shopPromptLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.shopImg.mas_bottom);
+        make.left.equalTo(self.shopImg.mas_right).with.offset(15);
+        make.width.equalTo(@70);
+    }];
+    
+    self.shopPreferentialLab.text = @"雅顿品牌全场2件5折";
+    [self.contentView addSubview:self.shopPreferentialLab];
+    [self.shopPreferentialLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(self.shopPromptLab.mas_centerY).with.offset(0);
+        make.left.equalTo(self.shopPromptLab.mas_right).with.offset(5);
+        make.height.equalTo(@20);
+        make.width.equalTo(@200);
+    }];
+    
+    //[self.contentView addSubview:self.seeButton];
+//    [self.seeButton mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.centerY.equalTo(self.shopPromptLab.mas_centerY).with.offset(0);
+//        make.right.equalTo(@0);
+//        make.height.equalTo(@30);
+//        make.width.equalTo(@50);
+//    }];
+}
+
+- (UIImageView *)shopImg
+{
+    if (!_shopImg) {
+        _shopImg =[[UIImageView alloc] init];
+        _shopImg.contentMode = UIViewContentModeScaleToFill;
+    }
+    return _shopImg;
+}
+- (UILabel *)shopNameLab
+{
+    if (!_shopNameLab) {
+        _shopNameLab = [[UILabel alloc] init];
+        _shopNameLab.textAlignment = NSTextAlignmentLeft;
+        _shopNameLab.backgroundColor = [UIColor clearColor];
+        _shopNameLab.font = ADeanFONT16;
+        _shopNameLab.textColor = [UIColor blackColor];
+    }
+    return _shopNameLab;
+}
+- (UILabel *)shopPriceLab
+{
+    if (!_shopPriceLab) {
+        _shopPriceLab = [[UILabel alloc] init];
+        _shopPriceLab.textAlignment = NSTextAlignmentLeft;
+        _shopPriceLab.backgroundColor = [UIColor clearColor];
+        _shopPriceLab.font = ADeanFONT14;
+        _shopPriceLab.textColor = [UIColor blackColor];
+    }
+    return _shopPriceLab;
+}
+- (UILabel *)shopPromptLab
+{
+    if (!_shopPromptLab) {
+        _shopPromptLab = [[UILabel alloc] init];
+        _shopPromptLab.textAlignment = NSTextAlignmentCenter;
+        _shopPromptLab.backgroundColor = [UIColor redColor];
+        _shopPromptLab.font = ADeanFONT12;
+        _shopPromptLab.textColor = [UIColor whiteColor];
+    }
+    return _shopPromptLab;
+}
+- (UILabel *)shopPreferentialLab
+{
+    if (!_shopPreferentialLab) {
+        _shopPreferentialLab = [[UILabel alloc] init];
+        _shopPreferentialLab.textAlignment = NSTextAlignmentLeft;
+        _shopPreferentialLab.backgroundColor = [UIColor clearColor];
+        _shopPreferentialLab.font = ADeanFONT12;
+        _shopPreferentialLab.textColor = [UIColor grayColor];
+    }
+    return _shopPreferentialLab;
+}
+- (UIButton *)seeButton
+{
+    if (!_seeButton) {
+        _seeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _seeButton.layer.cornerRadius = 2;
+        _seeButton.layer.masksToBounds = YES;
+        _seeButton.layer.borderWidth = 1;
+        _seeButton.layer.borderColor = [UIColor grayColor].CGColor;
+        _seeButton.titleLabel.font = [UIFont systemFontOfSize:12];
+        [_seeButton setTitle:@"查看" forState:UIControlStateNormal];
+        [_seeButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+        [_seeButton setBackgroundColor:[UIColor whiteColor]];
+//        [_seeButton addTarget:self action:@selector(loginButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _seeButton;
+}
+
+@end

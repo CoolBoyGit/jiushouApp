@@ -1,0 +1,23 @@
+//
+//  ESMyFootListCell.h
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/20.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ESMyFootListCell : UITableViewCell
+@property (nonatomic,strong)FavoritesGoodsInfo*favoritesInfo;
+/** 足迹信息 */
+@property (nonatomic,strong) FootprintInfo *footInfo;
+/**推荐商品信息**/
+@property (nonatomic,strong)  GoodsInfo *info;
+@property (nonatomic,assign) BOOL isShowButton;
+@property (nonatomic,copy) void (^selectBlock)(BOOL isdelect,  NSIndexPath*indexPath);
+@property (nonatomic,assign) int flag; //0 代表的是收藏  1 代表的是足迹
+@property (nonatomic,strong) UIButton*ediButton;//打勾的Button
+@property (nonatomic,assign) NSInteger row;
+@property (nonatomic,strong) NSIndexPath*index;
+@end

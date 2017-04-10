@@ -1,0 +1,112 @@
+//
+//  ESPayViewCell.m
+//  EasyShop
+//
+//  Created by jiushou on 16/6/17.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESPayViewCell.h"
+@interface ESPayViewCell()
+@property (nonatomic,strong)UIView*selectView;
+@property (nonatomic,strong)UILabel*typeLable;
+@property (nonatomic,strong)UIImageView*iconImageView;
+@property (nonatomic,strong)UIButton*selectButton;
+@end
+@implementation ESPayViewCell
+-(void)setSelect:(BOOL)select{
+    if (select) {
+        self.selectButton.selected=YES;
+    }else{
+        self.selectButton.selected=NO;
+    }
+    if (self.defaultselect==1) {
+        self.selectButton.selected=YES;
+    }
+}
+-(void)setImageStr:(NSString *)imageStr{
+    _iconImageView.image=[UIImage imageNamed:imageStr];
+}
+-(void)setTitleStr:(NSString *)titleStr{
+    _typeLable.text=titleStr;
+}
+-(UILabel *)typeLable{
+    if (_typeLable==nil) {
+        _typeLable=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, 0, 20)];
+        _typeLable.font=[UIFont systemFontOfSize:15];
+        _typeLable.text=@"支付宝";
+        _typeLable.textColor=AllTextColor;
+    }
+    return _typeLable;
+}
+- (UIButton *)selectButton
+{
+    if (!_selectButton) {
+        _selectButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_selectButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [_selectButton setBackgroundColor:[UIColor clearColor]];
+        [_selectButton setImage:[UIImage imageNamed:@"shopcart_unselect_icon"] forState:UIControlStateNormal];
+        [_selectButton setImage:[UIImage imageNamed:@"shopcart_selected_icon"] forState:UIControlStateSelected];
+        [_selectButton addTarget:self action:@selector(selectBtnAction:) forControlEvents:UIControlEventTouchUpInside];
+        
+       
+    }
+    return _selectButton;
+}
+-(void)selectBtnAction:(UIButton*)button{
+    button.selected=YES;
+    if (self.selectedBlock) {
+        self.selectedBlock();
+    }
+}
+-(UIView *)selectView{
+    if (_selectView==nil) {
+        _selectView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, ScreenWidth, 20)];
+        _selectView.layer.cornerRadius=7.5;
+        _selectView.layer.masksToBounds=YES;
+        //_selectView.backgroundColor=[UIColor yellowColor];
+        
+        
+    }
+    return _selectView;
+}
+-(UIImageView *)iconImageView{
+    if (_iconImageView==nil) {
+        _iconImageView=[[UIImageView alloc]initWithFrame:CGRectMake(0, 0, ScreenWidth, 30)];
+        
+    }return _iconImageView;
+}
+-(id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    
+    self=[super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+     
+        self.selectionStyle=UITableViewCellSelectionStyleNone;
+        [self.contentView addSubview:self.iconImageView];
+        [self.iconImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(@13.25);
+            make.left.equalTo(@20);
+            make.height.equalTo(@20);
+            make.width.equalTo(@20);
+            
+        }];
+        [self.contentView addSubview:self.typeLable];
+        [self.typeLable mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top .equalTo(@8.25);
+            make.left.equalTo(self.iconImageView.mas_right).offset(5);
+            make.width.equalTo(@100);
+            make.height.equalTo(@30);
+            
+        }];
+        [self.contentView addSubview:self.selectButton];
+        [self.selectButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(@16);
+            make.height.equalTo(@30);
+            make.width.equalTo(@30);
+            make.right.equalTo(@(-20));
+        }];
+    
+    }
+    return self;
+}
+@end

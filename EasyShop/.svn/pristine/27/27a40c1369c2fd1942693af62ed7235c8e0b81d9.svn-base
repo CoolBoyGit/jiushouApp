@@ -1,0 +1,246 @@
+//
+//  ESMyFootListCell.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/20.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESMyFootListCell.h"
+
+@interface ESMyFootListCell()
+
+@property (nonatomic, strong) UIImageView     *shopImg;//商品图像
+@property (nonatomic, strong) UILabel         *shopNameLab;//商品名字
+@property (nonatomic, strong) UILabel         *shopPriceLab;//商品价格
+@property (nonatomic, strong) UIButton        *seeButton;//登陆按钮
+@property (nonatomic, strong) UILabel         *shopPromptLab;//多件多折
+@property (nonatomic, strong) UILabel         *shopPreferentialLab;//商品优惠信息
+@property (nonatomic,strong) UIView*lineView;          //横线
+@property (nonatomic,strong) UIButton*ediButton;//打勾的Button
+@end
+
+@implementation ESMyFootListCell
+-(UIView *)lineView{
+    if (!_lineView) {
+        _lineView=[[UIView alloc]init];
+        _lineView.backgroundColor=KCommontLineViewBagroudColor;
+    }
+    return _lineView;
+}
+- (void)setFootInfo:(FootprintInfo *)footInfo
+{
+    _footInfo = footInfo;
+    
+    [self.shopImg sd_setImageWithURL:[NSURL URLWithString:_footInfo.goods_image]
+                    placeholderImage:[UIImage imageNamed:@"bg100"]];
+    
+    self.shopNameLab.text = _footInfo.goods_name;
+    self.shopPriceLab.text = [NSString stringWithFormat:@"¥%.2f",_footInfo.goods_price.floatValue];
+}
+-(void)setFavoritesInfo:(FavoritesGoodsInfo *)favoritesInfo{
+    _favoritesInfo=favoritesInfo;
+    [self.shopImg sd_setImageWithURL:[NSURL URLWithString:_favoritesInfo.goods_image]
+                    placeholderImage:[UIImage imageNamed:@"bg100"]];
+    
+    self.shopNameLab.text = _favoritesInfo.goods_name;
+    self.shopPriceLab.text = [NSString stringWithFormat:@"¥%.2f",_favoritesInfo.goods_price.floatValue];
+
+}
+-(void)setInfo:(GoodsInfo *)info{
+      _info=info;
+    [self.shopImg sd_setImageWithURL:[NSURL URLWithString:info.image]
+                    placeholderImage:[UIImage imageNamed:@"bg100"]];
+    self.shopNameLab.text = info.name;
+    self.shopPriceLab.text = [NSString stringWithFormat:@"¥%@",info.price];
+    
+}
+-(void)setIsShowButton:(BOOL)isShowButton{
+    if (isShowButton) {
+        [self .contentView removeAllSubviews];
+        [self setupViews];
+        [self.lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(@0);
+            make.left.right.equalTo(@0);
+            make.height.equalTo(@0.5);
+        }];
+        self.ediButton.selected=NO;
+        self.ediButton.hidden=NO;
+        [self.ediButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@15);
+            make.centerY.equalTo(self.mas_centerY);
+            make.width.height.equalTo(@25);
+        }];
+        [self.shopImg mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@45);
+            make.top.equalTo(@2);
+            make.height.width.equalTo(@80);
+        }];
+        [self.shopNameLab mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(@5);
+            make.right.equalTo(@(-10));
+            make.left.equalTo(self.shopImg.mas_right).with.offset(15);
+        }];
+        
+        [self.shopPriceLab mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.equalTo(@100);
+            make.bottom.equalTo(@(-10));
+            make.left.equalTo(self.shopImg.mas_right).with.offset(15);
+        }];
+        
+        
+    }else{
+        [self .contentView removeAllSubviews];
+        [self setupViews];
+        [self.lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(@0);
+            make.left.right.equalTo(@0);
+            make.height.equalTo(@0.5);
+        }];
+        self.ediButton.hidden=YES;
+        self.ediButton.selected=NO;
+        [self.ediButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@10);
+            make.centerY.equalTo(self.mas_centerY);
+            make.width.height.equalTo(@30);
+        }];
+        [self.shopImg mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(@10);
+            make.top.equalTo(@2);
+            make.height.width.equalTo(@80);
+        }];
+        [self.shopNameLab mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(@5);
+            make.right.equalTo(@(-10));
+            make.left.equalTo(self.shopImg.mas_right).with.offset(15);
+        }];
+        
+        [self.shopPriceLab mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.equalTo(@100);
+            make.bottom.equalTo(@(-10));
+            make.left.equalTo(self.shopImg.mas_right).with.offset(15);
+        }];
+        
+        
+        
+    }
+}
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    return self;
+}
+-(UIButton *)ediButton{
+    if (_ediButton==nil) {
+        _ediButton=[[UIButton alloc]initWithFrame:CGRectMake(0, 0, 0, 0)];
+        [_ediButton setImage:[UIImage imageNamed:@"shopcart_unselect_icon"] forState:UIControlStateNormal];
+        //[_ediButton setBackgroundImage:[UIImage imageNamed:@"shopcart_unselect_icon"] forState:UIControlStateNormal];
+        [_ediButton setImage:[UIImage imageNamed:@"shopcart_selected_icon"] forState:UIControlStateSelected];
+        //[_ediButton setBackgroundImage:[UIImage imageNamed:@"shopcart_selected_icon"] forState:UIControlStateSelected];
+        [_ediButton addTarget:self action:@selector(ediButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _ediButton;
+}
+-(void)ediButtonAction{
+    
+    self.ediButton.selected=!self.ediButton.selected;
+    if (self.selectBlock) {
+        if (self.flag==0) {
+            self.selectBlock(self.ediButton.selected,self.favoritesInfo.goods_id);
+        }else{
+            self.selectBlock(self.ediButton.selected,self.footInfo.fid);
+        }
+        
+    }
+}
+- (void)setupViews
+{
+    [self.contentView addSubview:self.lineView];
+    
+    [self.contentView addSubview:self.shopImg];
+    [self.contentView addSubview:self.ediButton];
+    
+    [self.contentView addSubview:self.shopNameLab];
+    
+    [self.contentView addSubview:self.shopPriceLab];
+}
+
+- (UIImageView *)shopImg
+{
+    if (!_shopImg) {
+        _shopImg =[[UIImageView alloc] init];
+        _shopImg.contentMode = UIViewContentModeScaleAspectFit;
+    }
+    return _shopImg;
+}
+- (UILabel *)shopNameLab
+{
+    if (!_shopNameLab) {
+        _shopNameLab = [[UILabel alloc] init];
+        _shopNameLab.textAlignment = NSTextAlignmentLeft;
+        _shopNameLab.backgroundColor = [UIColor clearColor];
+        _shopNameLab.font = ADeanFONT15;
+        _shopNameLab.numberOfLines=2;
+        _shopNameLab.textColor = [UIColor blackColor];
+    }
+    
+    return _shopNameLab;
+}
+- (UILabel *)shopPriceLab
+{
+    if (!_shopPriceLab) {
+        _shopPriceLab = [[UILabel alloc] init];
+        _shopPriceLab.textAlignment = NSTextAlignmentLeft;
+        _shopPriceLab.backgroundColor = [UIColor clearColor];
+        _shopPriceLab.text=@"123";
+        _shopPriceLab.font = ADeanFONT15;
+        _shopPriceLab.textColor = [UIColor blackColor];
+    }
+    return _shopPriceLab;
+}
+- (UILabel *)shopPromptLab
+{
+    if (!_shopPromptLab) {
+        _shopPromptLab = [[UILabel alloc] init];
+        _shopPromptLab.textAlignment = NSTextAlignmentCenter;
+        _shopPromptLab.backgroundColor = [UIColor redColor];
+        _shopPromptLab.font = ADeanFONT15;
+        _shopPromptLab.textColor = [UIColor whiteColor];
+    }
+    return _shopPromptLab;
+}
+- (UILabel *)shopPreferentialLab
+{
+    if (!_shopPreferentialLab) {
+        _shopPreferentialLab = [[UILabel alloc] init];
+        _shopPreferentialLab.textAlignment = NSTextAlignmentLeft;
+        _shopPreferentialLab.backgroundColor = [UIColor clearColor];
+        _shopPreferentialLab.font = ADeanFONT15;
+        _shopPreferentialLab.textColor = [UIColor grayColor];
+    }
+    return _shopPreferentialLab;
+}
+- (UIButton *)seeButton
+{
+    if (!_seeButton) {
+        _seeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _seeButton.layer.cornerRadius = 2;
+        _seeButton.layer.masksToBounds = YES;
+        _seeButton.layer.borderWidth = 1;
+        _seeButton.layer.borderColor = [UIColor grayColor].CGColor;
+        _seeButton.titleLabel.font = [UIFont systemFontOfSize:15];
+        [_seeButton setTitle:@"查看" forState:UIControlStateNormal];
+        [_seeButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+        [_seeButton setBackgroundColor:[UIColor whiteColor]];
+        //        [_seeButton addTarget:self action:@selector(loginButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _seeButton;
+}
+
+
+
+@end

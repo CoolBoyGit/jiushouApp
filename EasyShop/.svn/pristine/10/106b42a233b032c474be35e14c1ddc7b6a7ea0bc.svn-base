@@ -1,0 +1,81 @@
+//
+//  LogisticsController.m
+//  EasyShop
+//
+//  Created by jiushou on 16/7/1.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESLogisticsController.h"
+#import "ESLogisticsTableViewCell.h"
+#import "ESLogisticHeardView.h"
+
+@interface ESLogisticsController ()<UITableViewDelegate,UITableViewDataSource>
+@property (nonatomic,strong)UITableView*tableView;
+@end
+
+@implementation ESLogisticsController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor=[UIColor whiteColor];
+    [self.view addSubview:self.tableView];
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@0);
+        make.right.left.bottom.equalTo(@0);
+    }];
+    
+}
+-(UITableView*)tableView{
+    if (_tableView==nil) {
+        _tableView=[[UITableView alloc]initWithFrame:CGRectMake(0, 0, ScreenWidth, ScreenHeight) style:UITableViewStyleGrouped];
+        _tableView.delegate=self;
+        _tableView.dataSource=self;
+        [_tableView registerClass:[ESLogisticsTableViewCell class] forCellReuseIdentifier:@"ESLogisticsTableViewCell"];
+        [_tableView registerClass:[ESLogisticHeardView class] forHeaderFooterViewReuseIdentifier:@"ESLogisticHeardView"];
+    }
+    return _tableView;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 44;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    return 0.1;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 20;
+}
+//-(UIView*)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
+//    UIView*view=[[UIView alloc]initWithFrame:CGRectMake(0, 0, 0, 3)];
+//    return view;
+//}
+-(UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    ESLogisticHeardView*heardView=[tableView dequeueReusableHeaderFooterViewWithIdentifier:@"ESLogisticHeardView"];
+    return heardView;
+}
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 2;
+}
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 9;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    ESLogisticsTableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:@"ESLogisticsTableViewCell"];
+    return cell;
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

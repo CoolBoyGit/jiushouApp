@@ -1,0 +1,221 @@
+//
+//  CreateCommentViewController.m
+//  MFBank
+//
+//  Created by lyywhg on 15/12/5.
+//  Copyright (c) 2015年 MFBank. All rights reserved.
+//
+
+#import "PostCommentViewController.h"
+#import "PostCommentCell.h"
+#import "ESStarRateCell.h"
+#import "ESCommentBottonView.h"
+#import "ESCommentModel.h"
+#import "ESPosrCommentCell.h"
+#import "ESOrderDetailController.h"
+
+@interface PostCommentViewController ()<UITextViewDelegate,UITableViewDelegate,UITableViewDataSource>
+
+@property (nonatomic, strong) UITableView *tableView;
+
+/** indicator */
+@property (nonatomic,strong) ESIndicator *indicator;
+/** bottom */
+@property (nonatomic,weak) ESCommentBottonView *bottomView;
+
+/** 订单评论请求 */
+@property (nonatomic,strong) AddEvaluationRequest  *evaluationRequest;
+
+@end
+
+@implementation PostCommentViewController
+
+- (void)setOrderInfo:(OrderInfo *)orderInfo
+{
+    _orderInfo = orderInfo;
+    
+    //初始化评价请求
+    AddEvaluationRequest *reqeust = [AddEvaluationRequest request];
+    reqeust.order_id = orderInfo.order_id;
+    NSMutableArray *mArr = [NSMutableArray array];
+    for (OrderGoodsInfo *goodsInfo in orderInfo.order_goods) {
+        EvaluationGoodsInfo *info   = [[EvaluationGoodsInfo alloc] init];
+        info.goods_id               = goodsInfo.goods_id;
+        info.imageURL               = goodsInfo.goods_image;
+//        info.scores                 = @3;
+        info.result=[NSNumber numberWithInt:1];
+        info.content=@"好评!";
+        info.is_anonymous=[NSNumber numberWithInt:1];
+        [mArr addObject:info];
+    }
+    reqeust.evaluationItems = [mArr copy];
+    self.evaluationRequest = reqeust;
+}
+
+- (ESIndicator *)indicator
+{
+    if (!_indicator) {
+        _indicator = [ESIndicator indicatorToView:self.view];
+    }
+    return _indicator;
+}
+
+- (UITableView *)tableView
+{
+    if (_tableView == nil) {
+        _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        _tableView.delegate = self;
+        _tableView.tableFooterView = [[UIView alloc] init];
+        [_tableView registerClass:[ESPosrCommentCell class] forCellReuseIdentifier:@"ShopCommentCellIdentifier1"];
+        [_tableView registerClass:[ESStarRateCell  class] forCellReuseIdentifier:@"ESStarRateCell"];
+    }
+    return _tableView;
+}
+
+
+#pragma mark - LifeCycle
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
+    self.navigationItem.title = @"发表评价";
+    [self.view addSubview:self.tableView];
+//    self.tableView.scrollEnabled=NO;
+    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(@0);
+        make.top.equalTo(@0);
+        make.bottom.equalTo(@-44);
+    }];
+    
+    ESCommentBottonView *view = [[ESCommentBottonView alloc] initWithFrame:CGRectMake(0, ScreenHeight-49, ScreenWidth, 49)];
+    view.evaluationRequest = self.evaluationRequest;
+    [self.view addSubview:view];
+    self.bottomView = view;
+    [view mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.equalTo(@49);
+        make.bottom.equalTo(@0);
+        make.right.left.equalTo(@0);
+    }];
+    @weakify(self);
+    view.sureBlock = ^{
+      @strongify(self);
+        if (self.evaluationRequest.didUpload) {
+            [self doEvaluate];
+        }else{
+            [self uploadEvaluationImages];
+        }
+    };
+    
+}
+
+#pragma mark - UITableViewDataSource
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return self.evaluationRequest.evaluationItems.count + 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 1;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section <  self.evaluationRequest.evaluationItems.count) { //每个商品
+        static NSString *ShopCommentCellIdentifier = @"ShopCommentCellIdentifier1";
+        ESPosrCommentCell*cell = [tableView dequeueReusableCellWithIdentifier:ShopCommentCellIdentifier];
+        cell.evaluationInfo = [self.evaluationRequest.evaluationItems objectAtIndex:indexPath.section];
+        return cell;
+    }
+    
+    ESStarRateCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESStarRateCell"];
+    cell.evaluationRequest = self.evaluationRequest;
+    return cell;
+}
+
+#pragma mark - UITableViewDelegate
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 10;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section <  self.evaluationRequest.evaluationItems.count) {
+        return 210;
+    }
+    return 160;
+}
+
+
+#pragma mark - Networking
+//这里分开上传
+
+- (void)uploadEvaluationImages
+{
+    for (EvaluationGoodsInfo *info in self.evaluationRequest.evaluationItems) {
+        if (info.imageItems.count > 0) {//有图片的上传
+            [self uploadGoodsImages:info];
+        }
+    }
+}
+
+- (void)uploadGoodsImages:(EvaluationGoodsInfo *)info
+{
+    FileUploadRequest *request = [FileUploadRequest request];
+    request.imageItems = info.imageItems;
+    NSLog(@"%ld",info.imageItems.count);
+    NSLog(@"上传商品%@ 图片....",info.goods_id);
+    @weakify(self);
+    [self.indicator startAnimation];
+    [ESService fileUploadRequest:request success:^(NSArray *response) {
+        NSLog(@"上传商品%@ 图片 完成.",info.goods_id);
+        //保存返回的图片url数组
+        info.image = response;
+        [self doEvaluate];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+#pragma mark - 发表评论
+- (void)doEvaluate
+{
+    if (self.evaluationRequest && self.evaluationRequest.didUpload) {//图片上传完毕，进行评论
+        
+        @weakify(self);
+        [self.indicator startAnimation];
+        [ESService addEvaluationRequest:self.evaluationRequest success:^{
+            @strongify(self);
+            [self endGSNetworking];
+            
+            [ESToast showSuccess:@"评价成功！"];
+            [[NSNotificationCenter defaultCenter]postNotificationName:KKUpdateAllOredrCountNotifacation object:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kReloadOrderListNotification object:nil];
+            //如果是从订单详情页面进入，从堆栈删除
+            NSMutableArray *mArr = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+            [mArr enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if ([obj isKindOfClass:[ESOrderDetailController class]]) {
+                    [mArr removeObject:obj];
+                }
+            }];
+            self.navigationController.viewControllers = [mArr copy];
+            [self.navigationController popViewControllerAnimated:YES];
+            
+            
+        } failure:^(NSError *error) {
+            @strongify(self);
+            [self endGSNetworking];
+        }];
+        
+    }
+}
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.indicator stopAnimation];
+}
+
+@end

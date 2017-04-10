@@ -1,0 +1,115 @@
+//
+//  ESScoreHeaderView.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/21.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESScoreHeaderView.h"
+
+@interface ESScoreHeaderView()
+
+@property (nonatomic, strong) UIImageView *userImageView;//用户头像
+@property (nonatomic, strong) UILabel     *userNameLab;//用户名称
+@property (nonatomic, strong) UILabel     *userScoreLab;//拥有积分
+@property (nonatomic, strong) UILabel     *userScoreNum;//积分数目
+
+@end
+
+@implementation ESScoreHeaderView
+
+-(instancetype)initWithFrame:(CGRect)frame
+{
+    if ([super initWithFrame:frame]) {
+        [self setupViews];
+    }
+    return self;
+}
+
+-(void)setupViews
+{
+    [self addSubview:self.userImageView];
+    [self.userImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.mas_equalTo(@0);
+        make.top.mas_equalTo(@30);
+        make.width.height.mas_equalTo(@50);
+    }];
+    
+    [self addSubview:self.userNameLab];
+    [self.userNameLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(@0);
+        make.top.mas_equalTo(self.userImageView.mas_bottom);
+        make.height.mas_equalTo(@25);
+    }];
+    
+    [self addSubview:self.userScoreLab];
+    [self.userScoreLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(@0);
+        make.top.mas_equalTo(self.userNameLab.mas_bottom);
+        make.height.mas_equalTo(@25);
+    }];
+    
+    [self addSubview:self.userScoreNum];
+    [self.userScoreNum mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(@0);
+        make.top.mas_equalTo(self.userScoreLab.mas_bottom);
+        make.height.mas_equalTo(@40);
+    }];
+    
+    [self addSubview:self.scoreRecordLab];
+    [self.scoreRecordLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(@0);
+        make.bottom.mas_equalTo(@0);
+        make.height.mas_equalTo(@20);
+    }];
+}
+
+-(UIImageView *)userImageView
+{
+    if (!_userImageView) {
+        _userImageView = [[UIImageView alloc] init];
+        _userImageView.image = [UIImage imageNamed:@"icon_home_cate"];
+    }
+    return _userImageView;
+}
+-(UILabel *)userNameLab
+{
+    if (!_userNameLab) {
+        _userNameLab = [[UILabel alloc] init];
+        _userNameLab.textAlignment = NSTextAlignmentCenter;
+        _userNameLab.text = @"用户13270823020";
+    }
+    return _userNameLab;
+}
+-(UILabel *)userScoreLab
+{
+    if (!_userScoreLab) {
+        _userScoreLab = [[UILabel alloc] init];
+        _userScoreLab.textAlignment = NSTextAlignmentCenter;
+        _userScoreLab.text = @"拥有积分:";
+    }
+    return _userScoreLab;
+}
+-(UILabel *)userScoreNum
+{
+    if (!_userScoreNum) {
+        _userScoreNum = [[UILabel alloc] init];
+        _userScoreNum.textColor = [UIColor redColor];
+        _userScoreNum.textAlignment = NSTextAlignmentCenter;
+        _userScoreNum.text = @"92";
+        _userScoreNum.font = [UIFont boldSystemFontOfSize:40];
+    }
+    return _userScoreNum;
+}
+-(UILabel *)scoreRecordLab
+{
+    if (!_scoreRecordLab) {
+        _scoreRecordLab = [[UILabel alloc] init];
+        _scoreRecordLab.textAlignment = NSTextAlignmentCenter;
+        _scoreRecordLab.text = @"积分纪录";
+    }
+    return _scoreRecordLab;
+}
+
+@end

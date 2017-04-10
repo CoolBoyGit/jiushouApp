@@ -1,0 +1,161 @@
+//
+//  ESStarRateCell.m
+//  EasyShop
+//
+//  Created by 脉融LCJ on 16/5/12.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESStarRateCell.h"
+
+@interface ESStarRateCell()<CanStarRatingViewDelegate>
+
+@property (nonatomic, strong) UILabel  *titleLab1;
+@property (nonatomic, strong) UILabel  *titleLab2;
+@property (nonatomic, strong) UILabel  *titleLab3;
+@property (nonatomic, strong) UILabel  *titleLab4;
+
+@end
+
+@implementation ESStarRateCell
+
+-(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if ([super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        [self setUpViews];
+    }
+    return self;
+}
+
+-(void)setUpViews
+{
+    self.titleLab1.alpha = 1.0f;
+    self.titleLab2.alpha = 1.0f;
+    self.titleLab3.alpha = 1.0f;
+    self.titleLab4.alpha = 1.0f;
+    
+    self.starRatingView2.alpha = 1.0f;
+    self.starRatingView3.alpha = 1.0f;
+    self.starRatingView4.alpha = 1.0f;
+}
+
+
+- (UILabel *)titleLab1 {
+    
+    if (!_titleLab1) {
+        _titleLab1 = [[UILabel alloc] init];
+        _titleLab1.textAlignment = NSTextAlignmentLeft;
+        _titleLab1.text = @"店铺介绍";
+        _titleLab1.font = ADeanFONT15;
+        [self.contentView addSubview:_titleLab1];
+        [_titleLab1 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.mas_left).with.offset(5);
+            make.top.equalTo(self.mas_top).with.offset(15);
+            make.height.equalTo(@20);
+            make.width.equalTo(@100);
+        }];
+    }
+    return _titleLab1;
+}
+- (UILabel *)titleLab2 {
+    
+    if (!_titleLab2) {
+        _titleLab2 = [[UILabel alloc] init];
+        _titleLab2.textAlignment = NSTextAlignmentLeft;
+        _titleLab2.text = @"描述相符";
+        _titleLab2.font = ADeanFONT13;
+        [self.contentView addSubview:_titleLab2];
+        [_titleLab2 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.mas_left).with.offset(5);
+            make.top.equalTo(self.titleLab1.mas_bottom).with.offset(10);
+            make.height.equalTo(@20);
+            make.width.equalTo(@100);
+        }];
+    }
+    return _titleLab2;
+}
+- (UILabel *)titleLab3 {
+    
+    if (!_titleLab3) {
+        _titleLab3 = [[UILabel alloc] init];
+        _titleLab3.textAlignment = NSTextAlignmentLeft;
+        _titleLab3.text = @"发货速度";
+        _titleLab3.font = ADeanFONT13;
+        [self.contentView addSubview:_titleLab3];
+        [_titleLab3 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.mas_left).with.offset(5);
+            make.top.equalTo(self.titleLab2.mas_bottom).with.offset(10);
+            make.height.equalTo(@20);
+            make.width.equalTo(@100);
+        }];
+    }
+    return _titleLab3;
+}
+- (UILabel *)titleLab4 {
+    
+    if (!_titleLab4) {
+        _titleLab4 = [[UILabel alloc] init];
+        _titleLab4.textAlignment = NSTextAlignmentLeft;
+        _titleLab4.text = @"服务态度";
+        _titleLab4.font = ADeanFONT13;
+        [self.contentView addSubview:_titleLab4];
+        [_titleLab4 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.mas_left).with.offset(5);
+            make.top.equalTo(self.titleLab3.mas_bottom).with.offset(10);
+            make.height.equalTo(@20);
+            make.width.equalTo(@100);
+        }];
+    }
+    return _titleLab4;
+}
+
+- (CanStarRatingView *)starRatingView2 {
+    
+    if (!_starRatingView2) {
+        _starRatingView2 = [[CanStarRatingView alloc] initWithFrame:CGRectMake(ScreenWidth/2-100, 75, 180, 20) numberOfStar:5];
+        [self addSubview:_starRatingView2];
+        _starRatingView2.delegate=self;
+        [_starRatingView2 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.equalTo(self.mas_right).with.offset(-15);
+            make.centerY.equalTo(self.titleLab2.mas_centerY).with.offset(0);
+            make.height.equalTo(@20);
+            make.width.equalTo(@180);
+        }];
+    }
+    return _starRatingView2;
+}
+- (CanStarRatingView *)starRatingView3 {
+    
+    if (!_starRatingView3) {
+        _starRatingView3 = [[CanStarRatingView alloc] initWithFrame:CGRectMake(ScreenWidth/2-100, 75, 180, 20) numberOfStar:5];
+        [self addSubview:_starRatingView3];
+        _starRatingView3.delegate=self;
+        [_starRatingView3 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.equalTo(self.mas_right).with.offset(-15);
+            make.centerY.equalTo(self.titleLab3.mas_centerY).with.offset(0);
+            make.height.equalTo(@20);
+            make.width.equalTo(@180);
+        }];
+    }
+    return _starRatingView3;
+}
+- (CanStarRatingView *)starRatingView4 {
+    
+    if (!_starRatingView4) {
+        _starRatingView4 = [[CanStarRatingView alloc] initWithFrame:CGRectMake(ScreenWidth/2-100, 75, 180, 20) numberOfStar:5];
+        [self addSubview:_starRatingView4];
+        _starRatingView4.delegate=self;
+        [_starRatingView4 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.equalTo(self.mas_right).with.offset(-15);
+            make.centerY.equalTo(self.titleLab4.mas_centerY).with.offset(0);
+            make.height.equalTo(@20);
+            make.width.equalTo(@180);
+        }];
+    }
+    return _starRatingView4;
+}
+-(void)starRatingView:(CanStarRatingView *)view score:(CGFloat)score{
+    NSLog(@"%f",score);
+}
+@end

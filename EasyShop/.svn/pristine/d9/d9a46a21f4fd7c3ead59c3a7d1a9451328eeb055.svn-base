@@ -1,0 +1,13 @@
+//
+//  ESChatViewController.h
+//  EasyShop
+//
+//  Created by wcz on 16/4/23.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+//#import "JSQMessagesViewController.h"
+
+@interface ESChatViewController : UIViewController//JSQMessagesViewController
+
+@end

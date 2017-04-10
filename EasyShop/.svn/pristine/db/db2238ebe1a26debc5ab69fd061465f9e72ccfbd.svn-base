@@ -1,0 +1,123 @@
+//
+//  ESTabbar.m
+//  EasyShop
+//
+//  Created by wcz on 16/5/22.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESTabbar.h"
+#import "ESButton.h"
+
+@interface ESTabbar ()
+
+@property (nonatomic, strong) NSArray *array;
+@property (nonatomic, strong) NSMutableArray *buttonArray;
+
+@end
+
+@implementation ESTabbar
+
+- (NSArray *)array
+{
+    if (_array == nil) {
+        _array = @[
+                   @{
+                       @"title":@"首页",
+                       @"image":@"home_normal",
+                       @"selectImage":@"home_select"
+                       },
+                   
+                   @{
+                       @"title":@"抢购",
+                       @"image":@"icon_tab_buy_normal",
+                       @"selectImage":@"icon_tab_buy_select"
+                       },
+                   
+                    @{
+                       @"title":@"购物车",
+                       @"image":@"shopcar_normal",
+                       @"selectImage":@"shopcar_select"
+                       },
+                   
+                   @{
+                       @"title":@"我的",
+                       @"image":@"mycenter_normal",
+                       @"selectImage":@"mycenter_select"
+                       },
+                   
+                   ];
+    }
+    return _array;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame])
+    {
+        self.backgroundColor = [UIColor whiteColor];
+        self.buttonArray = [NSMutableArray arrayWithCapacity:4];
+        for (int i = 0; i < self.array.count; i ++)
+        {
+            UIView *view = [self intailizedViewWithDic:self.array[i] withIndex:i];
+            view.frame = CGRectMake(ScreenWidth / self.array.count * i, 0, ScreenWidth/self.array.count, 49);
+            [self addSubview:view];
+        }
+    }
+    return self;
+}
+
+
+- (UIView *)intailizedViewWithDic:(NSDictionary *)dic withIndex:(NSInteger)index
+{
+    UIView *view = [[UIView alloc]init];
+    ESButton *button = [ESButton buttonWithType:UIButtonTypeCustom];
+    button.tag = 100 + index;
+    [button setImage: [UIImage imageNamed:dic[@"image"]] forState:UIControlStateNormal];
+    [button setTitle:dic[@"title"] forState:UIControlStateNormal];
+    [button setTitle:dic[@"title"] forState:UIControlStateSelected];
+    [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [button setTitleColor:[UIColor redColor ] forState:UIControlStateSelected];
+    [button setImage:[UIImage imageNamed:dic[@"selectImage"]] forState:UIControlStateSelected];
+    [self.buttonArray addObject:button];
+    [button addTarget:self action:@selector(buttonBeTouch:) forControlEvents:UIControlEventTouchUpInside];
+    if (button.tag==100) {
+        button.selected=YES;
+    }
+    [view addSubview:button];
+    
+    [button mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.center.equalTo(@0);
+        make.top.bottom.equalTo(@0);
+        make.width.equalTo(@50);
+    }];
+    return view;
+}
+
+- (void)buttonBeTouch:(UIButton *)button
+{
+    for (UIButton *button in self.buttonArray) {
+        button.selected = NO;
+    }
+    [self animationStart:button];
+    button.selected = YES;
+    if (self.delegate && [self.delegate respondsToSelector:@selector(ESTabbarDidSelectIndex:)]) {
+        [self.delegate ESTabbarDidSelectIndex:button.tag -100];
+    }
+}
+
+- (void)animationStart:(UIButton *)button
+{
+    
+    CABasicAnimation *scaleAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+    scaleAnimation.fromValue = [NSNumber numberWithFloat:1.0];
+    scaleAnimation.toValue = [NSNumber numberWithFloat:0.95];
+    scaleAnimation.autoreverses = YES;
+    scaleAnimation.fillMode = kCAFillModeForwards;
+    scaleAnimation.repeatCount = 1;
+    scaleAnimation.duration = 0.3;
+    [button.layer addAnimation:scaleAnimation forKey:@"scaleAnimation"];
+}
+
+
+@end

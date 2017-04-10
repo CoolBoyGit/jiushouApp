@@ -1,0 +1,57 @@
+
+//
+//  ESRefoundTexdField.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/23.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESRefoundTexdField.h"
+@interface ESRefoundTexdField()<UITextFieldDelegate>
+
+@end
+@implementation ESRefoundTexdField
+-(BOOL)textFieldShouldBeginEditing:(UITextField *)textField{
+    return NO;
+    
+}
+- (instancetype)initWithLeftTitleName:(NSString *)leftName
+{
+    if (self = [super initWithFrame:CGRectZero])
+    {
+        UIView *view = [self initalieViewWithName:leftName];
+        view.contentMode   = UIViewContentModeScaleAspectFit;
+        view.frame = CGRectMake(0, 0, 120, 30);
+        self.leftView           = view;
+        self.font = [UIFont systemFontOfSize:13];
+        self.leftViewMode       = UITextFieldViewModeAlways;
+    }
+    return self;
+}
+
+
+- (UIView *)initalieViewWithName:(NSString *)leftName
+{
+    UIView *view = [[UIView alloc]init];
+    UILabel *label = [[UILabel alloc]init];
+    label.textColor = [UIColor redColor];
+    label.text = @"*";
+    [view addSubview:label];
+    [label mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@12);
+        make.centerY.equalTo(@0);
+    }];
+    
+    UILabel *nameLabel = [[UILabel alloc] init];
+    nameLabel.textColor = RGB(205, 206, 207);
+    nameLabel.text = leftName;
+    [view addSubview:nameLabel];
+    [nameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(label.mas_right).offset(5);
+        make.centerY.equalTo(@0);
+    }];
+    return view;
+}
+
+@end

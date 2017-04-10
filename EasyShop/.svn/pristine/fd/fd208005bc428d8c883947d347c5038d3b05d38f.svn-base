@@ -1,0 +1,84 @@
+//
+//  ESShopCartNoneCell.m
+//  EasyShop
+//
+//  Created by guojian on 16/5/23.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESShopCartNoneCell.h"
+
+@interface ESShopCartNoneCell()
+
+@property (nonatomic, strong) UILabel *promptLab;
+@property (nonatomic, strong) UIButton *gotoSeeShop;
+
+@end
+
+@implementation ESShopCartNoneCell
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        
+        [self.contentView addSubview:self.promptLab];
+        [self.contentView addSubview:self.gotoSeeShop];
+        
+    }
+    return self;
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    [self.promptLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(@0);
+        make.top.equalTo(@40);
+        make.height.equalTo(@20);
+    }];
+    
+    [self.gotoSeeShop mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(@0);
+        make.top.equalTo(self.promptLab.mas_bottom).with.offset(30);
+        make.height.equalTo(@30);
+        make.width.equalTo(@100);
+    }];
+}
+
+
+-(UILabel *)promptLab
+{
+    if (!_promptLab) {
+        _promptLab = [[UILabel alloc] init];
+        _promptLab.text = @"购物车还没有商品，快去逛逛吧。";
+        _promptLab.textAlignment = NSTextAlignmentCenter;
+        _promptLab.font = [UIFont systemFontOfSize:20];
+    }
+    return _promptLab;
+}
+
+-(UIButton *)gotoSeeShop
+{
+    if (!_gotoSeeShop) {
+        _gotoSeeShop = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_gotoSeeShop setTitle:@"去逛逛" forState:UIControlStateNormal];
+        _gotoSeeShop.titleLabel.font = [UIFont systemFontOfSize:15];
+        [_gotoSeeShop setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        _gotoSeeShop.backgroundColor = ADeanHEXCOLOR(0xcccccc);
+        [_gotoSeeShop addTarget:self action:@selector(gotoSeeShopAction) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _gotoSeeShop;
+}
+
+-(void)gotoSeeShopAction
+{
+    ESLoginVerify
+    
+    if (self.gotoBlock) {
+        self.gotoBlock();
+    }
+}
+
+@end

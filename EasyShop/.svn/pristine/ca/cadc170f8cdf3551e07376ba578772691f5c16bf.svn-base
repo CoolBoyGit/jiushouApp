@@ -1,0 +1,256 @@
+//
+//  ESRefundResultCon.m
+//  EasyShop
+//
+//  Created by jiushou on 16/7/4.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESRefundResultCon.h"
+#import "ESESRefoundController.h"
+#import "ESMyOrderListController.h"
+#import "ESMyOrderPageController.h"
+@interface ESRefundResultCon ()
+@property (nonatomic,strong)UILabel *timeLabel;//时间
+@property (nonatomic,strong)UILabel *statuLabel;//买家状态
+@property (nonatomic,strong)UILabel * companyTipsLabel;//公司返回状态
+@property (nonatomic,strong)UILabel *companyResonLabel;//公司理由
+@property (nonatomic,strong)UILabel *resonLbel;//买家理由
+@property (nonatomic,strong)UILabel *companyLabel;//公司
+@property (nonatomic,strong)UIView *companyBgView;//公司背景
+@property (nonatomic,strong)UIView *bgView;//卖家背景;
+@property (nonatomic,strong)UIView *companyLineView;//公司横线
+@property (nonatomic,strong)UIView *lineview;//买家横线
+@property (nonatomic,strong)UIView *corView;//圆圈
+@end
+
+@implementation ESRefundResultCon
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor=[UIColor whiteColor];
+    [self setupView];
+    [self setAllLabel];
+    
+    
+}
+-(void)setupView{
+    self.navigationController.navigationBar.translucent=NO;
+    self.title=@"退款状态";
+    UIButton*leftButton=[UIButton buttonWithType:UIButtonTypeCustom];
+//    [leftButton setTitle:@"返回" forState:UIControlStateNormal];
+    leftButton.frame=CGRectMake(0, 0, 44, 44);
+   [leftButton setImage:[UIImage imageNamed:@"leftButton"] forState:UIControlStateNormal];
+   
+    [leftButton setImageEdgeInsets:UIEdgeInsetsMake(0, -40, 0, 0)];
+    [leftButton addTarget:self action:@selector(leftButtonAction) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem*leftBarButtonItem=[[UIBarButtonItem alloc]initWithCustomView:leftButton];
+    self.navigationItem.leftBarButtonItem=leftBarButtonItem;
+}
+-(void)setAllLabel{
+    [self.view addSubview:self.timeLabel];
+    [self.timeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@10);
+        make.left.equalTo(@((ScreenWidth-80)/2.0));
+        make.width.equalTo(@(80));
+        make.height.equalTo(@20);
+    }];
+    [self.view addSubview:self.bgView];
+    [self.bgView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.timeLabel.mas_bottom).offset(10);
+        make.left.equalTo(@20);
+        make.right.equalTo(@(-20));
+        make.height.equalTo(@140);
+     
+    }];
+    [self.bgView addSubview:self.statuLabel];
+    [self.statuLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@10);
+        make.right.equalTo(@(-10));
+        make.height.equalTo(@20);
+        make.top.equalTo(@10);
+        
+    }];
+    [self.bgView addSubview:self.lineview];
+    [self.lineview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@35);
+        make.height.equalTo(@0.5);
+        make.left.equalTo(@10);
+        make.right.equalTo(@(-10));
+    }];
+    [self.bgView addSubview:self.resonLbel];
+    [self.resonLbel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@36);
+        make.left.equalTo(@10);
+        make.right.equalTo(@(-10));
+        make.bottom.equalTo(@(-10));
+    }];
+    [self.view addSubview:self.corView];
+    [self.corView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@5);
+        make.top.equalTo(self.bgView.mas_bottom).offset(30);
+        make.height.width.equalTo(@10);
+    }];
+    [self.view addSubview:self.companyLabel];
+    [self.companyLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.bgView.mas_bottom).offset(30);
+        make.left.equalTo(@16);
+        make.width.equalTo(@100);
+        make.height.equalTo(@20);
+        
+    }];
+    [self.view addSubview:self.companyBgView];
+    [self.companyBgView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.corView.mas_bottom).offset(20);
+        make.left.equalTo(@20);
+        make.height.equalTo(@120);
+        make.right.equalTo(@(-20));
+        
+    }];
+    [self.companyBgView addSubview:self.companyTipsLabel];
+    [self.companyTipsLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@10);
+        make.width.equalTo(@80);
+        make.height.equalTo(@20);
+        make.left.equalTo(@10);
+        
+    }];
+    [self.companyBgView addSubview:self.companyLineView];
+    [self.companyLineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@35);
+        make.left.equalTo(@10);
+        make.right.equalTo(@(-10));
+        make.height.equalTo(@0.5);
+        
+    }];
+    [self.companyBgView addSubview:self.companyResonLabel];
+    [self.companyResonLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@36);
+        make.left.equalTo(@10);
+        make.right.equalTo(@(-10));
+        make.bottom.equalTo(@(-10));
+    }];
+}
+-(UIView*)corView{
+    if (_corView==nil) {
+        _corView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, 10, 10)];
+        _corView.backgroundColor=RGB(237, 237, 237);
+        _corView.layer.cornerRadius=5;
+        _corView.layer.masksToBounds=YES;
+    }
+    return _corView;
+}
+-(UIView *)companyBgView{
+    if (_companyBgView==nil) {
+        _companyBgView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, 0, 0)];
+        _companyBgView.layer.cornerRadius=20;
+        _companyBgView.layer.masksToBounds=YES;
+        _companyBgView.backgroundColor=RGB(237, 237, 237);
+        
+    }
+    return _companyBgView;
+}
+-(UIView *)bgView{
+    if (_bgView==nil) {
+        _bgView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, 0, 0)];
+        _bgView.layer.cornerRadius=20;
+        _bgView.layer.masksToBounds=YES;
+        _bgView.backgroundColor=RGB(237, 237, 237);
+    }
+    return _bgView;
+}
+-(UIView *)lineview{
+    if (_lineview==nil) {
+        _lineview=[[UIView alloc]initWithFrame:CGRectMake(0, 0, 0, 0)];
+        _lineview.backgroundColor=RGB(217, 217, 217);
+        
+        
+    }
+    return _lineview;
+    
+}
+-(UIView *)companyLineView{
+    if (_companyLineView==nil) {
+        _companyLineView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, 0, 0)];
+        _companyLineView.backgroundColor=RGB(217, 217, 217);
+        
+    }
+    return _companyLineView;
+}
+-(UILabel *)timeLabel{
+    if (_timeLabel==nil) {
+        _timeLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, 2, 8)];
+        _timeLabel.layer.cornerRadius=8;
+        _timeLabel.layer.masksToBounds=YES;
+        _timeLabel.backgroundColor=RGB(237, 237, 237);
+        _timeLabel.textAlignment=NSTextAlignmentCenter;
+        _timeLabel.text=@"1222222";
+        _timeLabel.font=[UIFont systemFontOfSize:11];
+    }
+    return _timeLabel;
+}
+-(UILabel *)statuLabel{
+    if (_statuLabel==nil) {
+        _statuLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, 2, 9)];
+        _statuLabel.textAlignment=NSTextAlignmentLeft;
+        _statuLabel.text=@"退款中";
+        _statuLabel.font=[UIFont systemFontOfSize:15];
+        
+        
+    }
+    return _statuLabel;
+}
+-(UILabel *)resonLbel{
+    if (_resonLbel==nil) {
+        _resonLbel=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, 2, 3)];
+        _resonLbel.numberOfLines=0;
+        _resonLbel.textAlignment=NSTextAlignmentLeft;
+        _resonLbel.text=@"你说你的极力反对捡垃圾发;啊机读卡来决定安静多了啊啊来多久了开房间啊";
+        _resonLbel.font=[UIFont systemFontOfSize:15];
+    }
+    return _resonLbel;
+}
+-(UILabel *)companyLabel{
+    if (_companyLabel==nil) {
+        _companyLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, 0, 0)];
+        _companyLabel.textAlignment=NSTextAlignmentLeft;
+        _companyLabel.text=@"就手国际";
+    }
+    return _companyLabel;
+}
+-(UILabel *)companyResonLabel{
+    if (_companyResonLabel==nil) {
+        _companyResonLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, 0, 0)];
+        _companyResonLabel.numberOfLines=0;
+        _companyResonLabel.textAlignment=NSTextAlignmentLeft;
+        _companyResonLabel.text=@"djajejakjl激将法刻录机打;积分;啊AK骄傲了看发开发奥克兰";
+        
+    }
+    return _companyResonLabel;
+}
+-(void)leftButtonAction{
+
+        for (UIViewController*vc in self.navigationController.viewControllers) {
+            if ([vc isKindOfClass:[ESMyOrderPageController class]]) {
+                [self.navigationController popToViewController:vc animated:YES];
+            }
+        }
+
+    //[self.navigationController popViewControllerAnimated:YES];
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

@@ -1,0 +1,214 @@
+//
+//  ICCouponController.m
+//  iCarePregnant
+//
+//  Created by wcz on 16/6/22.
+//  Copyright © 2016年 oenius. All rights reserved.
+//
+
+#import "ICCouponController.h"
+#import "ESCouponViewCell.h"
+
+@interface ICCouponController ()<UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout>
+
+@property (nonatomic, strong) UICollectionView *collectionview;
+
+/** from */
+@property (nonatomic,assign) NSInteger page;
+/** 卡券 */
+@property (nonatomic,strong) NSMutableArray *couponItems;
+
+/** indicator */
+@property (nonatomic,strong) ESIndicator *indicator;
+
+@end
+
+@implementation ICCouponController
+
+- (NSMutableArray *)couponItems
+{
+    if (!_couponItems) {
+        _couponItems = [NSMutableArray array];
+    }
+    return _couponItems;
+}
+
+- (ESIndicator *)indicator
+{
+    if (!_indicator) {
+        _indicator = [ESIndicator indicatorToView:self.view];
+    }
+    return _indicator;
+}
+
+- (UICollectionView *)collectionview
+{
+    if (_collectionview == nil) {
+        
+        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc]init];
+        _collectionview = [[UICollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:flowLayout];
+        _collectionview.dataSource = self;
+        _collectionview.delegate = self;
+        _collectionview.backgroundColor = [UIColor whiteColor];
+        [_collectionview registerClass:[ESCouponViewCell class] forCellWithReuseIdentifier:@"ESCouponViewCell"];
+    }
+    return _collectionview;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    
+    if (!self.isCenter) {//可领取优惠券
+        self.title = @"可领取优惠券";
+    }
+    
+    [self.view addSubview:self.collectionview];
+    [self.collectionview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(@0);
+    }];
+    
+    @weakify(self);
+    self.collectionview.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        @strongify(self);
+        [self refreshList];
+    }];
+    if (self.isCenter) {//个人中心
+        self.collectionview.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+            @strongify(self);
+            [self moreList];
+        }];
+    }
+    
+    [self refreshList];
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    return self.couponItems.count;
+}
+
+-(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+{
+    return UIEdgeInsetsMake(10, 0, 0, 0);
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    return CGSizeMake(ScreenWidth - 20, 90);
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESCouponViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ESCouponViewCell" forIndexPath:indexPath];
+    cell.couponInfo = [self.couponItems objectAtIndex:indexPath.item];
+    
+    return cell;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (!self.isCenter) {//可领取
+        CouponInfo *couponInfo = [self.couponItems objectAtIndex:indexPath.item];
+        //获取优惠券
+        [self getCouponWithCid:couponInfo.qid];
+    }
+}
+
+#pragma mark - Networking
+- (void)refreshList
+{
+    if (self.isCenter) {//个人中心
+        self.page = 1;
+        [self fetchCoupon];
+    }else{//可查询
+        [self queryCoupon];
+    }
+}
+- (void)moreList
+{
+    self.page ++ ;
+    [self fetchCoupon];
+}
+
+#pragma mark 请求可领取优惠券
+- (void)queryCoupon
+{
+    QueryCouponRequest *request = [QueryCouponRequest request];
+    
+    @weakify(self);
+    [ESService queryCouponRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        [self.couponItems removeAllObjects];
+        [self.couponItems addObjectsFromArray:response];
+        
+        [self.collectionview reloadData];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+    
+}
+
+#pragma mark 获取优惠券
+- (void)getCouponWithCid:(NSString *)cid
+{
+    GetCouponRequest *request = [GetCouponRequest request];
+    request.cid = cid;
+    
+    @weakify(self);
+    [self.indicator startAnimation];
+    [ESService getCouponRequest:request success:^{
+        @strongify(self);
+        [self endGSNetworking];
+        
+        [self refreshList];//刷新列表
+        [ESToast showSuccess:@"获取优惠券成功！"];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+    
+}
+
+#pragma mark 请求个人中心优惠券
+- (void)fetchCoupon
+{
+    CouponRequest *request = [CouponRequest request];
+    request.type = self.type;
+    request.page = [NSNumber numberWithInteger:self.page];
+    request.n = @20;
+    
+    @weakify(self);
+    [ESService couponRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        [self endGSNetworking];
+        
+        if (self.page == 1) {
+            [self.couponItems removeAllObjects];
+        }
+        self.collectionview.mj_footer.hidden = response.count < 20;
+        
+        [self.couponItems addObjectsFromArray:response];
+        [self.collectionview reloadData];
+        
+    } failure:^(NSError *error) {
+        @strongify(self);
+        [self endGSNetworking];
+    }];
+}
+
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.indicator stopAnimation];
+    [self.collectionview.mj_header endRefreshing];
+    [self.collectionview.mj_footer endRefreshing];
+}
+
+@end

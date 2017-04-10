@@ -1,0 +1,29 @@
+//
+//  UserResponse.m
+//  EasyShopService
+//
+//  Created by guojian on 16/5/1.
+//  Copyright © 2016年 naijoug. All rights reserved.
+//
+
+#import "UserResponse.h"
+
+@implementation LoginInfo
+
+@end
+
+@implementation UserInfo
+
+@end
+@implementation UserInfo (Extension)
+
+- (NSString *)displaySex
+{
+    return self.sex.intValue ? @"女" : @"男";
+}
+
+@end
+
+@implementation EombaseInfo
+
+@end

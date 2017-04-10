@@ -1,0 +1,208 @@
+//
+//  ESShopCommentController.m
+//  EasyShop
+//
+//  Created by wcz on 16/6/5.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESShopCommentController.h"
+#import "ESShopCommentCell.h"
+#import "ESShopCommentReusableView.h"
+
+@interface ESShopCommentController ()<UITableViewDelegate  ,UITableViewDataSource>
+
+//@property (nonatomic, strong) UICollectionView *collectionview;
+
+@property (nonatomic, strong) UITableView *tableview;
+
+/** 评价信息 */
+@property (nonatomic,strong) NSMutableArray *evaluationItems;
+/** from */
+@property (nonatomic,assign) NSInteger page;
+
+@end
+
+@implementation ESShopCommentController
+
+- (NSMutableArray *)evaluationItems
+{
+    if (!_evaluationItems) {
+        _evaluationItems = [NSMutableArray array];
+    }
+    return _evaluationItems;
+}
+
+- (UITableView *)tableview
+{
+    if (_tableview == nil) {
+        _tableview = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+        _tableview.dataSource = self;
+        _tableview.delegate = self;
+        [_tableview registerClass:[ESShopCommentCell class] forCellReuseIdentifier:@"ESShopCommentCell"];
+        _tableview.tableFooterView = [[UIView alloc]init];
+    }
+    return _tableview;
+}
+
+//- (UICollectionView *)collectionview
+//{
+//    if (_collectionview == nil) {
+//        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+//        flowLayout.minimumInteritemSpacing = 5;
+//        flowLayout.minimumLineSpacing = 5;
+//        flowLayout.scrollDirection = UICollectionViewScrollDirectionVertical;
+////             flowLayout.itemSize = CGSizeMake(ScreenWidth, 125);
+//        _collectionview = [[UICollectionView alloc]initWithFrame:CGRectZero collectionViewLayout:flowLayout];
+//        _collectionview.dataSource = self;
+//        _collectionview.pagingEnabled = YES;
+//        _collectionview.showsVerticalScrollIndicator = NO;
+//        _collectionview.showsHorizontalScrollIndicator = NO;
+//        _collectionview.delegate = self;
+//        [_collectionview registerClass:[ESShopCommentReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"ESShopCommentReusableView"];
+//        [_collectionview registerClass:[ESShopCommentCell class] forCellWithReuseIdentifier:@"ESShopCommentCell"];
+//        _collectionview.backgroundColor = [UIColor whiteColor];
+//    }
+//    return _collectionview;
+//}
+
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    [self.view addSubview:self.tableview];
+    
+    self.title = @"商品评论";
+    [self.tableview mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(@0);
+    }];
+    
+    @weakify(self);
+    self.tableview.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        @strongify(self);
+        [self refreshList];
+    }];
+    self.tableview.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+        @strongify(self);
+        [self moreList];
+    }];
+    
+    
+    [self refreshList];
+}
+#pragma mark - collectionview 代理方法
+
+- (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 10;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 150;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    ESShopCommentCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ESShopCommentCell"];
+    cell.model = nil;
+    return cell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    return 90;
+}
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    ESShopCommentReusableView *reusableView = [[ESShopCommentReusableView alloc] initWithFrame:CGRectMake(0, 0, ScreenWidth, 90)];
+    reusableView.backgroundColor = [UIColor whiteColor];
+    reusableView.model = nil;
+    return reusableView;
+}
+
+//- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+//{
+//    return 10;
+//}
+//
+//- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    return CGSizeMake(ScreenWidth, 150);
+//}
+//
+//- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    ESShopCommentCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ESShopCommentCell" forIndexPath:indexPath];
+//    cell.model = nil;
+//    return cell;
+//}
+//
+//- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
+//{
+//    return CGSizeMake(ScreenWidth, 90);
+//}
+//
+//- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+//{
+//    if (kind == UICollectionElementKindSectionHeader) {
+//        ESShopCommentReusableView *reusableView = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"ESShopCommentReusableView" forIndexPath:indexPath];
+//        reusableView.model = nil;
+//        return reusableView;
+//    }
+//    return nil;
+//}
+
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+}
+
+#pragma mark - Networking
+
+- (void)refreshList
+{
+    self.page = 1;
+    [self fetchGoodsEvaluation];
+}
+- (void)moreList
+{
+    self.page ++ ;
+    [self fetchGoodsEvaluation];
+}
+
+/** 请求商品评价 */
+- (void)fetchGoodsEvaluation
+{
+    GetGoodsEvaluationRequest *request = [GetGoodsEvaluationRequest request];
+    request.goods_id = self.goods_id;
+    request.page = [NSNumber numberWithInteger:self.page];
+    request.n   = @20;
+    
+    @weakify(self);
+    [ESService getGoodsEvaluationRequest:request success:^(NSArray *response) {
+        @strongify(self);
+        
+        if (self.page == 1) {
+            [self.evaluationItems removeAllObjects];
+        }
+        self.tableview.mj_footer.hidden = response.count < 20;
+        
+        [self.evaluationItems addObjectsFromArray:response];
+        [self.tableview reloadData];
+        
+    } failure:^(NSError *error) {
+        
+    }];
+    
+}
+
+#pragma mark GSNetworking
+- (void)endGSNetworking
+{
+    [self.tableview.mj_header endRefreshing];
+    [self.tableview.mj_footer endRefreshing];
+}
+
+@end

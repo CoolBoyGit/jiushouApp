@@ -1,0 +1,29 @@
+//
+//  ESFunctionView.h
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/3/28.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@protocol ESFunctionViewDelegate <NSObject>
+
+- (void)functionViewAction:(int)index;
+
+@end
+
+@interface ESFunctionView : UIView
+
+/** 商品类型 */
+@property (nonatomic, strong) UIButton *shopCart;//购物车
+@property (nonatomic, strong) UIButton *forumBtn;//论坛
+@property (nonatomic, strong) UIButton *dreamBtn;//收藏
+@property (nonatomic ,assign) BOOL isSelect;
+@property (nonatomic,assign) GoodsInfoType goodsInfoType;
+@property (nonatomic,strong) GoodsDetailInfo*goodsDetail;
+@property (nonatomic, assign) id<ESFunctionViewDelegate>                delegate;
+@property (nonatomic, strong) UILabel *countLabel; //count
+@property (nonatomic,strong) UIView*lineView;
+@end

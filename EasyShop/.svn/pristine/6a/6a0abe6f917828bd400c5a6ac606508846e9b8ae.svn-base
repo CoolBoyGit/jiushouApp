@@ -1,0 +1,146 @@
+
+//
+//  ESThreeLoginCell.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/4/2.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESThreeLoginView.h"
+
+@interface ESThreeLoginView ()
+
+@property (nonatomic, strong) UILabel *titleNameLabel;
+@property (nonatomic, strong) UIButton *weChatButton;
+@property (nonatomic, strong) UIButton *aliButton;
+
+@end
+
+@implementation ESThreeLoginView
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        [self intaliButtonzedView];
+    }
+    return self;
+}
+
+-(void)intaliButtonzedView
+{
+    [self addSubview:self.titleNameLabel];
+    [self.titleNameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(@(0));
+        make.top.equalTo(@20);
+        make.right.equalTo(@0);
+        make.height.equalTo(@15);
+    }];
+    
+    [self addSubview:self.weChatButton];
+    [self.weChatButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.mas_centerX).with.offset(-45);
+        make.width.equalTo(@50);
+        make.top.equalTo(self.titleNameLabel.mas_bottom).with.offset(20);
+        make.height.equalTo(@50);
+    }];
+    
+    UILabel *wechatLabel = [[UILabel alloc] init];
+    wechatLabel.textColor = LoginComColor;
+    wechatLabel.text = @"微信";
+    wechatLabel.font = [UIFont systemFontOfSize:10];
+    [self addSubview:wechatLabel];
+    [wechatLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.weChatButton.mas_bottom).offset(2);
+        make.centerX.equalTo(self.weChatButton);
+    }];
+    
+    [self addSubview:self.aliButton];
+    [self.aliButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.mas_centerX).with.offset(45);
+        make.width.equalTo(@50);
+        make.top.equalTo(self.titleNameLabel.mas_bottom).with.offset(20);
+        make.height.equalTo(@50);
+    }];
+    
+    UILabel *alipayLabel = [[UILabel alloc] init];
+    alipayLabel.text = @"QQ";
+    alipayLabel.textColor = LoginComColor;
+    alipayLabel.font = [UIFont systemFontOfSize:10];
+    [self addSubview:alipayLabel];
+    [alipayLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.aliButton.mas_bottom).offset(2);
+        make.centerX.equalTo(self.aliButton);
+    }];
+    if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"weixin://"]]) {
+        
+        
+    }else {
+        self.weChatButton.hidden=YES;
+        wechatLabel.hidden=YES;
+        
+    }
+    if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"mqq://"]]) {
+        
+    }
+    
+    else{
+        self.aliButton.hidden=YES;
+        alipayLabel.hidden=YES;
+    }
+    if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"weixin://"]]||[[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"mqq://"]]) {
+        
+    }else{
+        self.titleNameLabel.hidden=YES;
+    }
+
+
+}
+
+- (UILabel *)titleNameLabel {
+    if (!_titleNameLabel) {
+        _titleNameLabel = [[UILabel alloc] init];
+        _titleNameLabel.font = ADeanFONT11;
+        _titleNameLabel.textAlignment = NSTextAlignmentCenter;
+        _titleNameLabel.textColor = LoginComColor;
+        _titleNameLabel.text = @"社交平台登陆";
+    }
+    return _titleNameLabel;
+}
+-(UIButton *)weChatButton
+{
+    if (!_weChatButton) {
+        _weChatButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_weChatButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+        _weChatButton.titleLabel.font = ADeanFONT14;
+        //        _weChatButton.backgroundColor = [UIColor whiteColor];
+        _weChatButton.tag = 5;
+        _weChatButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        [_weChatButton setImage:[UIImage imageNamed:@"wechat"] forState:UIControlStateNormal];
+        [_weChatButton addTarget:self action:@selector(btnAction:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _weChatButton;
+}
+-(UIButton *)aliButton
+{
+    if (!_aliButton) {
+        _aliButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_aliButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+        _aliButton.titleLabel.font = ADeanFONT14;
+        //        _aliButton.alpha = 0.4f;
+        //        _aliButton.backgroundColor = [UIColor whiteColor];
+        _aliButton.tag = 6;
+        _aliButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        [_aliButton setImage:[UIImage imageNamed:@"alipay"] forState:UIControlStateNormal];
+        [_aliButton addTarget:self action:@selector(btnAction:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _aliButton;
+}
+-(void)btnAction:(UIButton *)btn
+{
+    if (_delegate && [_delegate respondsToSelector:@selector(threeLoginAboutAction:)]) {
+        [_delegate threeLoginAboutAction:(LoginType)btn.tag];
+    }
+}
+
+@end

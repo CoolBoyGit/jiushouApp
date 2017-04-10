@@ -1,0 +1,14 @@
+//
+//  ESLocationManager.h
+//  EasyShop
+//
+//  Created by jiushou on 16/8/17.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import<CoreLocation/CoreLocation.h>
+@interface ESLocationManager : NSObject
+@property (nonatomic,copy) void(^sucessBlock)(NSString *str);
+@property (nonatomic,strong) CLLocationManager*locationManager;
+@end

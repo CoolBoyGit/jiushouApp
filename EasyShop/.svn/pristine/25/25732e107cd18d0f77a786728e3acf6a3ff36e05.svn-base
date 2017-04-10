@@ -1,0 +1,105 @@
+//
+//  ESMyOrderListController.m
+//  EasyShop
+//
+//  Created by wcz on 16/4/24.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESMyOrderPageController.h"
+#import "ESMyOrderListController.h"
+#import "OrderItem.h"
+#import "ESSureOrderController.h"
+
+@interface ESMyOrderPageController ()
+
+/** 订单item */
+@property (nonatomic,strong) NSArray *orderItems;
+
+@end
+
+@implementation ESMyOrderPageController
+
+- (NSArray *)orderItems
+{
+    if (!_orderItems) {
+        _orderItems = @[[OrderItem itemWithTitle:@"全部" type:OrderType_All],
+                        [OrderItem itemWithTitle:@"待付款" type:OrderType_WaitingPay],
+                        [OrderItem itemWithTitle:@"待发货" type:OrderType_WaitingSend],
+                        [OrderItem itemWithTitle:@"待收货" type:OrderType_WaitingSure],
+                        [OrderItem itemWithTitle:@"待评价" type:OrderType_OK],];
+    }
+    return _orderItems;
+}
+
+
+- (instancetype)init
+{
+    if(self = [super init])
+    {
+        self.menuHeight = 44;
+        self.progressColor = [UIColor blackColor];
+        self.progressHeight = 1;
+        self.menuViewStyle = WMMenuViewStyleLine;
+        self.menuItemWidth = 50 ;
+        self.postNotification = YES;
+        self.titleSizeSelected = 15;
+        self.itemMargin = 20;
+        self.titleSizeNormal = 15;
+        self.titleColorSelected = [UIColor blackColor];
+        self.titleColorNormal = RGB(138, 138, 138);
+
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+     TitleCenter;
+    //self.navigationController.navigationBar.alpha=1.0f;
+    self.navigationItem.title = @"我的订单";
+
+}
+-(void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    ShowNavbar;
+}
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    
+    //如果是从确认订单页面进入，则清除该页面
+    NSMutableArray *mArr = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+    [mArr enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj isKindOfClass:[ESSureOrderController class]]) {
+            [mArr removeObject:obj];
+        }
+    }];
+    self.navigationController.viewControllers = [mArr copy];
+    
+}
+
+
+- (NSInteger)numbersOfChildControllersInPageController:(WMPageController *)pageController
+{
+    return self.orderItems.count;
+}
+
+- (NSString *)pageController:(WMPageController *)pageController titleAtIndex:(NSInteger)index
+{
+    OrderItem *item = [self.orderItems objectAtIndex:index];
+    return item.title;
+}
+
+
+
+- (__kindof UIViewController *)pageController:(WMPageController *)pageController viewControllerAtIndex:(NSInteger)index
+{
+    ESMyOrderListController *order = [[ESMyOrderListController alloc] init];
+    OrderItem *item = [self.orderItems objectAtIndex:index];
+    order.orderType = item.orderType;
+    return order;
+}
+
+@end

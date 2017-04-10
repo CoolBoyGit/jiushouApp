@@ -1,0 +1,185 @@
+//
+//  ESFunctionView.m
+//  EasyShop
+//
+//  Created by 脉融iOS开发 on 16/3/28.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESFunctionView.h"
+
+@interface ESFunctionView()
+
+@property (nonatomic, strong) UIButton *addToShopCart;//加入购物车
+@property (nonatomic,assign) NSInteger count;
+@end
+
+
+@implementation ESFunctionView
+
+- (UILabel *)countLabel
+{
+    if (_countLabel == nil) {
+        _countLabel = [[UILabel alloc] init];
+        _countLabel.font = [UIFont systemFontOfSize:12];
+        _countLabel.layer.cornerRadius = 7;
+        _countLabel.layer.masksToBounds = YES;
+        _countLabel.textColor = RGB(233, 40, 46);
+        _countLabel.backgroundColor = [UIColor clearColor];
+    }
+    return _countLabel;
+}
+-(UIView *)lineView{
+    if (_lineView==nil) {
+        _lineView=[[UIView alloc]init];
+        _lineView.backgroundColor=RGB(178, 179, 180);
+        
+    }
+    return _lineView;
+}
+- (void)setGoodsInfoType:(GoodsInfoType)goodsInfoType
+{
+    _goodsInfoType = goodsInfoType;
+    
+    NSString *title = @"加入购物车";
+    switch (_goodsInfoType) {
+        case GoodsInfoType_Remind:  title = @"到货提醒";    break;
+        case GoodsInfoType_Wish:    title = @"心愿单";     break;
+        case GoodsInfoType_Sell:    title = @"加入购物车";   break;
+    }
+    [self.addToShopCart setTitle:title forState:UIControlStateNormal];
+}
+-(void)setGoodsDetail:(GoodsDetailInfo *)goodsDetail{
+    _goodsDetail=goodsDetail;
+    _dreamBtn.selected=_goodsDetail.isCollect;
+    self.count=goodsDetail.cart_info.goods_sum;
+    self.countLabel.text=[NSString stringWithFormat:@"%ld",goodsDetail.cart_info.goods_sum];
+}
+-(void)setIsSelect:(BOOL)isSelect{
+    _dreamBtn.selected=isSelect;
+}
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(updateCountLbelText) name:kCartInfoUpdateNotification object:nil];
+        [self setupViews];
+        
+    }
+    return self;
+}
+-(void)updateCountLbelText{
+    self.count++;
+    self.countLabel.text=[NSString stringWithFormat:@"%ld",self.count];
+}
+
+- (void)setupViews
+{
+    
+    [self addSubview:self.lineView];
+    [self.lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(@0);
+        make.left.right.equalTo(@0);
+        make.height.equalTo(@0.35);
+    }];
+    [self addSubview:self.addToShopCart];
+    [self.addToShopCart mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.mas_left).with.offset(150);
+        make.top.equalTo(self.mas_top).with.offset(0.35);
+        make.right.equalTo(self.mas_right).with.offset(0);
+        make.height.equalTo(@43.65);
+    }];
+
+   [self addSubview:self.dreamBtn];
+    [self.dreamBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.mas_left).with.offset(0);
+        make.top.equalTo(self.mas_top).with.offset(0.35);
+        make.width.equalTo(@50);
+        make.height.equalTo(@43.65);
+    }];
+    
+    [self addSubview:self.shopCart];
+    [self.shopCart mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.dreamBtn.mas_right).with.offset(0);
+        make.top.equalTo(self.mas_top).with.offset(0.35);
+        make.width.equalTo(@50);
+        make.height.equalTo(@43.65);
+    }];
+
+    
+    [self addSubview:self.forumBtn];
+    [self.forumBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.shopCart.mas_right).with.offset(0);
+        make.top.equalTo(self.mas_top).with.offset(0.35);
+        make.width.equalTo(@50);
+        make.height.equalTo(@43.65);
+    }];
+    [self addSubview:self.countLabel];
+    self.countLabel.text = @"20";
+    self.countLabel.textAlignment = NSTextAlignmentCenter;
+    [self addSubview:self.countLabel];
+    [self.countLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.shopCart.mas_right).with.offset(-16);
+        make.top.equalTo(self.mas_top).with.offset(2.5);
+        make.width.height.equalTo(@20);
+    }];
+
+    self.addToShopCart.alpha = 1.0f;
+    self.forumBtn.alpha = 1.0f;
+    self.shopCart.alpha = 1.0f;
+    self.dreamBtn.alpha = 1.0f;
+}
+-(UIButton *)addToShopCart
+{
+    if (!_addToShopCart) {
+        _addToShopCart = [UIButton buttonWithType:UIButtonTypeCustom];
+        _addToShopCart.backgroundColor = RGB(233, 40, 46);
+        [_addToShopCart setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [_addToShopCart setTitle:@"加入购物车" forState:UIControlStateNormal];
+        _addToShopCart.tag = 103;
+        [_addToShopCart addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+            }
+    return _addToShopCart;
+}
+-(UIButton *)forumBtn
+{
+    if (!_forumBtn) {
+        _forumBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        _forumBtn.tag = 102;
+        [_forumBtn setImage:[UIImage imageNamed:@"services"] forState:UIControlStateNormal];
+        [_forumBtn addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _forumBtn;
+}
+-(UIButton *)shopCart
+{
+    if (!_shopCart) {
+        _shopCart = [UIButton buttonWithType:UIButtonTypeCustom];
+        _shopCart.tag = 101;
+        [_shopCart setImage:[UIImage imageNamed:@"shopcar"] forState:UIControlStateNormal];
+        
+        [_shopCart addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:_shopCart];
+    }
+    return _shopCart;
+}
+-(UIButton *)dreamBtn
+{
+    if (!_dreamBtn) {
+        _dreamBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        _dreamBtn.tag = 100;
+        [_dreamBtn setImage:[UIImage imageNamed:@"collect_normal"] forState:UIControlStateNormal];
+        [_dreamBtn setImage:[UIImage imageNamed:@"collect_select"] forState:UIControlStateSelected];
+        [_dreamBtn addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _dreamBtn;
+}
+
+-(void)btnClick:(UIButton *)btn
+{
+    if (_delegate && [_delegate respondsToSelector:@selector(functionViewAction:)]) {
+        [_delegate functionViewAction:(int)btn.tag];
+    }
+}
+
+@end

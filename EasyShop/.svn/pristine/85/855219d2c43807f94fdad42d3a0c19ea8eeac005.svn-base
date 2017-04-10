@@ -1,0 +1,237 @@
+//
+//  ESHomeProductCell.m
+//  EasyShop
+//
+//  Created by wcz on 16/3/24.
+//  Copyright © 2016年 wcz. All rights reserved.
+//
+
+#import "ESHomeProductCell.h"
+#import "ESProductViewCell.h"
+#import "ESHomeShopDetailController.h"
+#import "ESProductListController.h"
+#import "GoodsListViewController.h"
+#import "ESOneGoodsCell.h"
+#import "ESbuttoonViewCell.h"
+@interface ESHomeProductCell ()<UICollectionViewDataSource, UICollectionViewDelegate,UICollectionViewDelegateFlowLayout>
+
+@property (nonatomic, strong) UICollectionView *collectionview;
+
+@property (nonatomic, strong) UIImageView *productImageView;
+@property (nonatomic,strong) UIView *bgView;
+/*用来存放更多按钮的数组*/
+@property (nonatomic,strong) NSMutableArray*activityArray;
+@end
+
+@implementation ESHomeProductCell
+
+- (void)setActivityInfo:(ActivityInfo *)activityInfo
+{
+    self.activityArray=[[NSMutableArray alloc]init];
+    
+    _activityInfo = activityInfo;
+    if (_activityInfo.goods_list.count<=8) {
+        for (GoodsInfo *goods in _activityInfo.goods_list) {
+           
+                [self.activityArray addObject:goods];
+            
+        }
+    }
+    else{
+        for (int i=0; i<8; i++) {
+            [self.activityArray addObject:[_activityInfo.goods_list objectAtIndex:i]];
+        }
+    }
+    [self.productImageView sd_setImageWithURL:[NSURL URLWithString:_activityInfo.cover]
+                             placeholderImage:[UIImage imageNamed:@"bg"]];
+    
+    
+    [self.collectionview reloadData];
+    
+//    [self fetchActivityGoods];
+    
+}
+-(UIView *)bgView{
+    if (_bgView==nil) {
+        _bgView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, ScreenWidth, ScreenWidth*(408/617.0)+230)];
+        _bgView.backgroundColor=[UIColor grayColor];
+        _bgView.alpha=0.2;
+    }
+  
+    return _bgView;
+}
+- (UIImageView *)productImageView
+{
+    if (_productImageView == nil) {
+        _productImageView = [[UIImageView alloc] init];
+        UITapGestureRecognizer *gesTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showTapDetail)];
+        _productImageView.image = [UIImage imageNamed:@""];
+        [_productImageView addGestureRecognizer:gesTap];
+        _productImageView.userInteractionEnabled = YES;
+        _productImageView.contentMode = UIViewContentModeScaleAspectFill;
+    }
+    return _productImageView;
+}
+
+- (void)showTapDetail
+{
+    if (self.activityInfo) {
+        //专场只有一个商品的时候，直接进入该商品的详情页面
+        if (self.activityInfo.goods_list && self.activityInfo.goods_list.count == 1) {
+            GoodsInfo *info = self.activityInfo.goods_list.firstObject;
+            [self toGoodDetailWithInfo:info];
+            return;
+        }
+        
+        GoodsListViewController *list = [[GoodsListViewController alloc] init];
+        list.listType = GoodsListType_Activity;
+        list.activity_name = self.activityInfo.name;
+        list.activity_id = self.activityInfo.aid;
+        list.heardImageStr=self.activityInfo.cover;
+        [[AppDelegate shared] pushViewController:list animated:YES];
+    }
+}
+- (UICollectionView *)collectionview
+{
+    if (_collectionview == nil) {
+        UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+        flowLayout.minimumInteritemSpacing = 0;
+        flowLayout.minimumLineSpacing = 0;
+        flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+        _collectionview = [[UICollectionView alloc]initWithFrame:CGRectZero collectionViewLayout:flowLayout];
+        _collectionview.dataSource = self;
+        _collectionview.showsVerticalScrollIndicator = NO;
+        _collectionview.showsHorizontalScrollIndicator = NO;
+        _collectionview.delegate = self;
+        [_collectionview registerClass:[ESProductViewCell class] forCellWithReuseIdentifier:@"ESProductViewCell"];
+        [_collectionview registerClass:[ESOneGoodsCell class] forCellWithReuseIdentifier:@"ESOneGoodsCell"];
+        [_collectionview registerClass:[ESbuttoonViewCell class] forCellWithReuseIdentifier:@"ESbuttoonViewCell"];
+        _collectionview.backgroundColor = [UIColor whiteColor];
+    }
+    return _collectionview;
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        [self.contentView addSubview: self.bgView];
+        [self.contentView addSubview:self.productImageView];
+        [self.contentView addSubview:self.collectionview];
+        [self.productImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.right.equalTo(@0);
+            make.height.equalTo(@(ScreenWidth*(408/617.0)));
+        }];
+        
+        [self.collectionview.collectionViewLayout invalidateLayout];
+        
+        [self.collectionview mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.productImageView.mas_bottom);
+            make.left.right.equalTo(@0);
+            make.bottom.equalTo(@(-10));
+            //这些在这里这样写的意思就是距离父视图,左右下的距离就是零
+        }];
+        
+
+    }
+    return self;
+}
+
+
+#pragma mark - collectionview 代理方法
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    [self.collectionview.collectionViewLayout invalidateLayout];
+//    if (self.activityInfo.goods_list.count==1) {
+//        return self.activityInfo.goods_list.count;
+//    }else{
+//        return self.activityInfo.goods_list.count+1;
+//    }
+    if (self.activityArray.count==1) {
+        return 1;
+    }else{
+        return self.activityArray.count+1;
+    }
+    
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (self.activityInfo.goods_list.count==1) {
+        return CGSizeMake(ScreenWidth, 230);
+    }else{
+        return CGSizeMake(135, 230);
+    }
+    
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (self.activityArray. count==1) {
+        ESOneGoodsCell*cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"ESOneGoodsCell" forIndexPath:indexPath];
+        cell.goodsInfo=[self.activityArray objectAtIndex:indexPath.item];
+        return cell;
+    }
+    else if(indexPath.item==(self.activityArray. count)){
+    ESbuttoonViewCell*cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"ESbuttoonViewCell" forIndexPath:indexPath];
+        
+        return cell;
+        
+
+    }
+    else if(indexPath.item<=self.activityArray.count-1){
+        ESProductViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ESProductViewCell" forIndexPath:indexPath];
+        //    cell.backgroundColor = [UIColor redColor];
+        cell.goodsInfo = [self.activityArray objectAtIndex:indexPath.item];
+        
+        
+        return cell;
+    }
+    
+    return nil;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    
+    if (indexPath.item==self.activityArray.count) {
+        [self showTapDetail];
+    }else{
+        GoodsInfo *info = [self.activityArray objectAtIndex:indexPath.item];
+        [self toGoodDetailWithInfo:info];
+    }
+    
+
+//    [self.controller.navigationController pushViewController:detail animated:YES];
+}
+
+- (void)toGoodDetailWithInfo:(GoodsInfo *)info
+{
+    ESHomeShopDetailController *detail = [[ESHomeShopDetailController alloc] init];
+    detail.goods_id  = info.gid;
+//    detail.isNavHidden = YES;
+    [[AppDelegate shared] pushViewController:detail animated:YES];
+}
+
+//#pragma mark - Networking
+//- (void)fetchActivityGoods
+//{
+//    GetActivityGoodsListRequest *request = [GetActivityGoodsListRequest request];
+//    request.aid = self.activityInfo.aid;
+//    
+//    @weakify(self);
+//    [ESService getActivityGoodsListRequest:request success:^(NSArray *response) {
+//        @strongify(self);
+//        
+//        self.goodsItems = response;
+//        [self.collectionview reloadData];
+//        
+//    } failure:^(NSError *error) {
+//        
+//    }];
+//    
+//}
+
+
+@end
